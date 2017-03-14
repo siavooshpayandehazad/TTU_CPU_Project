@@ -1,0 +1,1 @@
+-intstyle "ise" -incremental -lib "unisims_ver" -lib "unimacro_ver" -lib "xilinxcorelib_ver" -lib "secureip" -o "/home/hartz/pc/minu_kaust/Kool/IAG0450/course_work/PicoCPU_16bit_mod/project/PicoCPUTestBench_isim_beh.exe" -prj "/home/hartz/pc/minu_kaust/Kool/IAG0450/course_work/PicoCPU_16bit_mod/project/PicoCPUTestBench_beh.prj" "work.PicoCPUTestBench" "work.glbl" 

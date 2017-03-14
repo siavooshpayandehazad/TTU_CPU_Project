@@ -1,0 +1,1201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="/home/hartz/pc/minu_kaust/Kool/IAG0450/course_work/PicoCPU_16bit_mod/project/PicoCPUTestBench_isim_beh1.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="attributes" />
+            <top_module name="glbl" />
+            <top_module name="math_real" />
+            <top_module name="numeric_std" />
+            <top_module name="picocputestbench" />
+            <top_module name="std_logic_1164" />
+            <top_module name="std_logic_arith" />
+            <top_module name="std_logic_misc" />
+            <top_module name="std_logic_unsigned" />
+            <top_module name="vl_types" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="36" />
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/rst" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/clk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/instr_in" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">instr_in[21:0]</obj_property>
+      <obj_property name="ObjectShortName">instr_in[21:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/instr_add" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">instr_add[15:0]</obj_property>
+      <obj_property name="ObjectShortName">instr_add[15:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/memrdaddress" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">memrdaddress[15:0]</obj_property>
+      <obj_property name="ObjectShortName">memrdaddress[15:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/memwrtaddress" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">memwrtaddress[15:0]</obj_property>
+      <obj_property name="ObjectShortName">memwrtaddress[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/mem_rw" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">mem_rw</obj_property>
+      <obj_property name="ObjectShortName">mem_rw</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/dpu_flags" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">dpu_flags[3:0]</obj_property>
+      <obj_property name="ObjectShortName">dpu_flags[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/datatodpu" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">datatodpu[15:0]</obj_property>
+      <obj_property name="ObjectShortName">datatodpu[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/commandtodpu" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">commandtodpu[10:0]</obj_property>
+      <obj_property name="ObjectShortName">commandtodpu[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/reg_in_sel" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">reg_in_sel[7:0]</obj_property>
+      <obj_property name="ObjectShortName">reg_in_sel[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/reg_out_sel" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">reg_out_sel[2:0]</obj_property>
+      <obj_property name="ObjectShortName">reg_out_sel[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/datafromdpu" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">datafromdpu[15:0]</obj_property>
+      <obj_property name="ObjectShortName">datafromdpu[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/state_in" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">state_in</obj_property>
+      <obj_property name="ObjectShortName">state_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/state_out" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">state_out</obj_property>
+      <obj_property name="ObjectShortName">state_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/instr" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">instr</obj_property>
+      <obj_property name="ObjectShortName">instr</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/sp_in" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">sp_in[15:0]</obj_property>
+      <obj_property name="ObjectShortName">sp_in[15:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/sp_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">sp_out[15:0]</obj_property>
+      <obj_property name="ObjectShortName">sp_out[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/pc_in" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">pc_in[15:0]</obj_property>
+      <obj_property name="ObjectShortName">pc_in[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/pc_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">pc_out[15:0]</obj_property>
+      <obj_property name="ObjectShortName">pc_out[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/instrreg_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">instrreg_out[21:0]</obj_property>
+      <obj_property name="ObjectShortName">instrreg_out[21:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/bitwidth" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">bitwidth</obj_property>
+      <obj_property name="ObjectShortName">bitwidth</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/ControlUnit_comp/instructionwidth" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">instructionwidth</obj_property>
+      <obj_property name="ObjectShortName">instructionwidth</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/DPU_comp/ALU_comp/a" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">a[15:0]</obj_property>
+      <obj_property name="ObjectShortName">a[15:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/DPU_comp/ALU_comp/b" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">b[15:0]</obj_property>
+      <obj_property name="ObjectShortName">b[15:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/DPU_comp/ALU_comp/command" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">command[3:0]</obj_property>
+      <obj_property name="ObjectShortName">command[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/DPU_comp/ALU_comp/cflag_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">cflag_in</obj_property>
+      <obj_property name="ObjectShortName">cflag_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/DPU_comp/ALU_comp/cflag_out" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">cflag_out</obj_property>
+      <obj_property name="ObjectShortName">cflag_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/DPU_comp/ALU_comp/result" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">result[15:0]</obj_property>
+      <obj_property name="ObjectShortName">result[15:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/DPU_comp/ALU_comp/addsub_result" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">addsub_result[15:0]</obj_property>
+      <obj_property name="ObjectShortName">addsub_result[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/DPU_comp/ALU_comp/cout" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">cout</obj_property>
+      <obj_property name="ObjectShortName">cout</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/DPU_comp/ALU_comp/add_sub" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">add_sub</obj_property>
+      <obj_property name="ObjectShortName">add_sub</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/Tab_comp/refresh_data" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">refresh_data</obj_property>
+      <obj_property name="ObjectShortName">refresh_data</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/DPU_comp/ALU_comp/Adder_comp/carry" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">carry[16:0]</obj_property>
+      <obj_property name="ObjectShortName">carry[16:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">mem[0:255]</obj_property>
+      <obj_property name="ObjectShortName">mem[0:255]</obj_property>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[0]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[0]</obj_property>
+         <obj_property name="ObjectShortName">mem[0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[1]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[1]</obj_property>
+         <obj_property name="ObjectShortName">mem[1]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[2]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[2]</obj_property>
+         <obj_property name="ObjectShortName">mem[2]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[3]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[3]</obj_property>
+         <obj_property name="ObjectShortName">mem[3]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[4]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[4]</obj_property>
+         <obj_property name="ObjectShortName">mem[4]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[5]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[5]</obj_property>
+         <obj_property name="ObjectShortName">mem[5]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[6]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[6]</obj_property>
+         <obj_property name="ObjectShortName">mem[6]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[7]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[7]</obj_property>
+         <obj_property name="ObjectShortName">mem[7]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[8]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[8]</obj_property>
+         <obj_property name="ObjectShortName">mem[8]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[9]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[9]</obj_property>
+         <obj_property name="ObjectShortName">mem[9]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[10]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[10]</obj_property>
+         <obj_property name="ObjectShortName">mem[10]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[11]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[11]</obj_property>
+         <obj_property name="ObjectShortName">mem[11]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[12]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[12]</obj_property>
+         <obj_property name="ObjectShortName">mem[12]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[13]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[13]</obj_property>
+         <obj_property name="ObjectShortName">mem[13]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[14]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[14]</obj_property>
+         <obj_property name="ObjectShortName">mem[14]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[15]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[15]</obj_property>
+         <obj_property name="ObjectShortName">mem[15]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[16]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[16]</obj_property>
+         <obj_property name="ObjectShortName">mem[16]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[17]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[17]</obj_property>
+         <obj_property name="ObjectShortName">mem[17]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[18]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[18]</obj_property>
+         <obj_property name="ObjectShortName">mem[18]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[19]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[19]</obj_property>
+         <obj_property name="ObjectShortName">mem[19]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[20]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[20]</obj_property>
+         <obj_property name="ObjectShortName">mem[20]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[21]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[21]</obj_property>
+         <obj_property name="ObjectShortName">mem[21]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[22]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[22]</obj_property>
+         <obj_property name="ObjectShortName">mem[22]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[23]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[23]</obj_property>
+         <obj_property name="ObjectShortName">mem[23]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[24]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[24]</obj_property>
+         <obj_property name="ObjectShortName">mem[24]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[25]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[25]</obj_property>
+         <obj_property name="ObjectShortName">mem[25]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[26]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[26]</obj_property>
+         <obj_property name="ObjectShortName">mem[26]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[27]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[27]</obj_property>
+         <obj_property name="ObjectShortName">mem[27]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[28]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[28]</obj_property>
+         <obj_property name="ObjectShortName">mem[28]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[29]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[29]</obj_property>
+         <obj_property name="ObjectShortName">mem[29]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[30]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[30]</obj_property>
+         <obj_property name="ObjectShortName">mem[30]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[31]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[31]</obj_property>
+         <obj_property name="ObjectShortName">mem[31]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[32]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[32]</obj_property>
+         <obj_property name="ObjectShortName">mem[32]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[33]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[33]</obj_property>
+         <obj_property name="ObjectShortName">mem[33]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[34]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[34]</obj_property>
+         <obj_property name="ObjectShortName">mem[34]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[35]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[35]</obj_property>
+         <obj_property name="ObjectShortName">mem[35]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[36]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[36]</obj_property>
+         <obj_property name="ObjectShortName">mem[36]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[37]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[37]</obj_property>
+         <obj_property name="ObjectShortName">mem[37]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[38]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[38]</obj_property>
+         <obj_property name="ObjectShortName">mem[38]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[39]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[39]</obj_property>
+         <obj_property name="ObjectShortName">mem[39]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[40]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[40]</obj_property>
+         <obj_property name="ObjectShortName">mem[40]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[41]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[41]</obj_property>
+         <obj_property name="ObjectShortName">mem[41]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[42]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[42]</obj_property>
+         <obj_property name="ObjectShortName">mem[42]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[43]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[43]</obj_property>
+         <obj_property name="ObjectShortName">mem[43]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[44]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[44]</obj_property>
+         <obj_property name="ObjectShortName">mem[44]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[45]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[45]</obj_property>
+         <obj_property name="ObjectShortName">mem[45]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[46]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[46]</obj_property>
+         <obj_property name="ObjectShortName">mem[46]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[47]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[47]</obj_property>
+         <obj_property name="ObjectShortName">mem[47]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[48]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[48]</obj_property>
+         <obj_property name="ObjectShortName">mem[48]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[49]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[49]</obj_property>
+         <obj_property name="ObjectShortName">mem[49]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[50]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[50]</obj_property>
+         <obj_property name="ObjectShortName">mem[50]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[51]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[51]</obj_property>
+         <obj_property name="ObjectShortName">mem[51]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[52]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[52]</obj_property>
+         <obj_property name="ObjectShortName">mem[52]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[53]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[53]</obj_property>
+         <obj_property name="ObjectShortName">mem[53]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[54]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[54]</obj_property>
+         <obj_property name="ObjectShortName">mem[54]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[55]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[55]</obj_property>
+         <obj_property name="ObjectShortName">mem[55]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[56]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[56]</obj_property>
+         <obj_property name="ObjectShortName">mem[56]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[57]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[57]</obj_property>
+         <obj_property name="ObjectShortName">mem[57]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[58]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[58]</obj_property>
+         <obj_property name="ObjectShortName">mem[58]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[59]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[59]</obj_property>
+         <obj_property name="ObjectShortName">mem[59]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[60]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[60]</obj_property>
+         <obj_property name="ObjectShortName">mem[60]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[61]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[61]</obj_property>
+         <obj_property name="ObjectShortName">mem[61]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[62]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[62]</obj_property>
+         <obj_property name="ObjectShortName">mem[62]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[63]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[63]</obj_property>
+         <obj_property name="ObjectShortName">mem[63]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[64]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[64]</obj_property>
+         <obj_property name="ObjectShortName">mem[64]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[65]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[65]</obj_property>
+         <obj_property name="ObjectShortName">mem[65]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[66]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[66]</obj_property>
+         <obj_property name="ObjectShortName">mem[66]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[67]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[67]</obj_property>
+         <obj_property name="ObjectShortName">mem[67]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[68]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[68]</obj_property>
+         <obj_property name="ObjectShortName">mem[68]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[69]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[69]</obj_property>
+         <obj_property name="ObjectShortName">mem[69]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[70]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[70]</obj_property>
+         <obj_property name="ObjectShortName">mem[70]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[71]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[71]</obj_property>
+         <obj_property name="ObjectShortName">mem[71]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[72]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[72]</obj_property>
+         <obj_property name="ObjectShortName">mem[72]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[73]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[73]</obj_property>
+         <obj_property name="ObjectShortName">mem[73]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[74]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[74]</obj_property>
+         <obj_property name="ObjectShortName">mem[74]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[75]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[75]</obj_property>
+         <obj_property name="ObjectShortName">mem[75]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[76]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[76]</obj_property>
+         <obj_property name="ObjectShortName">mem[76]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[77]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[77]</obj_property>
+         <obj_property name="ObjectShortName">mem[77]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[78]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[78]</obj_property>
+         <obj_property name="ObjectShortName">mem[78]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[79]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[79]</obj_property>
+         <obj_property name="ObjectShortName">mem[79]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[80]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[80]</obj_property>
+         <obj_property name="ObjectShortName">mem[80]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[81]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[81]</obj_property>
+         <obj_property name="ObjectShortName">mem[81]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[82]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[82]</obj_property>
+         <obj_property name="ObjectShortName">mem[82]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[83]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[83]</obj_property>
+         <obj_property name="ObjectShortName">mem[83]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[84]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[84]</obj_property>
+         <obj_property name="ObjectShortName">mem[84]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[85]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[85]</obj_property>
+         <obj_property name="ObjectShortName">mem[85]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[86]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[86]</obj_property>
+         <obj_property name="ObjectShortName">mem[86]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[87]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[87]</obj_property>
+         <obj_property name="ObjectShortName">mem[87]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[88]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[88]</obj_property>
+         <obj_property name="ObjectShortName">mem[88]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[89]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[89]</obj_property>
+         <obj_property name="ObjectShortName">mem[89]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[90]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[90]</obj_property>
+         <obj_property name="ObjectShortName">mem[90]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[91]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[91]</obj_property>
+         <obj_property name="ObjectShortName">mem[91]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[92]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[92]</obj_property>
+         <obj_property name="ObjectShortName">mem[92]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[93]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[93]</obj_property>
+         <obj_property name="ObjectShortName">mem[93]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[94]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[94]</obj_property>
+         <obj_property name="ObjectShortName">mem[94]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[95]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[95]</obj_property>
+         <obj_property name="ObjectShortName">mem[95]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[96]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[96]</obj_property>
+         <obj_property name="ObjectShortName">mem[96]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[97]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[97]</obj_property>
+         <obj_property name="ObjectShortName">mem[97]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[98]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[98]</obj_property>
+         <obj_property name="ObjectShortName">mem[98]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[99]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[99]</obj_property>
+         <obj_property name="ObjectShortName">mem[99]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[100]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[100]</obj_property>
+         <obj_property name="ObjectShortName">mem[100]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[101]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[101]</obj_property>
+         <obj_property name="ObjectShortName">mem[101]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[102]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[102]</obj_property>
+         <obj_property name="ObjectShortName">mem[102]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[103]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[103]</obj_property>
+         <obj_property name="ObjectShortName">mem[103]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[104]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[104]</obj_property>
+         <obj_property name="ObjectShortName">mem[104]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[105]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[105]</obj_property>
+         <obj_property name="ObjectShortName">mem[105]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[106]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[106]</obj_property>
+         <obj_property name="ObjectShortName">mem[106]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[107]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[107]</obj_property>
+         <obj_property name="ObjectShortName">mem[107]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[108]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[108]</obj_property>
+         <obj_property name="ObjectShortName">mem[108]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[109]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[109]</obj_property>
+         <obj_property name="ObjectShortName">mem[109]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[110]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[110]</obj_property>
+         <obj_property name="ObjectShortName">mem[110]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[111]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[111]</obj_property>
+         <obj_property name="ObjectShortName">mem[111]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[112]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[112]</obj_property>
+         <obj_property name="ObjectShortName">mem[112]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[113]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[113]</obj_property>
+         <obj_property name="ObjectShortName">mem[113]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[114]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[114]</obj_property>
+         <obj_property name="ObjectShortName">mem[114]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[115]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[115]</obj_property>
+         <obj_property name="ObjectShortName">mem[115]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[116]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[116]</obj_property>
+         <obj_property name="ObjectShortName">mem[116]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[117]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[117]</obj_property>
+         <obj_property name="ObjectShortName">mem[117]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[118]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[118]</obj_property>
+         <obj_property name="ObjectShortName">mem[118]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[119]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[119]</obj_property>
+         <obj_property name="ObjectShortName">mem[119]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[120]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[120]</obj_property>
+         <obj_property name="ObjectShortName">mem[120]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[121]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[121]</obj_property>
+         <obj_property name="ObjectShortName">mem[121]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[122]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[122]</obj_property>
+         <obj_property name="ObjectShortName">mem[122]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[123]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[123]</obj_property>
+         <obj_property name="ObjectShortName">mem[123]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[124]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[124]</obj_property>
+         <obj_property name="ObjectShortName">mem[124]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[125]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[125]</obj_property>
+         <obj_property name="ObjectShortName">mem[125]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[126]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[126]</obj_property>
+         <obj_property name="ObjectShortName">mem[126]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[127]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[127]</obj_property>
+         <obj_property name="ObjectShortName">mem[127]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[128]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[128]</obj_property>
+         <obj_property name="ObjectShortName">mem[128]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[129]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[129]</obj_property>
+         <obj_property name="ObjectShortName">mem[129]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[130]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[130]</obj_property>
+         <obj_property name="ObjectShortName">mem[130]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[131]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[131]</obj_property>
+         <obj_property name="ObjectShortName">mem[131]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[132]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[132]</obj_property>
+         <obj_property name="ObjectShortName">mem[132]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[133]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[133]</obj_property>
+         <obj_property name="ObjectShortName">mem[133]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[134]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[134]</obj_property>
+         <obj_property name="ObjectShortName">mem[134]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[135]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[135]</obj_property>
+         <obj_property name="ObjectShortName">mem[135]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[136]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[136]</obj_property>
+         <obj_property name="ObjectShortName">mem[136]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[137]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[137]</obj_property>
+         <obj_property name="ObjectShortName">mem[137]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[138]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[138]</obj_property>
+         <obj_property name="ObjectShortName">mem[138]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[139]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[139]</obj_property>
+         <obj_property name="ObjectShortName">mem[139]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[140]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[140]</obj_property>
+         <obj_property name="ObjectShortName">mem[140]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[141]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[141]</obj_property>
+         <obj_property name="ObjectShortName">mem[141]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[142]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[142]</obj_property>
+         <obj_property name="ObjectShortName">mem[142]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[143]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[143]</obj_property>
+         <obj_property name="ObjectShortName">mem[143]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[144]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[144]</obj_property>
+         <obj_property name="ObjectShortName">mem[144]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[145]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[145]</obj_property>
+         <obj_property name="ObjectShortName">mem[145]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[146]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[146]</obj_property>
+         <obj_property name="ObjectShortName">mem[146]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[147]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[147]</obj_property>
+         <obj_property name="ObjectShortName">mem[147]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[148]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[148]</obj_property>
+         <obj_property name="ObjectShortName">mem[148]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[149]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[149]</obj_property>
+         <obj_property name="ObjectShortName">mem[149]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[150]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[150]</obj_property>
+         <obj_property name="ObjectShortName">mem[150]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[151]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[151]</obj_property>
+         <obj_property name="ObjectShortName">mem[151]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[152]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[152]</obj_property>
+         <obj_property name="ObjectShortName">mem[152]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[153]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[153]</obj_property>
+         <obj_property name="ObjectShortName">mem[153]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[154]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[154]</obj_property>
+         <obj_property name="ObjectShortName">mem[154]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[155]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[155]</obj_property>
+         <obj_property name="ObjectShortName">mem[155]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[156]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[156]</obj_property>
+         <obj_property name="ObjectShortName">mem[156]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[157]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[157]</obj_property>
+         <obj_property name="ObjectShortName">mem[157]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[158]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[158]</obj_property>
+         <obj_property name="ObjectShortName">mem[158]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[159]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[159]</obj_property>
+         <obj_property name="ObjectShortName">mem[159]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[160]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[160]</obj_property>
+         <obj_property name="ObjectShortName">mem[160]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[161]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[161]</obj_property>
+         <obj_property name="ObjectShortName">mem[161]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[162]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[162]</obj_property>
+         <obj_property name="ObjectShortName">mem[162]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[163]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[163]</obj_property>
+         <obj_property name="ObjectShortName">mem[163]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[164]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[164]</obj_property>
+         <obj_property name="ObjectShortName">mem[164]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[165]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[165]</obj_property>
+         <obj_property name="ObjectShortName">mem[165]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[166]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[166]</obj_property>
+         <obj_property name="ObjectShortName">mem[166]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[167]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[167]</obj_property>
+         <obj_property name="ObjectShortName">mem[167]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[168]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[168]</obj_property>
+         <obj_property name="ObjectShortName">mem[168]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[169]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[169]</obj_property>
+         <obj_property name="ObjectShortName">mem[169]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[170]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[170]</obj_property>
+         <obj_property name="ObjectShortName">mem[170]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[171]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[171]</obj_property>
+         <obj_property name="ObjectShortName">mem[171]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[172]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[172]</obj_property>
+         <obj_property name="ObjectShortName">mem[172]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[173]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[173]</obj_property>
+         <obj_property name="ObjectShortName">mem[173]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[174]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[174]</obj_property>
+         <obj_property name="ObjectShortName">mem[174]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[175]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[175]</obj_property>
+         <obj_property name="ObjectShortName">mem[175]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[176]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[176]</obj_property>
+         <obj_property name="ObjectShortName">mem[176]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[177]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[177]</obj_property>
+         <obj_property name="ObjectShortName">mem[177]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[178]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[178]</obj_property>
+         <obj_property name="ObjectShortName">mem[178]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[179]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[179]</obj_property>
+         <obj_property name="ObjectShortName">mem[179]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[180]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[180]</obj_property>
+         <obj_property name="ObjectShortName">mem[180]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[181]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[181]</obj_property>
+         <obj_property name="ObjectShortName">mem[181]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[182]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[182]</obj_property>
+         <obj_property name="ObjectShortName">mem[182]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[183]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[183]</obj_property>
+         <obj_property name="ObjectShortName">mem[183]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[184]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[184]</obj_property>
+         <obj_property name="ObjectShortName">mem[184]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[185]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[185]</obj_property>
+         <obj_property name="ObjectShortName">mem[185]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[186]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[186]</obj_property>
+         <obj_property name="ObjectShortName">mem[186]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[187]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[187]</obj_property>
+         <obj_property name="ObjectShortName">mem[187]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[188]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[188]</obj_property>
+         <obj_property name="ObjectShortName">mem[188]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[189]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[189]</obj_property>
+         <obj_property name="ObjectShortName">mem[189]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[190]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[190]</obj_property>
+         <obj_property name="ObjectShortName">mem[190]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="CustomSignalColor">#ff00ff</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[191]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[191]</obj_property>
+         <obj_property name="ObjectShortName">mem[191]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[192]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[192]</obj_property>
+         <obj_property name="ObjectShortName">mem[192]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[193]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[193]</obj_property>
+         <obj_property name="ObjectShortName">mem[193]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[194]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[194]</obj_property>
+         <obj_property name="ObjectShortName">mem[194]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[195]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[195]</obj_property>
+         <obj_property name="ObjectShortName">mem[195]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[196]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[196]</obj_property>
+         <obj_property name="ObjectShortName">mem[196]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[197]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[197]</obj_property>
+         <obj_property name="ObjectShortName">mem[197]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[198]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[198]</obj_property>
+         <obj_property name="ObjectShortName">mem[198]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[199]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[199]</obj_property>
+         <obj_property name="ObjectShortName">mem[199]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[200]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[200]</obj_property>
+         <obj_property name="ObjectShortName">mem[200]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[201]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[201]</obj_property>
+         <obj_property name="ObjectShortName">mem[201]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[202]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[202]</obj_property>
+         <obj_property name="ObjectShortName">mem[202]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[203]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[203]</obj_property>
+         <obj_property name="ObjectShortName">mem[203]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[204]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[204]</obj_property>
+         <obj_property name="ObjectShortName">mem[204]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[205]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[205]</obj_property>
+         <obj_property name="ObjectShortName">mem[205]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[206]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[206]</obj_property>
+         <obj_property name="ObjectShortName">mem[206]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[207]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[207]</obj_property>
+         <obj_property name="ObjectShortName">mem[207]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[208]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[208]</obj_property>
+         <obj_property name="ObjectShortName">mem[208]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[209]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[209]</obj_property>
+         <obj_property name="ObjectShortName">mem[209]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[210]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[210]</obj_property>
+         <obj_property name="ObjectShortName">mem[210]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[211]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[211]</obj_property>
+         <obj_property name="ObjectShortName">mem[211]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[212]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[212]</obj_property>
+         <obj_property name="ObjectShortName">mem[212]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[213]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[213]</obj_property>
+         <obj_property name="ObjectShortName">mem[213]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[214]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[214]</obj_property>
+         <obj_property name="ObjectShortName">mem[214]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[215]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[215]</obj_property>
+         <obj_property name="ObjectShortName">mem[215]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[216]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[216]</obj_property>
+         <obj_property name="ObjectShortName">mem[216]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[217]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[217]</obj_property>
+         <obj_property name="ObjectShortName">mem[217]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[218]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[218]</obj_property>
+         <obj_property name="ObjectShortName">mem[218]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[219]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[219]</obj_property>
+         <obj_property name="ObjectShortName">mem[219]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[220]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[220]</obj_property>
+         <obj_property name="ObjectShortName">mem[220]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[221]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[221]</obj_property>
+         <obj_property name="ObjectShortName">mem[221]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[222]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[222]</obj_property>
+         <obj_property name="ObjectShortName">mem[222]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[223]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[223]</obj_property>
+         <obj_property name="ObjectShortName">mem[223]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[224]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[224]</obj_property>
+         <obj_property name="ObjectShortName">mem[224]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[225]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[225]</obj_property>
+         <obj_property name="ObjectShortName">mem[225]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[226]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[226]</obj_property>
+         <obj_property name="ObjectShortName">mem[226]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[227]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[227]</obj_property>
+         <obj_property name="ObjectShortName">mem[227]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[228]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[228]</obj_property>
+         <obj_property name="ObjectShortName">mem[228]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[229]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[229]</obj_property>
+         <obj_property name="ObjectShortName">mem[229]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[230]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[230]</obj_property>
+         <obj_property name="ObjectShortName">mem[230]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[231]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[231]</obj_property>
+         <obj_property name="ObjectShortName">mem[231]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[232]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[232]</obj_property>
+         <obj_property name="ObjectShortName">mem[232]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[233]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[233]</obj_property>
+         <obj_property name="ObjectShortName">mem[233]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[234]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[234]</obj_property>
+         <obj_property name="ObjectShortName">mem[234]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[235]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[235]</obj_property>
+         <obj_property name="ObjectShortName">mem[235]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[236]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[236]</obj_property>
+         <obj_property name="ObjectShortName">mem[236]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[237]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[237]</obj_property>
+         <obj_property name="ObjectShortName">mem[237]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[238]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[238]</obj_property>
+         <obj_property name="ObjectShortName">mem[238]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[239]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[239]</obj_property>
+         <obj_property name="ObjectShortName">mem[239]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[240]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[240]</obj_property>
+         <obj_property name="ObjectShortName">mem[240]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[241]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[241]</obj_property>
+         <obj_property name="ObjectShortName">mem[241]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[242]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[242]</obj_property>
+         <obj_property name="ObjectShortName">mem[242]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[243]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[243]</obj_property>
+         <obj_property name="ObjectShortName">mem[243]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[244]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[244]</obj_property>
+         <obj_property name="ObjectShortName">mem[244]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[245]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[245]</obj_property>
+         <obj_property name="ObjectShortName">mem[245]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[246]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[246]</obj_property>
+         <obj_property name="ObjectShortName">mem[246]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[247]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[247]</obj_property>
+         <obj_property name="ObjectShortName">mem[247]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[248]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[248]</obj_property>
+         <obj_property name="ObjectShortName">mem[248]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[249]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[249]</obj_property>
+         <obj_property name="ObjectShortName">mem[249]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[250]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[250]</obj_property>
+         <obj_property name="ObjectShortName">mem[250]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[251]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[251]</obj_property>
+         <obj_property name="ObjectShortName">mem[251]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[252]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[252]</obj_property>
+         <obj_property name="ObjectShortName">mem[252]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[253]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[253]</obj_property>
+         <obj_property name="ObjectShortName">mem[253]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[254]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[254]</obj_property>
+         <obj_property name="ObjectShortName">mem[254]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/picocputestbench/PicoCPU_comp/Mem_comp/mem[255]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[255]</obj_property>
+         <obj_property name="ObjectShortName">mem[255]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="/picocputestbench/PicoCPU_comp/Tab_comp/temp" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">temp[0:7]</obj_property>
+      <obj_property name="ObjectShortName">temp[0:7]</obj_property>
+   </wvobject>
+</wave_config>

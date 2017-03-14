@@ -1,0 +1,64 @@
+NET clk LOC = V10;
+NET rst LOC = C4;
+NET ClkBttn LOC = D9;
+#NET clk LOC = T10;
+ 
+NET FlagOutput<0> LOC = U16;
+NET FlagOutput<1> LOC = V16;
+NET FlagOutput<2> LOC = U15;
+NET FlagOutput<3> LOC = V15;
+ 
+NET SevenSeg<6> LOC = T17;
+NET SevenSeg<5> LOC = T18;
+NET SevenSeg<4> LOC = U17;
+NET SevenSeg<3> LOC = U18;
+NET SevenSeg<2> LOC = M14;
+NET SevenSeg<1> LOC = N14;
+NET SevenSeg<0> LOC = L14;
+
+NET SwitchInput<7> LOC = T5;
+NET SwitchInput<6> LOC = V8;
+NET SwitchInput<5> LOC = U8;
+NET SwitchInput<4> LOC = N8;
+NET SwitchInput<3> LOC = M8;
+NET SwitchInput<2> LOC = V9;
+NET SwitchInput<1> LOC = T9;
+NET SwitchInput<0> LOC = T10;
+
+NET AN<3> LOC = P17;
+NET AN<2> LOC = P18;
+NET AN<1> LOC = N15;
+NET AN<0> LOC = N16;
+
+NET update_mux LOC = L7;#
+NET Mux<3> LOC = F2;#
+NET Mux<2> LOC = J6;#
+NET Mux<1> LOC = J7;#
+NET Mux<0> LOC = G1;#
+
+#NET NegPin<7> LOC = V11;
+#NET NegPin<6> LOC = U11;
+#NET NegPin<5> LOC = N9;
+#NET NegPin<4> LOC = M10;
+#NET NegPin<3> LOC = P11;
+#NET NegPin<2> LOC = N10;
+#NET NegPin<1> LOC = V12;
+#NET NegPin<0> LOC = T12;
+
+NET NegPin<0> LOC = V11;
+NET NegPin<1> LOC = U11;
+NET NegPin<2> LOC = N9;
+NET NegPin<3> LOC = M10;
+NET NegPin<4> LOC = P11;
+NET NegPin<5> LOC = N10;
+NET NegPin<6> LOC = V12;
+NET NegPin<7> LOC = T12;
+
+NET PosPin<0> LOC = K5;
+NET PosPin<1> LOC = K3;
+NET PosPin<2> LOC = J1;
+NET PosPin<3> LOC = J3;
+NET PosPin<4> LOC = L3;
+NET PosPin<5> LOC = L4;
+NET PosPin<6> LOC = K1;
+NET PosPin<7> LOC = K2;

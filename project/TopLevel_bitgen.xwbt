@@ -1,0 +1,8 @@
+INTSTYLE=ise
+INFILE=/home/hartz/pc/minu_kaust/Kool/IAG0450/course_work/PicoCPU_16bit_mod/project/TopLevel.ncd
+OUTFILE=/home/hartz/pc/minu_kaust/Kool/IAG0450/course_work/PicoCPU_16bit_mod/project/TopLevel.bit
+FAMILY=Spartan6
+PART=xc6slx16-3csg324
+WORKINGDIR=/home/hartz/pc/minu_kaust/Kool/IAG0450/course_work/PicoCPU_16bit_mod/project
+LICENSE=ISE
+USER_INFO=174123256_177724473_210552576_965

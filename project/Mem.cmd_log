@@ -1,0 +1,1 @@
+vhdtdtfi -prj project -o P:/Keijo.Lass/DigitalSystemsModeling/PicoCPU_Synthesis/project/Mem.vhi -module Mem -template E:/Xilinx/14.7/ISE_DS/ISE//data/vhdlinst.tft -deleteonerror -lib work ../PicoCPU_VHDL/Memory.vhd 
