@@ -1,0 +1,10 @@
+module instmemory( address, data );
+parameter BitWidth = 8;
+parameter InstructionWidth = 6 + BitWidth; 
+ input  [(BitWidth-1):0] address;
+ output [(InstructionWidth - 1):0] data; 
+ reg [(InstructionWidth - 1):0] data;
+ reg [(InstructionWidth - 1):0] memo [0:(2**BitWidth)-1];
+ initial $readmemb("C:\Users\keijo\Documents\digitaldesing\PicoCPU_16bit_mod\Instructions.txt",memo);
+ always @(address) data=memo[address];
+endmodule
