@@ -8,4 +8,9 @@ Based on: IAY0340 - Digital Systems Modeling and Synthesis (2016) [CPU lab](http
 * Added LED panel driver including 2 extra Instructions
   * LED panel is flattened LED Cube, without the controll board
     * Based on [this](http://www.instructables.com/id/Led-Cube-8x8x8/) project
+  * LED panel driver is memory mapped
+  * Added Instructions are for better memory access.
+  
+ 
+![Alt text](block_diagram.jpg?raw=true "Title")
 
