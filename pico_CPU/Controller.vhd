@@ -8,25 +8,22 @@ entity ControlUnit is
   generic (BitWidth: integer;
            InstructionWidth: integer);
   port(
+    rst          : in  std_logic;
+    clk          : in  std_logic;
     ----------------------------------------
-    rst: in std_logic;
-    clk: in std_logic;
+    Instr_In     : in  std_logic_vector (InstructionWidth-1 downto 0);
+    Instr_Add    : out std_logic_vector (BitWidth-1 downto 0);
     ----------------------------------------
-    Instr_In: in std_logic_vector (InstructionWidth-1 downto 0);
-    Instr_Add: out std_logic_vector (BitWidth-1 downto 0);
+    MemRdAddress : out std_logic_vector (BitWidth-1 downto 0);
+	  MemWrtAddress: out std_logic_vector (BitWidth-1 downto 0);
+    Mem_RW       : out std_logic;
     ----------------------------------------
-    MemRdAddress: out std_logic_vector (BitWidth-1 downto 0);
-	 MemWrtAddress: out std_logic_vector (BitWidth-1 downto 0);
-    Mem_RW: out std_logic;
-    ----------------------------------------
-    DPU_Flags: in std_logic_vector (3 downto 0);
-    DataToDPU: out std_logic_vector (BitWidth-1 downto 0);
-    CommandToDPU: out std_logic_vector (10 downto 0);
-	 Reg_in_sel: out std_logic_vector (7 downto 0);
-	 Reg_out_sel: out std_logic_vector (2 downto 0);
-    DataFromDPU: in std_logic_vector (BitWidth-1 downto 0)
-
-    ----------------------------------------
+    DPU_Flags    : in  std_logic_vector (3 downto 0);
+    DataToDPU    : out std_logic_vector (BitWidth-1 downto 0);
+    CommandToDPU : out std_logic_vector (10 downto 0);
+	  Reg_in_sel   : out std_logic_vector (7 downto 0);
+	  Reg_out_sel  : out std_logic_vector (2 downto 0);
+    DataFromDPU  : in  std_logic_vector (BitWidth-1 downto 0)
   );
 end ControlUnit;
 
@@ -50,11 +47,11 @@ architecture RTL of ControlUnit is
                        Load_A_Mem,Load_R0_Mem,Load_R0_Dir,Store_A_Mem,load_A_R,load_R_A,Load_Ind_A,
                        ClearZ,ClearOV,ClearC, ClearACC,
                        NOP,HALT);
-  signal Instr:Instruction;
+  signal Instr:Instruction := NOP;
 
   signal SP_in, SP_out : std_logic_vector (BitWidth-1 downto 0):= (others => '0');
   signal PC_in, PC_out : std_logic_vector (BitWidth-1 downto 0):= (others => '0');
-  signal InstrReg_out: std_logic_vector (InstructionWidth-1 downto 0);
+  signal InstrReg_out: std_logic_vector (InstructionWidth-1 downto 0) := (others => '0');
 
   ---------------------------------------------
   --      OpCode Aliases
@@ -69,12 +66,10 @@ architecture RTL of ControlUnit is
   process (clk,rst)
     begin
     if rst = '1' then
-
        State_out <= F;
        SP_out <= (others => '0');
        PC_out <= (others => '0');
        InstrReg_out <= (others => '0');
-
     elsif clk'event and clk='1' then
        State_out <= State_in;
        SP_out <= SP_in;
@@ -90,194 +85,153 @@ architecture RTL of ControlUnit is
 --Control FSM
 -----------------------------------------------------------
 
-  process(State_out,PC_out,Instr,InstrReg_out,DataFromDPU,SP_out,DPU_Flags)
+  process(State_out,PC_out,Instr,InstrReg_out,DataFromDPU, SP_out, DPU_Flags)
     begin
     SP_in <= SP_out;
-	 PC_in <= PC_out;
-	 Instr_Add <= PC_out;
+	  PC_in <= PC_out;
+	  Instr_Add <= PC_out;
     Mem_RW <= '0';
-
+    MemRdAddress <= (others => '0');
+    MemWrtAddress <= (others => '0');
+    DataToDPU <= (others => '0');
+    CommandToDPU <= "00000001000"; --do not do anything
+    Reg_in_sel<="00000000";
+    Reg_out_sel<="000";
     case State_out IS
 --Fetch--------------------------------------------------------------------------
             WHEN F =>
-
-                DataToDPU <= (others => '0');
-                MemRdAddress <= (others => '0');
-					 MemWrtAddress <= (others => '0');
-                CommandToDPU <= "00000001000"; --do not do anything
-					 Reg_in_sel<="00000000";
-					 Reg_out_sel<="000";
-                Mem_RW <= '0';
                 State_in <= D;
 --Decode-------------------------------------------------------------------------
             WHEN D =>
-                DataToDPU <= (others => '0');
-                MemRdAddress <= (others => '0');
-					 MemWrtAddress <= (others => '0');
-                CommandToDPU <= "00000001000"; --do not do anything
-					 Reg_in_sel<="00000000";
-					 Reg_out_sel<="000";
                 State_in <= Ex;
 --Execution------------------------------------------------------------------------
             WHEN Ex =>
-               DataToDPU <= (others => '0');
-              MemRdAddress <= (others => '0');
-				  MemWrtAddress <= (others => '0');
-              Mem_RW <= '0';
-              CommandToDPU <= "00000001000"; --do not do anything
-				  Reg_in_sel<="00000000";
-				  Reg_out_sel<="000";
               State_in <= WB;
-                -----------------------------------------------------------
-                -----------------------Arithmetic--------------------------
-                -----------------------------------------------------------
-                if Instr = Add_A_R then
+              -----------------------Arithmetic--------------------------
+              if Instr = Add_A_R then
                   CommandToDPU <= "00000000010";
-						Reg_out_sel<= InstrReg_out (2 downto 0);
+						      Reg_out_sel<= InstrReg_out (2 downto 0);
 
-                elsif Instr = Add_A_Mem then
-                  MemRdAddress <= InstrReg_out (BitWidth-1 downto 0);
-                  CommandToDPU <= "00000000000";
+              elsif Instr = Add_A_Mem then
+                    MemRdAddress <= InstrReg_out (BitWidth-1 downto 0);
+                    CommandToDPU <= "00000000000";
 
-                elsif Instr = Add_A_Dir then
-                   DataToDPU <= InstrReg_out (BitWidth-1 downto 0);
-                  CommandToDPU <= "00000000001";
-
+              elsif Instr = Add_A_Dir then
+                     DataToDPU <= InstrReg_out (BitWidth-1 downto 0);
+                     CommandToDPU <= "00000000001";
                 -----------------------------------------------
-                elsif Instr = Sub_A_R then
+              elsif Instr = Sub_A_R then
                   CommandToDPU <= "00000000110";
-						Reg_out_sel<= InstrReg_out (2 downto 0);
+						      Reg_out_sel<= InstrReg_out (2 downto 0);
 
-                elsif Instr = Sub_A_Mem then
+              elsif Instr = Sub_A_Mem then
                   MemRdAddress <= InstrReg_out (BitWidth-1 downto 0);
                   CommandToDPU <= "00000000100";
 
-                elsif Instr = Sub_A_Dir then
+              elsif Instr = Sub_A_Dir then
                   DataToDPU <= InstrReg_out (BitWidth-1 downto 0);
                   CommandToDPU <= "00000000101";
                 -----------------------------------------------
-                elsif Instr = IncA then
+              elsif Instr = IncA then
                   CommandToDPU <= "00000000011";
 
-                elsif Instr = DecA then
+              elsif Instr = DecA then
                   CommandToDPU <= "00000000111";
-
-
-                -----------------------------------------------------------
                 -----------------------Shift-------------------------------
-                -----------------------------------------------------------
-                elsif Instr = ShiftA_R  then
+              elsif Instr = ShiftA_R  then
                   CommandToDPU <= "00000011100";
 
-                elsif Instr = ShiftA_L  then
+              elsif Instr = ShiftA_L  then
                   CommandToDPU <= "00000100000";
 
-                elsif Instr = ShiftArithL  then
+              elsif Instr = ShiftArithL  then
                   CommandToDPU <= "00000101100";
 
-                elsif Instr = ShiftArithR  then
+              elsif Instr = ShiftArithR  then
                   CommandToDPU <= "00000101000";
 
-                elsif Instr = RRC  then
+              elsif Instr = RRC  then
                   CommandToDPU <= "00000111000";
 
-                elsif Instr = RLC  then
+              elsif Instr = RLC  then
                   CommandToDPU <= "00000111100";
-
-                -----------------------------------------------------------
                 -----------------------Logical-----------------------------
-                -----------------------------------------------------------
-                 elsif Instr = NegA then
+              elsif Instr = NegA then
                   CommandToDPU <= "00000100100";
 
-                 elsif Instr = FlipA then
+              elsif Instr = FlipA then
                   CommandToDPU <= "00000110000";
 
-                elsif Instr = And_A_R  then
+              elsif Instr = And_A_R  then
                   CommandToDPU <= "00000010010";
-						Reg_out_sel<= InstrReg_out (2 downto 0);
+						      Reg_out_sel<= InstrReg_out (2 downto 0);
 
-                elsif Instr = OR_A_R  then
+              elsif Instr = OR_A_R  then
                   CommandToDPU <= "00000010110";
-						Reg_out_sel<= InstrReg_out (2 downto 0);
+						      Reg_out_sel<= InstrReg_out (2 downto 0);
 
-                elsif Instr = XOR_A_R  then
+              elsif Instr = XOR_A_R  then
                   CommandToDPU <= "00000011010";
-						Reg_out_sel<= InstrReg_out (2 downto 0);
-                -----------------------------------------------------------
+						      Reg_out_sel<= InstrReg_out (2 downto 0);
                 -----------------------Memory------------------------------
-                -----------------------------------------------------------
-                elsif Instr = Load_R0_Mem  then
+              elsif Instr = Load_R0_Mem  then
 
                   MemRdAddress <= InstrReg_out (BitWidth-1 downto 0);
                   Mem_RW <= '0';
                   CommandToDPU <= "11000001000";
                   Reg_in_sel<= "00000001";
 
-                elsif Instr = Load_A_Mem  then
+              elsif Instr = Load_A_Mem  then
                   MemRdAddress <= InstrReg_out (BitWidth-1 downto 0);
                   Mem_RW <= '0';
                   CommandToDPU <= "00000001100";
 
-                elsif Instr = SavePC  then
+              elsif Instr = SavePC  then
                   DataToDPU <= PC_out;
                   CommandToDPU <= "00000001101";
 
-                elsif Instr = Load_R0_Dir  then
+              elsif Instr = Load_R0_Dir  then
                     CommandToDPU <= "01000001000";
                     DataToDPU <= InstrReg_out (BitWidth-1 downto 0);
                     Reg_in_sel<= "00000001";
-						  Reg_out_sel<= "000";
+						        Reg_out_sel<= "000";
 
-                elsif Instr = Load_Ind_A  then
+              elsif Instr = Load_Ind_A  then
                     MemRdAddress <= DataFromDPU;
                     Mem_RW <= '0';
                     CommandToDPU <= "00000001100";
                     Reg_in_sel<= "00000000";
-						  Reg_out_sel<= "000";
+						        Reg_out_sel<= "000";
 
-                elsif Instr = load_A_R then
+              elsif Instr = load_A_R then
                     CommandToDPU <= "00000001100";
-						  Reg_out_sel<= InstrReg_out (2 downto 0);
+						        Reg_out_sel<= InstrReg_out (2 downto 0);
 
-                elsif Instr = load_R_A then
+              elsif Instr = load_R_A then
                     CommandToDPU <= "10000001000";
                     Reg_in_sel<= InstrReg_out (7 downto 0);
-
-                -----------------------------------------------------------
                 -----------------------Stack-------------------------------
-                -----------------------------------------------------------
-                elsif Instr = POP  then
+              elsif Instr = POP  then
                     MemRdAddress <=   SP_out - "00000001";
                     SP_in <= SP_out - 1;
                     Mem_RW <= '0';
                     CommandToDPU <= "00000001100";
-                -----------------------------------------------------------
                 -----------------------ClearFlags--------------------------
-                -----------------------------------------------------------
-                elsif Instr = ClearZ  then
+              elsif Instr = ClearZ  then
                     CommandToDPU <= "00001001000";
-                elsif Instr = ClearOV  then
+              elsif Instr = ClearOV  then
                    CommandToDPU <= "00010001000";
-                elsif Instr = ClearC  then
+              elsif Instr = ClearC  then
                    CommandToDPU <= "00100001000";
-                elsif Instr = ClearACC  then
+              elsif Instr = ClearACC  then
                    CommandToDPU <= "00000110100";
-
-                else
+              else
                 CommandToDPU <= "00000001000"; --do not do anything
-                end if;
+              end if;
 
 --WriteBack------------------------------------------------------------------------
             WHEN WB =>
-                DataToDPU <= (others => '0');
-                MemRdAddress <= (others => '0');
-					 MemWrtAddress <= (others => '0');
-                CommandToDPU <= "00000001000"; --do not do anything
-					 Reg_in_sel<="00000000";
-					 Reg_out_sel<="000";
                 State_in <= F;
-
                 if Instr = Store_A_Mem then
                       MemWrtAddress <= InstrReg_out (BitWidth-1 downto 0);
                       Mem_RW <= '1';
@@ -285,10 +239,7 @@ architecture RTL of ControlUnit is
                 elsif Instr = HALT then
                       PC_in <= PC_out;
                       State_in <= WB;
-
-                -----------------------------------------------------------
                 -----------------------Jump--------------------------------
-                -----------------------------------------------------------
                 elsif Instr = Jmp then
                       PC_in <= InstrReg_out (BitWidth-1 downto 0);
 
@@ -310,10 +261,7 @@ architecture RTL of ControlUnit is
                 elsif Instr= LoadPC then
                       PC_in <= DataFromDPU ;
                       State_in <= F;
-                -----------------------------------------------------------
                 -----------------------Stack OP----------------------------
-                -----------------------------------------------------------
-
                 elsif Instr= PUSH then
                       PC_in <= PC_out+1;
                       MemWrtAddress <=  SP_out;
@@ -323,12 +271,8 @@ architecture RTL of ControlUnit is
                       PC_in <= PC_out+1;
 
                 end if;
-
        END case;
   end process;
-
-
-
 
   ------------------------------------------------
   -- Instr decoder

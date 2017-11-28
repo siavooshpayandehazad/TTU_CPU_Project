@@ -21,7 +21,7 @@ architecture RTL of Adder_Sub is
 ---------------------------------------------
 --      Signals
 ---------------------------------------------
-signal   carry : std_logic_vector (bitwidth downto 0);
+signal   carry : std_logic_vector (bitwidth downto 0) := (others => '0');
 ---------------------------------------------
 begin
 

@@ -17,8 +17,8 @@ end Mem;
 
 architecture beh of Mem is
 
-  type Mem_type is array (0 to DataMem_depth-1) of std_logic_vector(BitWidth-1 downto 0);
-   signal Mem : Mem_type;
+  type Mem_type is array (0 to DataMem_depth-1) of std_logic_vector(BitWidth-1 downto 0) ;
+   signal Mem : Mem_type := ((others=> (others=>'0')));
 
 begin
 
@@ -44,4 +44,5 @@ begin
       Data_Out <= (others=> '0');
     end if;
   end process;
+  
 end beh;

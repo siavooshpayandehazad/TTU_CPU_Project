@@ -1,12 +1,8 @@
-
-
-
-
 library IEEE;
 use IEEE.std_logic_1164.all;
-USE ieee.std_logic_unsigned.ALL;
- USE IEEE.NUMERIC_STD.ALL;
- use work.pico_cpu.all;
+use ieee.std_logic_unsigned.all;
+use IEEE.NUMERIC_STD.all;
+use work.pico_cpu.all;
 
 --ALU entity
 entity ALU is
@@ -25,8 +21,8 @@ architecture RTL of ALU is
 ---------------------------------------------
 --      Signals
 ---------------------------------------------
- signal AddSub_result: std_logic_vector (BitWidth-1 downto 0);
- signal Cout,Add_Sub: std_logic;
+ signal AddSub_result: std_logic_vector (BitWidth-1 downto 0) := (others => '0');
+ signal Cout,Add_Sub: std_logic := '0';
 
 begin
 ---------------------------------------------
@@ -35,7 +31,6 @@ begin
 Adder_comp: Adder_Sub generic map (BitWidth => BitWidth)  port map (A,B,Add_Sub,AddSub_result,Cout);
 ---------------------------------------------
 Cflag_out <= Cout;
-
 
 
 PROC_ALU: process(Command,A,B,AddSub_result,Cflag_in)

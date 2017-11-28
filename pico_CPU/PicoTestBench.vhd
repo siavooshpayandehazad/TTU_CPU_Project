@@ -19,11 +19,21 @@ begin
 --Component instantiation of ALU
 PicoCPU_comp: PicoCPU port map (rst, clk);
 
- clk <= not clk after 1 ns;
- rst <=  '0' after 3 ns;
+process
+begin
+  clk <= '0';
+  wait for clock_period/2;
+  clk <= '1';
+  wait for clock_period/2;
+end process;
 
-
-
+process
+begin
+  rst <= '1';
+  wait for 3*clock_period;
+  rst <=  '0';
+  wait;
+end process;
 
 
 end Bench;

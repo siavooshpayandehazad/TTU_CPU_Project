@@ -16,7 +16,7 @@ architecture Behavioral of FullAdderSub is
 ---------------------------------------------
 --      Signals
 ---------------------------------------------
- signal NewB : std_logic;
+ signal NewB : std_logic := '0';
 ---------------------------------------------
 begin
 
@@ -27,5 +27,3 @@ Sum <= a xor NewB xor C_in;
 C_out  <= (a and NewB) or ((a xor NewB) and C_in);
 
 end Behavioral;
-
-

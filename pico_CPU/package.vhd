@@ -10,6 +10,32 @@ package pico_cpu is
     constant CPU_Instwidth : integer := 6 + CPU_Bitwidth;
     constant InstMem_depth : integer := 1024;
     constant DataMem_depth : integer := 1024;
+    constant clock_period  : time := 1 ns;
+
+    component ALU is
+      generic (BitWidth: integer);
+      port ( A: in std_logic_vector (BitWidth-1 downto 0);
+            B: in std_logic_vector (BitWidth-1 downto 0);
+            Command: in std_logic_vector (3 downto 0);
+            Cflag_in: in std_logic;
+            Cflag_out: out std_logic;
+            Result: out std_logic_vector (BitWidth-1 downto 0)
+        );
+    end component;
+
+    component RegisterFile is
+    generic (BitWidth: integer);
+      port ( clk : in std_logic;
+    			rst: in std_logic;
+    			Data_in_mem: in std_logic_vector (BitWidth-1 downto 0);
+    			Data_in_CU: in std_logic_vector (BitWidth-1 downto 0);
+    			Data_in_ACC: in std_logic_vector (BitWidth-1 downto 0);
+    			Data_in_sel: in std_logic_vector (1 downto 0);
+    			Register_in_sel: in std_logic_vector (7 downto 0);
+    			Register_out_sel: in std_logic_vector (2 downto 0);
+    			Data_out: out std_logic_vector (BitWidth-1 downto 0)
+      );
+    end component;
 
     component PicoCPU is
       port(

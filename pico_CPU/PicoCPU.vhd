@@ -17,13 +17,13 @@ architecture RTL of PicoCPU is
 ---------------------------------------------
 --      Signals
 ---------------------------------------------
-signal Instr: std_logic_vector (CPU_Instwidth-1 downto 0);
-signal InstrAdd , Mem_Rd_Address,Mem_Wrt_Address, DPUData,MEMDATA,DPU_Result: std_logic_vector (CPU_Bitwidth-1 downto 0) ;
-signal MemRW: std_logic;
-signal DPUFlags: std_logic_vector (3 downto 0);
-signal DPUCommand : std_logic_vector (10 downto 0);
-signal Reg_in_sel: std_logic_vector (7 downto 0);
-signal Reg_out_sel: std_logic_vector (2 downto 0);
+signal Instr: std_logic_vector (CPU_Instwidth-1 downto 0):= (others=>'0');
+signal InstrAdd , Mem_Rd_Address, Mem_Wrt_Address, DPUData, MEMDATA, DPU_Result: std_logic_vector (CPU_Bitwidth-1 downto 0) := (others=>'0');
+signal MemRW: std_logic := '0';
+signal DPUFlags: std_logic_vector (3 downto 0):= (others=>'0');
+signal DPUCommand : std_logic_vector (10 downto 0):= (others=>'0');
+signal Reg_in_sel: std_logic_vector (7 downto 0):= (others=>'0');
+signal Reg_out_sel: std_logic_vector (2 downto 0):= (others=>'0');
 
 begin
 
@@ -44,7 +44,7 @@ begin
   --memory
   Mem_comp: Mem
   generic map (BitWidth => CPU_Bitwidth)
-  port map (Mem_Rd_Address, DPU_Result,Mem_Wrt_Address, clk,MemRW , rst , MEMDATA);
+  port map (Mem_Rd_Address, DPU_Result, Mem_Wrt_Address, clk,MemRW , rst , MEMDATA);
 
   FlagOut <=	DPUFlags;
   output <= DPU_Result;
