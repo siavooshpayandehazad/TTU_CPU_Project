@@ -8,6 +8,7 @@
 vlib work
 
 # Include files and compile them
+vcom "package.vhd"
 vcom "Adder.vhd"
 vcom "FullAdder.vhd"
 vcom "ALU.vhd"
