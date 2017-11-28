@@ -6,6 +6,19 @@ use ieee.numeric_std.all;
 
 package pico_cpu is
 
+    constant CPU_Bitwidth  : integer := 32;
+    constant CPU_Instwidth : integer := 6 + CPU_Bitwidth;
+    constant InstMem_depth : integer := 1024;
+    constant DataMem_depth : integer := 1024;
+
+    component PicoCPU is
+      port(
+        rst: in std_logic;
+        clk: in std_logic;
+    	 FlagOut: out std_logic_vector ( 3 downto 0);
+    	 output: out std_logic_vector ( CPU_Bitwidth-1 downto 0)
+      );
+    end component;
 
     component ControlUnit is
     generic (BitWidth: integer;

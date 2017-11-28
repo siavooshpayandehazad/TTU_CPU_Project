@@ -1,9 +1,7 @@
-
-
-
 library IEEE;
 use IEEE.std_logic_1164.all;
 USE ieee.std_logic_unsigned.ALL;
+use work.pico_cpu.all;
 
 entity PicoCPUTestBench is
 end PicoCPUTestBench;
@@ -11,14 +9,7 @@ end PicoCPUTestBench;
 architecture Bench of PicoCPUTestBench is
 
   --Component declaration for ALU
- Component PicoCPU is
-  port(
 
-    rst: in std_logic;
-    clk: in std_logic
-
-  );
-end Component;
 
  signal clk: std_logic:= '0';
  signal rst: std_logic:= '1';

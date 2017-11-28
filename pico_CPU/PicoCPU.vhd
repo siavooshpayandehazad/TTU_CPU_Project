@@ -8,18 +8,12 @@ entity PicoCPU is
     rst: in std_logic;
     clk: in std_logic;
 	 FlagOut: out std_logic_vector ( 3 downto 0);
-	 output: out std_logic_vector ( 7 downto 0)
+	 output: out std_logic_vector ( CPU_Bitwidth-1 downto 0)
   );
 end PicoCPU;
 
 
 architecture RTL of PicoCPU is
----------------------------------------------
---      constants
----------------------------------------------
-constant CPU_Bitwidth : integer := 8;
-constant CPU_Instwidth : integer := 6 + CPU_Bitwidth;
-
 ---------------------------------------------
 --      Signals
 ---------------------------------------------
