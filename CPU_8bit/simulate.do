@@ -28,5 +28,5 @@ do wave.do
 # Run the simulation
 vcd file wave.vcd
 vcd add -r -optcells /*
-run 1500 ns
+run 300 ns
 vcd flush
