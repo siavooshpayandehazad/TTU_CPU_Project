@@ -63,6 +63,8 @@ package pico_cpu is
         CommandToDPU: out std_logic_vector (10 downto 0);
   		  Reg_in_sel: out std_logic_vector (7 downto 0);
   		  Reg_out_sel: out std_logic_vector (2 downto 0);
+        flush_pipeline  : out std_logic;
+        DataFromDPU_bypass: in std_logic_vector (BitWidth-1 downto 0);
         DataFromDPU: in std_logic_vector (BitWidth-1 downto 0)
       );
     end component;
@@ -83,9 +85,9 @@ package pico_cpu is
              Data_in_RegFile: in std_logic_vector (BitWidth-1 downto 0);
              Data_in_control: in std_logic_vector (BitWidth-1 downto 0);
              Command: in std_logic_vector (10 downto 0);
-
              DPU_Flags: out std_logic_vector (3 downto 0);
              DPU_Flags_FF: out std_logic_vector (3 downto 0);
+             Result_bypass: out std_logic_vector (BitWidth-1 downto 0);
              Result: out std_logic_vector (BitWidth-1 downto 0)
         );
     end component;
@@ -122,4 +124,6 @@ package pico_cpu is
              Sum : out  STD_LOGIC);
   end component;
 
+
+  
 end; --package body

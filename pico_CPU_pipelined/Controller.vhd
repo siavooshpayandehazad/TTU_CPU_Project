@@ -24,6 +24,8 @@ entity ControlUnit is
     CommandToDPU : out std_logic_vector (10 downto 0);
 	  Reg_in_sel   : out std_logic_vector (7 downto 0);
 	  Reg_out_sel  : out std_logic_vector (2 downto 0);
+	  flush_pipeline  : out std_logic;
+    DataFromDPU_bypass: in std_logic_vector (BitWidth-1 downto 0);
     DataFromDPU  : in  std_logic_vector (BitWidth-1 downto 0)
   );
 end ControlUnit;
@@ -51,6 +53,8 @@ architecture RTL of ControlUnit is
   signal InstrReg_out: std_logic_vector (InstructionWidth-1 downto 0) := (others => '0');
   signal arithmetic_operation : std_logic;
   signal halt_signal_in, halt_signal : std_logic := '0';
+  signal flush_signal, flush_signal_FF: std_logic;
+
   ---------------------------------------------
   --      OpCode Aliases
   ---------------------------------------------
@@ -58,7 +62,7 @@ architecture RTL of ControlUnit is
   alias opcode_in : std_logic_vector (5 downto 0) is Instr_In (InstructionWidth-1 downto BitWidth);
 
   begin
-
+    flush_pipeline <= flush_signal;
   ---------------------------------------------
   -- Registers setting
   ---------------------------------------------
@@ -72,6 +76,7 @@ architecture RTL of ControlUnit is
        Instr_E <= NOP;
        Instr_WB <= NOP;
        halt_signal<= '0';
+       flush_signal_FF<= '0';
     elsif clk'event and clk='1' then
        SP_out <= SP_in;
        PC_out <= PC_in;
@@ -81,7 +86,7 @@ architecture RTL of ControlUnit is
          Instr_E <= Instr_D;
          Instr_WB <= Instr_E;
        end if;
-
+       flush_signal_FF <= flush_signal;
   end if;
   end process;
   ---------------------------------------------
@@ -236,10 +241,12 @@ architecture RTL of ControlUnit is
   end process;
 
 --WriteBack------------------------------------------------------------------------
-      process(Instr_D, InstrReg_out, PC_out, DPU_Flags, DPU_Flags_FF, Instr_E, halt_signal)begin
+      process(Instr_D, InstrReg_out, PC_out, DPU_Flags, DPU_Flags_FF,
+              Instr_E, halt_signal, arithmetic_operation, DataFromDPU_bypass)begin
                 halt_signal_in <= halt_signal;
+                flush_signal <= '0';
                 if halt_signal = '1' then
-                  pc_in <= PC_out;
+                    pc_in <= PC_out;
                 else
                     PC_in <= PC_out+1;
                     if Instr_D = HALT then
@@ -248,90 +255,106 @@ architecture RTL of ControlUnit is
                     -----------------------Jump--------------------------------
                     elsif Instr_D = Jmp then
                           PC_in <= InstrReg_out (BitWidth-1 downto 0);
-
+                          flush_signal <= '1';
                     elsif Instr_D = JmpOV and DPU_Flags_FF(0) = '1' then
                           PC_in <= InstrReg_out (BitWidth-1 downto 0);
-
+                          flush_signal <= '1';
                     elsif Instr_D = JmpZ and DPU_Flags_FF(1) = '1' then
                           PC_in <= InstrReg_out (BitWidth-1 downto 0);
-
+                          flush_signal <= '1';
                     elsif Instr_D = JMPEQ and DPU_Flags_FF(2) = '1' then
                           PC_in <= InstrReg_out (BitWidth-1 downto 0);
-
+                          flush_signal <= '1';
                     elsif Instr_D = JmpC and DPU_Flags_FF(3) = '1' then
                           PC_in <= InstrReg_out (BitWidth-1 downto 0);
-
+                          flush_signal <= '1';
                     elsif Instr_D= Jmp_rel then
                           PC_in <= PC_out + InstrReg_out (BitWidth-1 downto 0);
-
+                          flush_signal <= '1';
                     elsif Instr_D= LoadPC then
-                          PC_in <= DataFromDPU ;
-
+                          if arithmetic_operation = '1' then
+                            PC_in <= DataFromDPU_bypass;
+                          else
+                            PC_in <= DataFromDPU;
+                          end if;
+                          flush_signal <= '1';
                     end if;
                 end if;
   end process;
 
+process(Instr_E)begin
+  if   Instr_E = Add_A_R   or Instr_E = Add_A_Mem or Instr_E = Add_A_Dir
+    or Instr_E = Sub_A_R or Instr_E = Sub_A_Mem or Instr_E = Sub_A_Dir
+    or Instr_E = IncA  or Instr_E = DecA then
+      arithmetic_operation <= '1';
+  else
+      arithmetic_operation <= '0';
+  end if;
+end process;
   ------------------------------------------------
   -- Instr decoder
   ------------------------------------------------
-  process (opcode)
+  process (opcode, flush_signal_FF)
   begin
-    case opcode is
-      when "000000" => Instr_D <= Add_A_R;
-      when "000001" => Instr_D <= Add_A_Mem;
-      when "000010" => Instr_D <= Add_A_Dir;
+      if flush_signal_FF = '0' then
+          case opcode is
+            when "000000" => Instr_D <= Add_A_R;
+            when "000001" => Instr_D <= Add_A_Mem;
+            when "000010" => Instr_D <= Add_A_Dir;
 
-      when "000011" => Instr_D <= Sub_A_R;
-      when "000100" => Instr_D <= Sub_A_Mem;
-      when "000101" => Instr_D <= Sub_A_Dir;
+            when "000011" => Instr_D <= Sub_A_R;
+            when "000100" => Instr_D <= Sub_A_Mem;
+            when "000101" => Instr_D <= Sub_A_Dir;
 
-      when "000110" => Instr_D <= IncA;
-      when "000111" => Instr_D <= DecA;
+            when "000110" => Instr_D <= IncA;
+            when "000111" => Instr_D <= DecA;
 
+            when "001000" => Instr_D <= ShiftArithR;
+            when "001001" => Instr_D <= ShiftArithL;
+            when "001010" => Instr_D <= ShiftA_R;
+            when "001011" => Instr_D <= ShiftA_L;
+            when "001100" => Instr_D <= RRC;
+            when "001101" => Instr_D <= RLC;
 
-      when "001000" => Instr_D <= ShiftArithR;
-      when "001001" => Instr_D <= ShiftArithL;
-      when "001010" => Instr_D <= ShiftA_R;
-      when "001011" => Instr_D <= ShiftA_L;
-      when "001100" => Instr_D <= RRC;
-      when "001101" => Instr_D <= RLC;
+            when "001110" => Instr_D <= And_A_R;
+            when "001111" => Instr_D <= OR_A_R;
+            when "010000" => Instr_D <= XOR_A_R;
+            when "010001" => Instr_D <= FlipA;
+            when "010010" => Instr_D <= NegA;
 
-      when "001110" => Instr_D <= And_A_R;
-      when "001111" => Instr_D <= OR_A_R;
-      when "010000" => Instr_D <= XOR_A_R;
-      when "010001" => Instr_D <= FlipA;
-      when "010010" => Instr_D <= NegA;
+            when "010011" => Instr_D <= Jmp;
+            when "010100" => Instr_D <= JmpZ;
+            when "010101" => Instr_D <= JmpOV;
+            when "010110" => Instr_D <= JmpC;
+            when "010111" => Instr_D <= Jmp_rel;
+            when "011000" => Instr_D <= JMPEQ;
 
-      when "010011" => Instr_D <= Jmp;
-      when "010100" => Instr_D <= JmpZ;
-      when "010101" => Instr_D <= JmpOV;
-      when "010110" => Instr_D <= JmpC;
-      when "010111" => Instr_D <= Jmp_rel;
-      when "011000" => Instr_D <= JMPEQ;
+            when "011001" => Instr_D <= ClearZ;
+            when "011010" => Instr_D <= ClearOV;
+            when "011011" => Instr_D <= ClearC;
+            when "011100" => Instr_D <= ClearACC;
 
-      when "011001" => Instr_D <= ClearZ;
-      when "011010" => Instr_D <= ClearOV;
-      when "011011" => Instr_D <= ClearC;
-      when "011100" => Instr_D <= ClearACC;
+            when "011101" => Instr_D <= LoadPC;
+            when "011110" => Instr_D <= SavePC;
+            when "011111" => Instr_D <= Load_A_Mem;
+            when "100000" => Instr_D <= Store_A_Mem;
+            when "100001" => Instr_D <= Load_R0_Dir;
+            when "100010" => Instr_D <= Load_R0_Mem;
 
-      when "011101" => Instr_D <= LoadPC;
-      when "011110" => Instr_D <= SavePC;
-      when "011111" => Instr_D <= Load_A_Mem;
-      when "100000" => Instr_D <= Store_A_Mem;
-      when "100001" => Instr_D <= Load_R0_Dir;
-      when "100010" => Instr_D <= Load_R0_Mem;
+            when "100011" => Instr_D <= load_A_R;
+            when "100100" => Instr_D <= load_R_A;
+            when "100101" => Instr_D <= Load_Ind_A ;
 
-      when  "100011" => Instr_D <= load_A_R;
-      when  "100100" => Instr_D <= load_R_A;
-      when  "100101" => Instr_D <= Load_Ind_A ;
+            when "111100" => Instr_D <= PUSH;
+            when "111101" => Instr_D <= POP;
 
-      when "111100" => Instr_D <= PUSH;
-      when "111101" => Instr_D <= POP;
+            when "111110" => Instr_D <= NOP;
+            when "111111" => Instr_D <= HALT;
 
-      when "111110" => Instr_D <= NOP;
-      when "111111" => Instr_D <= HALT;
-
-      when others =>  Instr_D <= NOP;
-      end case;
-        end process;
+            when others =>  Instr_D <= NOP;
+          end case;
+      else
+        Instr_D <= NOP;
+      end if;
+  end process;
 end RTL;

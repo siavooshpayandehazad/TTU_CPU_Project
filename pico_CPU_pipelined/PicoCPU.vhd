@@ -18,7 +18,7 @@ architecture RTL of PicoCPU is
 --      Signals
 ---------------------------------------------
 signal Instr: std_logic_vector (CPU_Instwidth-1 downto 0):= (others=>'0');
-signal InstrAdd , MEMDATA, DPU_Result: std_logic_vector (CPU_Bitwidth-1 downto 0) := (others=>'0');
+signal InstrAdd , MEMDATA, DPU_Result, DataFromDPU_bypass: std_logic_vector (CPU_Bitwidth-1 downto 0) := (others=>'0');
 signal DPUData, DPUData_in: std_logic_vector (CPU_Bitwidth-1 downto 0) := (others=>'0');
 signal Mem_Rd_Address_1, Mem_Rd_Address_in,  Mem_Wrt_Address_1, Mem_Wrt_Address_in: std_logic_vector (CPU_Bitwidth-1 downto 0) := (others=>'0');
 signal MemRW_1, MemRW_in: std_logic := '0';
@@ -29,6 +29,7 @@ signal DPUCommand, DPUCommand_in : std_logic_vector (10 downto 0):= (others=>'0'
 signal Reg_in_sel: std_logic_vector (7 downto 0):= (others=>'0');
 signal Reg_out_sel: std_logic_vector (2 downto 0):= (others=>'0');
 signal Reg_file_out: std_logic_vector (CPU_Bitwidth-1 downto 0):= (others=>'0');
+signal flush_pipeline: std_logic;
 
 alias data_in_sel : std_logic_vector (1 downto 0) is DPUCommand_in (10 downto 9);
 
@@ -62,7 +63,9 @@ begin
 
   ControlUnit_comp: ControlUnit
   generic map (BitWidth => CPU_Bitwidth, InstructionWidth => CPU_Instwidth)
-  port map (rst, clk, Instr ,InstrAdd , Mem_Rd_Address_in, Mem_Wrt_Address_in , MemRW_in, DPUFlags, DPUFlags_FF, DPUData_in, DPUCommand_in, Reg_in_sel, Reg_out_sel, DPU_Result);
+  port map (rst, clk, Instr ,InstrAdd , Mem_Rd_Address_in, Mem_Wrt_Address_in,
+            MemRW_in, DPUFlags, DPUFlags_FF, DPUData_in, DPUCommand_in,
+            Reg_in_sel, Reg_out_sel, flush_pipeline, DataFromDPU_bypass, DPU_Result);
   --instruction memory
   InstMem_comp: InstMem
   generic map (BitWidth => CPU_Bitwidth, InstructionWidth => CPU_Instwidth)
@@ -76,7 +79,7 @@ begin
   --datapath unit
   DPU_comp: DPU
   generic map (BitWidth => CPU_Bitwidth)
-  port map (rst, clk, MEMDATA, Reg_file_out, DPUData,  DPUCommand, DPUFlags, DPUFlags_FF, DPU_Result);
+  port map (rst, clk, MEMDATA, Reg_file_out, DPUData,  DPUCommand, DPUFlags, DPUFlags_FF, DataFromDPU_bypass, DPU_Result);
   --memory
   Mem_comp: Mem
   generic map (BitWidth => CPU_Bitwidth)

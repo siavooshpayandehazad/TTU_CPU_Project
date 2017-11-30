@@ -17,6 +17,7 @@ entity DPU is
          Command: in std_logic_vector (10 downto 0);
          DPU_Flags: out std_logic_vector (3 downto 0);
          DPU_Flags_FF: out std_logic_vector (3 downto 0);
+         Result_bypass: out std_logic_vector (BitWidth-1 downto 0);
          Result: out std_logic_vector (BitWidth-1 downto 0)
     );
 end DPU;
@@ -42,8 +43,9 @@ architecture RTL of DPU is
   --        Opcode Aliases
   ---------------------------------------------
   alias Mux_Cont : std_logic_vector (1 downto 0) is Command (1 downto 0);
-  alias ALUCommand : std_logic_vector (3 downto 0) is Command (5 downto 2);
   alias SetFlag : std_logic_vector (2 downto 0) is Command (8 downto 6);
+  alias ALUCommand : std_logic_vector (3 downto 0) is Command (5 downto 2);
+
 
 
 begin
@@ -51,7 +53,6 @@ begin
 ALU_comp: ALU
 generic map (BitWidth => BitWidth)
 port map (ACC_out, Mux_Out, ALUCommand, C_flag_out, Cout, ACC_in);
-
 
   ---------------------------------------------
   --  Registers and Flags
@@ -148,6 +149,7 @@ port map (ACC_out, Mux_Out, ALUCommand, C_flag_out, Cout, ACC_in);
 
   end process;
 
+  Result_bypass <= ACC_in;
   Result <= ACC_out;
   DPU_Flags <= C_flag_in & EQ_Flag_in & Z_Flag_in  & OV_Flag_in;
   DPU_Flags_FF <= C_flag_out & EQ_Flag_out & Z_Flag_out  & OV_Flag_out;
