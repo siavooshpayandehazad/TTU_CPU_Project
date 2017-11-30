@@ -1,6 +1,7 @@
 add wave -noupdate  sim/:picocputestbench:clk
 add wave -noupdate  sim/:picocputestbench:rst
 
+add wave -noupdate -group {Control Unit}  sim/:picocputestbench:PicoCPU_comp:ControlUnit_comp:IO_DIR
 add wave -noupdate -group {Control Unit} -color Gold -radix decimal sim/:picocputestbench:PicoCPU_comp:ControlUnit_comp:PC_out
 add wave -noupdate -group {Control Unit} -color Gold sim/:picocputestbench:PicoCPU_comp:ControlUnit_comp:opcode_in
 add wave -noupdate -group {Control Unit} -color Gold sim/:picocputestbench:PicoCPU_comp:ControlUnit_comp:Instr_D

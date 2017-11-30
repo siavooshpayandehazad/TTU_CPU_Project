@@ -37,12 +37,14 @@ begin
     end if;
   end process MemProcess;
 
-  process(RdAddress)begin
-    if to_integer(unsigned(RdAddress(BitWidth-1 downto 0))) <= DataMem_depth-1 then
-      Data_Out <= Mem(to_integer(unsigned(RdAddress(BitWidth-1 downto 0))));
-    else
-      Data_Out <= (others=> '0');
-    end if;
+  process(RdAddress,clk)begin
+   if rising_edge(clk) then
+      if to_integer(unsigned(RdAddress(BitWidth-1 downto 0))) <= DataMem_depth-1 then
+        Data_Out <= Mem(to_integer(unsigned(RdAddress(BitWidth-1 downto 0))));
+      else
+        Data_Out <= (others=> '0');
+      end if;
+   end if;
   end process;
 
 end beh;

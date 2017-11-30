@@ -37,23 +37,23 @@ PROC_ALU: process(Command,A,B,AddSub_result,Cflag_in)
    begin
     Add_Sub <= '0';  --adding by default
      case Command is
-            WHEN "0000" =>   Result<= AddSub_result; --add
-            WHEN "0001" =>   Add_Sub <= '1';
-                             Result<= AddSub_result; -- Subtract
-            WHEN "0010" =>   Result <= A;  --Bypass A
-            WHEN "0011" =>   Result <= B;  --Bypass B
-            WHEN "0100" =>   Result<= A and B;  --And
-            WHEN "0101" =>   Result<= A or B;  --or
-            WHEN "0110" =>   Result<= A xor B;  --xor
-            WHEN "0111" =>   Result<= '0' & A(BitWidth-1 downto 1) ;  --shift right
-            WHEN "1000" =>   Result<= A(BitWidth-2 downto 0)& '0' ;  --shift left
-            WHEN "1001" =>   Result<= not A +1;  --negation
-            WHEN "1010" =>   Result<= A(BitWidth-1) & A(BitWidth-1 downto 1) ;  --shift right Arith
-            WHEN "1011" =>   Result<= A(BitWidth-1) & A(BitWidth-3 downto 0)& A(0) ;  --shift left Arith
-            WHEN "1100" =>   Result<= not(A); --Not of A
-            WHEN "1101" =>   Result<= (others => '0'); --Clear ACC
-            WHEN "1110" =>   Result<= Cflag_in & A(BitWidth-1 downto 1); -- RRC
-            WHEN "1111" =>   Result<= A(BitWidth-2 downto 0)& Cflag_in ; -- RLC
+            WHEN ALU_ADD    =>   Result<= AddSub_result; --add
+            WHEN ALU_SUB    =>   Add_Sub <= '1';
+                                 Result<= AddSub_result; -- Subtract
+            WHEN ALU_PASS_A =>   Result <= A;  --Bypass A
+            WHEN ALU_PASS_B =>   Result <= B;  --Bypass B
+            WHEN ALU_AND    =>   Result<= A and B;  --And
+            WHEN ALU_OR     =>   Result<= A or B;  --or
+            WHEN ALU_XOR    =>   Result<= A xor B;  --xor
+            WHEN ALU_SLR    =>   Result<= '0' & A(BitWidth-1 downto 1) ;  --shift right
+            WHEN ALU_SLL    =>   Result<= A(BitWidth-2 downto 0)& '0' ;  --shift left
+            WHEN ALU_NEG_A  =>   Result<= not A +1;  --negation
+            WHEN ALU_SAR    =>   Result<= A(BitWidth-1) & A(BitWidth-1 downto 1) ;  --shift right Arith
+            WHEN ALU_SAL    =>   Result<= A(BitWidth-1) & A(BitWidth-3 downto 0)& A(0) ;  --shift left Arith
+            WHEN ALU_NOT_A  =>   Result<= not(A); --Not of A
+            WHEN ALU_CLR_A  =>   Result<= (others => '0'); --Clear ACC
+            WHEN ALU_RRC    =>   Result<= Cflag_in & A(BitWidth-1 downto 1); -- RRC
+            WHEN ALU_RLC    =>   Result<= A(BitWidth-2 downto 0)& Cflag_in ; -- RLC
        WHEN OTHERS => Result<= (others => '0');
     END CASE;
 

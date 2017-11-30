@@ -12,12 +12,13 @@ architecture Bench of PicoCPUTestBench is
 
 
  signal clk: std_logic:= '0';
- signal rst: std_logic:= '1';
+ signal rst: std_logic:= '0';
+ signal IO: std_logic_vector(CPU_Bitwidth-1 downto 0):= (others => 'Z');
 
 begin
 
 --Component instantiation of ALU
-PicoCPU_comp: PicoCPU port map (rst, clk);
+PicoCPU_comp: PicoCPU port map (rst, clk, IO => IO);
 
 process
 begin
@@ -30,10 +31,10 @@ end process;
 process
 begin
   rst <= '1';
-  wait for 2.5*clock_period;
+  wait for 1*clock_period;
   rst <=  '0';
   wait;
 end process;
 
-
+IO <= "00000000000000000000000000000001" after 36.5 ns;
 end Bench;

@@ -2,7 +2,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 USE ieee.std_logic_unsigned.ALL;
-
+USE ieee.numeric_std.ALL;
 
 entity ControlUnit is
   generic (BitWidth: integer;
@@ -17,6 +17,10 @@ entity ControlUnit is
     MemRdAddress : out std_logic_vector (BitWidth-1 downto 0);
 	  MemWrtAddress: out std_logic_vector (BitWidth-1 downto 0);
     Mem_RW       : out std_logic;
+    ----------------------------------------
+    IO_DIR     : out std_logic;
+    IO_RD      : in std_logic_vector (BitWidth-1 downto 0);
+    IO_WR      : out std_logic_vector (BitWidth-1 downto 0);
     ----------------------------------------
     DPU_Flags    : in  std_logic_vector (3 downto 0);
     DPU_Flags_FF : in  std_logic_vector (3 downto 0);
@@ -45,7 +49,7 @@ architecture RTL of ControlUnit is
                        Add_A_R, Add_A_Mem,Add_A_Dir, Sub_A_R,Sub_A_Mem,Sub_A_Dir,IncA,DecA,
                        Load_A_Mem,Load_R0_Mem,Load_R0_Dir,Store_A_Mem,load_A_R,load_R_A,Load_Ind_A,
                        ClearZ,ClearOV,ClearC, ClearACC,
-                       NOP,HALT);
+                       NOP,HALT, GPIO_RD, GPIO_WR, GPIO_DIR);
   signal Instr_D, Instr_E, Instr_WB :Instruction := NOP;
 
   signal SP_in, SP_out : std_logic_vector (BitWidth-1 downto 0):= (others => '0');
@@ -54,7 +58,8 @@ architecture RTL of ControlUnit is
   signal arithmetic_operation : std_logic;
   signal halt_signal_in, halt_signal : std_logic := '0';
   signal flush_signal, flush_signal_FF: std_logic;
-
+  signal IO_WR_in, IO_WR_in_FF : std_logic_vector(BitWidth-1 downto 0);
+  signal IO_DIR_in, IO_DIR_FF :std_logic;
   ---------------------------------------------
   --      OpCode Aliases
   ---------------------------------------------
@@ -77,7 +82,11 @@ architecture RTL of ControlUnit is
        Instr_WB <= NOP;
        halt_signal<= '0';
        flush_signal_FF<= '0';
+       IO_WR_in_FF <=  (others=> '0');
+       IO_DIR_FF <= '0';
     elsif clk'event and clk='1' then
+       IO_WR_in_FF <= IO_WR_in;
+       IO_DIR_FF <= IO_DIR_in;
        SP_out <= SP_in;
        PC_out <= PC_in;
        halt_signal<= halt_signal_in;
@@ -91,22 +100,25 @@ architecture RTL of ControlUnit is
   end process;
   ---------------------------------------------
 
-
+  IO_DIR <= IO_DIR_FF;
+  IO_WR <= IO_WR_in_FF;
 -----------------------------------------------------------
 --Control FSM
 -----------------------------------------------------------
 
   process(PC_out,Instr_D,InstrReg_out,DataFromDPU, SP_out, DPU_Flags)
     begin
-    SP_in <= SP_out;
-	  Instr_Add <= PC_out;
-    Mem_RW <= '0';
-    MemRdAddress <= (others => '0');
-    DataToDPU <= (others => '0');
-    CommandToDPU <= "00000001000"; --do not do anything
-    Reg_in_sel<="00000000";
-    Reg_out_sel<="000";
-    MemWrtAddress <= (others => '0');
+      IO_WR_in <= IO_WR_in_FF;
+      IO_DIR_in <= IO_DIR_FF;
+      SP_in <= SP_out;
+  	  Instr_Add <= PC_out;
+      Mem_RW <= '0';
+      MemRdAddress <= (others => '0');
+      DataToDPU <= (others => '0');
+      CommandToDPU <= "00000001000"; --do not do anything
+      Reg_in_sel<="00000000";
+      Reg_out_sel<="000";
+      MemWrtAddress <= (others => '0');
 
             -----------------------Arithmetic--------------------------
               if Instr_D = Add_A_R then
@@ -178,13 +190,11 @@ architecture RTL of ControlUnit is
               elsif Instr_D = Load_R0_Mem  then
 
                   MemRdAddress <= InstrReg_out (BitWidth-1 downto 0);
-                  Mem_RW <= '0';
                   CommandToDPU <= "11000001000";
                   Reg_in_sel<= "00000001";
 
               elsif Instr_D = Load_A_Mem  then
                   MemRdAddress <= InstrReg_out (BitWidth-1 downto 0);
-                  Mem_RW <= '0';
                   CommandToDPU <= "00000001100";
 
               elsif Instr_D = SavePC  then
@@ -199,7 +209,6 @@ architecture RTL of ControlUnit is
 
               elsif Instr_D = Load_Ind_A  then
                     MemRdAddress <= DataFromDPU;
-                    Mem_RW <= '0';
                     CommandToDPU <= "00000001100";
                     Reg_in_sel<= "00000000";
 						        Reg_out_sel<= "000";
@@ -211,15 +220,29 @@ architecture RTL of ControlUnit is
               elsif Instr_D = load_R_A then
                     CommandToDPU <= "10000001000";
                     Reg_in_sel<= InstrReg_out (7 downto 0);
+              -----------------------GPIO-------------------------------
+              elsif Instr_D = GPIO_RD  then
+                      DataToDPU <= IO_RD;
+                      CommandToDPU <= "00000001101";
+
+              elsif Instr_D = GPIO_WR  then
+                      IO_WR_in <= DataFromDPU;
+
+              elsif Instr_D = GPIO_DIR  then
+                  if to_integer(unsigned(InstrReg_out (BitWidth-1 downto 0))) = 0 then
+                      IO_DIR_in <= '0';
+                  else
+                      IO_DIR_in <= '1';
+                  end if;
                 -----------------------store-------------------------------
               elsif Instr_D = Store_A_Mem then
-                          MemWrtAddress <= InstrReg_out (BitWidth-1 downto 0);
-                          Mem_RW <= '1';
+                     MemWrtAddress <= InstrReg_out (BitWidth-1 downto 0);
+                     Mem_RW <= '1';
                 -----------------------Stack-------------------------------
               elsif Instr_D = POP  then
                     MemRdAddress <=   SP_out - "00000001";
                     SP_in <= SP_out - 1;
-                    Mem_RW <= '0';
+
                     CommandToDPU <= "00000001100";
               -----------------------Stack OP----------------------------
               elsif Instr_D= PUSH then
@@ -240,17 +263,17 @@ architecture RTL of ControlUnit is
               end if;
   end process;
 
---WriteBack------------------------------------------------------------------------
+--PC handling------------------------------------------------------------------------
       process(Instr_D, InstrReg_out, PC_out, DPU_Flags, DPU_Flags_FF,
               Instr_E, halt_signal, arithmetic_operation, DataFromDPU_bypass)begin
+
                 halt_signal_in <= halt_signal;
                 flush_signal <= '0';
                 if halt_signal = '1' then
                     pc_in <= PC_out;
                 else
-                    PC_in <= PC_out+1;
+                    PC_in <= PC_out;
                     if Instr_D = HALT then
-                          PC_in <= PC_out;
                           halt_signal_in <= '1';
                     -----------------------Jump--------------------------------
                     elsif Instr_D = Jmp then
@@ -278,6 +301,8 @@ architecture RTL of ControlUnit is
                             PC_in <= DataFromDPU;
                           end if;
                           flush_signal <= '1';
+                    else
+                          PC_in <= PC_out+1;
                     end if;
                 end if;
   end process;
@@ -344,6 +369,10 @@ end process;
             when "100011" => Instr_D <= load_A_R;
             when "100100" => Instr_D <= load_R_A;
             when "100101" => Instr_D <= Load_Ind_A ;
+
+            when "100110" => Instr_D <= GPIO_DIR;
+            when "100111" => Instr_D <= GPIO_RD;
+            when "101000" => Instr_D <= GPIO_WR;
 
             when "111100" => Instr_D <= PUSH;
             when "111101" => Instr_D <= POP;
