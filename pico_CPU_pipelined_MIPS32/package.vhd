@@ -16,29 +16,30 @@ package pico_cpu is
 
     -------------------------------------------------
     TYPE Instruction IS (--arithmetic
-                        ADDU, ADDI, ADDIU,
+                        ADDU, ADDI, ADDIU, LUI,
                         -- logical
-                        AND_inst, ANDI, OR_inst, ORI, NOP
+                        AND_inst, ANDI, OR_inst, ORI, NOR_inst, XOR_inst, XORI, NOP
                         );
 
     -------------------------------------------------ALU COMMANDS
-    constant ALU_COMAND_WIDTH : integer := 4;
-    constant ALU_ADD    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "0000";
-    constant ALU_SUB    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "0001";
-    constant ALU_PASS_A : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "0010";
-    constant ALU_PASS_B : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "0011";
-    constant ALU_AND    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "0100";
-    constant ALU_OR     : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "0101";
-    constant ALU_XOR    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "0110";
-    constant ALU_SLR    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "0111";
-    constant ALU_SLL    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "1000";
-    constant ALU_NEG_A  : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "1001";
-    constant ALU_SAR    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "1010";
-    constant ALU_SAL    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "1011";
-    constant ALU_FLIP_A : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "1100";
-    constant ALU_CLR_A  : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "1101";
-    constant ALU_RRC    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "1110";
-    constant ALU_RLC    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "1111";
+    constant ALU_COMAND_WIDTH : integer := 5;
+    constant ALU_ADD    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "00000";
+    constant ALU_SUB    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "00001";
+    constant ALU_PASS_A : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "00010";
+    constant ALU_PASS_B : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "00011";
+    constant ALU_AND    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "00100";
+    constant ALU_OR     : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "00101";
+    constant ALU_XOR    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "00110";
+    constant ALU_SLR    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "00111";
+    constant ALU_SLL    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "01000";
+    constant ALU_NEG_A  : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "01001";
+    constant ALU_SAR    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "01010";
+    constant ALU_SAL    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "01011";
+    constant ALU_FLIP_A : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "01100";
+    constant ALU_CLR_A  : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "01101";
+    constant ALU_RRC    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "01110";
+    constant ALU_RLC    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "01111";
+    constant ALU_NOR    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "10000";
 
     -------------------------------------------------DPU COMMANDS
     constant DPU_DATA_SEL_WIDTH : integer := 2;

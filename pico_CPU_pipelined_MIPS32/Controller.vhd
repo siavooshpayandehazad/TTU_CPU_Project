@@ -151,7 +151,6 @@ DEC_SIGNALS_GEN:
           RFILE_out_sel_1  <=  rs_d;
     	    RFILE_out_sel_2  <=  rs_d;
 
-
       elsif Instr_D = ADDIU then
             RFILE_out_sel_1  <=  rs_d;
       	    RFILE_out_sel_2  <=  rs_d;
@@ -167,9 +166,21 @@ DEC_SIGNALS_GEN:
      elsif Instr_D = OR_inst then
            RFILE_out_sel_1  <=  rs_d;
            RFILE_out_sel_2  <=  rt_d;
+
      elsif Instr_D = ORI then
            RFILE_out_sel_1  <=  rs_d;
            RFILE_out_sel_2  <=  rs_d;
+
+     elsif Instr_D = NOR_inst then
+           RFILE_out_sel_1  <=  rs_d;
+           RFILE_out_sel_2  <=  rt_d;
+    elsif Instr_D = XOR_inst then
+         RFILE_out_sel_1  <=  rs_d;
+         RFILE_out_sel_2  <=  rt_d;
+
+    elsif Instr_D = XORI then
+         RFILE_out_sel_1  <=  rs_d;
+         RFILE_out_sel_2  <=  rs_d;
       end if;
   end process;
 
@@ -181,7 +192,7 @@ DEC_SIGNALS_GEN:
         DPU_SetFlag    <= DPU_CLEAR_NO_FLAG;
 
         DataToDPU <= (others => '0');
-        DPU_ALUCommand <= (others => '0');
+        DPU_ALUCommand <= ALU_PASS_A;
         DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
         DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
         -----------------------Arithmetic--------------------------
@@ -205,6 +216,12 @@ DEC_SIGNALS_GEN:
               DataToDPU <= "1111111111111111"&IMMEDIATE;
             end if;
 
+        elsif Instr_E = LUI then
+          DPU_ALUCommand <= ALU_PASS_B;
+          DPU_Mux_Cont_1 <= DPU_DATA_IN_CONT;
+          DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
+          DataToDPU <= IMMEDIATE & "0000000000000000";
+        -----------------------logical--------------------------
         elsif Instr_E = AND_inst then
             DPU_ALUCommand <= ALU_AND;
 
@@ -222,6 +239,19 @@ DEC_SIGNALS_GEN:
             DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
             DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
             DataToDPU <= "0000000000000000"&IMMEDIATE;
+
+          elsif Instr_E = NOR_inst then
+                DPU_ALUCommand <= ALU_NOR;
+
+        elsif Instr_E = XOR_inst then
+              DPU_ALUCommand <= ALU_XOR;
+
+        elsif Instr_E = XORI then
+            DPU_ALUCommand <= ALU_XOR;
+            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
+            DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
+            DataToDPU <= "0000000000000000"&IMMEDIATE;
+
         end if;
     end process;
 
@@ -245,6 +275,11 @@ DEC_SIGNALS_GEN:
           RFILE_data_sel <= RFILE_IN_ACC;
           RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
           RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+      elsif Instr_WB = LUI then
+          RFILE_data_sel <= RFILE_IN_ACC;
+          RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
+          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+      -----------------------logical--------------------------
       elsif Instr_WB = AND_inst then
           RFILE_data_sel <= RFILE_IN_ACC;
           RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
@@ -261,6 +296,20 @@ DEC_SIGNALS_GEN:
             RFILE_data_sel <= RFILE_IN_ACC;
             RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
             RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+      elsif Instr_WB = NOR_inst then
+            RFILE_data_sel <= RFILE_IN_ACC;
+            RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
+            RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
+      elsif Instr_WB = XOR_inst then
+            RFILE_data_sel <= RFILE_IN_ACC;
+            RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
+            RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
+      elsif Instr_WB = XORI then
+            RFILE_data_sel <= RFILE_IN_ACC;
+            RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
+            RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+
+
       end if;
     end process;
 
@@ -273,38 +322,8 @@ process(PC_out, halt_signal)begin
     if halt_signal = '1' then
         pc_in <= PC_out;
     else
-        PC_in <= PC_out;
-        --if Instr_D = HALT then
-        --      halt_signal_in <= '1';
-        -------------------------Jump--------------------------------
-        --elsif Instr_D = Jmp then
-        --      PC_in <= InstrReg_out (BitWidth-1 downto 0);
-        --      flush_signal <= '1';
-        --elsif Instr_D = JmpOV and DPU_Flags_FF(0) = '1' then
-        --      PC_in <= InstrReg_out (BitWidth-1 downto 0);
-        --      flush_signal <= '1';
-        --elsif Instr_D = JmpZ and DPU_Flags_FF(1) = '1' then
-        --      PC_in <= InstrReg_out (BitWidth-1 downto 0);
-        --      flush_signal <= '1';
-        --elsif Instr_D = JMPEQ and DPU_Flags_FF(2) = '1' then
-        --      PC_in <= InstrReg_out (BitWidth-1 downto 0);
-        --      flush_signal <= '1';
-        --elsif Instr_D = JmpC and DPU_Flags_FF(3) = '1' then
-        --      PC_in <= InstrReg_out (BitWidth-1 downto 0);
-        --      flush_signal <= '1';
-        --elsif Instr_D= Jmp_rel then
-        --      PC_in <= PC_out + InstrReg_out (BitWidth-1 downto 0);
-        --      flush_signal <= '1';
-        --elsif Instr_D= LoadPC then
-        --      if arithmetic_operation = '1' then
-        --        PC_in <= DPU_RESULT;
-        --      else
-        --        PC_in <= DPU_RESULT_FF;
-        --      end if;
-        --      flush_signal <= '1';
-        --else
-              PC_in <= PC_out+1;
-        --end if;
+        PC_in <= PC_out+1;
+
     end if;
 end process;
 ------------------------------------------------
@@ -336,11 +355,17 @@ begin
                   Instr_F <= AND_inst;
               elsif opcode_in = "100101" then
                   Instr_F <= OR_inst;
+              elsif opcode_in = "100110" then
+                  Instr_F <= XOR_inst;
+              elsif opcode_in = "100111" then
+                  Instr_F <= NOR_inst;
               end if;
           when "001000" => Instr_F <= ADDI;
           when "001001" => Instr_F <= ADDIU;
           when "001100" => Instr_F <= ANDI;
           when "001101" => Instr_F <= ORI;
+          when "001110" => Instr_F <= XORI;
+          when "001111" => Instr_F <= LUI;
 
 
           when others =>  Instr_F <= NOP;

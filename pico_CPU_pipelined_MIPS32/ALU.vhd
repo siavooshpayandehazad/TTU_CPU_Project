@@ -44,6 +44,7 @@ PROC_ALU: process(Command,A,B,AddSub_result,Cflag_in)
             WHEN ALU_PASS_B =>   Result <= B;  --Bypass B
             WHEN ALU_AND    =>   Result<= A and B;  --And
             WHEN ALU_OR     =>   Result<= A or B;  --or
+            WHEN ALU_NOR     =>   Result<= not(A or B);  --or
             WHEN ALU_XOR    =>   Result<= A xor B;  --xor
             WHEN ALU_SLR    =>   Result<= '0' & A(BitWidth-1 downto 1) ;  --shift right
             WHEN ALU_SLL    =>   Result<= A(BitWidth-2 downto 0)& '0' ;  --shift left

@@ -65,16 +65,11 @@ begin
 ---------------------------------------------
   process (clk, rst)begin
     if rst = '1' then
-      --DPU_ALUCommand  <= (others => '0');
-      --DPU_Mux_Cont_1  <= (others => '0');
-      --DPU_Mux_Cont_2  <= (others => '0');
-      --DPU_SetFlag     <= (others => '0');
 
       Mem_Wrt_Address_1 <= (others => '0');
       MemRW_1 <= '0';
       Mem_Wrt_Address_2 <= (others => '0');
       MemRW_2 <= '0';
-      --DataToDPU <= (others => '0');
 
       RFILE_out_sel_1<= (others => '0');
       RFILE_out_sel_2<= (others => '0');
@@ -82,16 +77,11 @@ begin
       RFILE_out_sel_1<= RFILE_out_sel_1_in;
       RFILE_out_sel_2<= RFILE_out_sel_2_in;
 
-      --DPU_ALUCommand  <= DPU_ALUCommand_in;
-      --DPU_Mux_Cont_1  <= DPU_Mux_Cont_1_in;
-      --DPU_Mux_Cont_2  <= DPU_Mux_Cont_2_in;
-      --DPU_SetFlag     <= DPU_SetFlag_in;
-
       Mem_Wrt_Address_1 <= MemWrtAddress;
       MemRW_1 <= Mem_RW;
       Mem_Wrt_Address_2 <= Mem_Wrt_Address_1;
       MemRW_2 <= MemRW_1;
-      --DataToDPU <= DataToDPU_in;
+
     end if;
   end process;
 
