@@ -58,7 +58,7 @@ architecture RTL of ControlUnit is
   signal InstrReg_out_D, InstrReg_out_E, InstrReg_out_WB: std_logic_vector (InstructionWidth-1 downto 0) := (others => '0');
   signal arithmetic_operation : std_logic;
   signal halt_signal_in, halt_signal : std_logic := '0';
-  signal flush_signal, flush_signal_FF: std_logic;
+  signal flush_signal_D, flush_signal_E: std_logic;
   signal IO_WR_in, IO_WR_in_FF : std_logic_vector(BitWidth-1 downto 0);
   signal IO_DIR_in, IO_DIR_FF :std_logic;
   ---------------------------------------------
@@ -86,7 +86,7 @@ architecture RTL of ControlUnit is
   alias IMMEDIATE : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
 
   begin
-    flush_pipeline <= flush_signal;
+    flush_pipeline <= flush_signal_D;
   ---------------------------------------------
   -- Registers setting
   ---------------------------------------------
@@ -103,7 +103,6 @@ architecture RTL of ControlUnit is
        Instr_E <= NOP;
        Instr_WB <= NOP;
        halt_signal<= '0';
-       flush_signal_FF<= '0';
        IO_WR_in_FF <=  (others=> '0');
        IO_DIR_FF <= '0';
     elsif clk'event and clk='1' then
@@ -120,7 +119,7 @@ architecture RTL of ControlUnit is
          Instr_E <= Instr_D;
          Instr_WB <= Instr_E;
        end if;
-       flush_signal_FF <= flush_signal;
+
   end if;
   end process;
 
@@ -139,56 +138,63 @@ IO_WR <= IO_WR_in_FF;
 DEC_SIGNALS_GEN:
   process(Instr_D, rs_ex, rt_ex)
     begin
-
+      flush_signal_D <= '0';
       RFILE_out_sel_1 <= (others => '0');
       RFILE_out_sel_2 <= (others => '0');
       -----------------------Arithmetic--------------------------
       if Instr_D = ADDU then
-          RFILE_out_sel_1  <=  rs_d;
-		      RFILE_out_sel_2  <=  rt_d;
+          RFILE_out_sel_1  <=  rt_d;
+		      RFILE_out_sel_2  <=  rs_d;
 
       elsif Instr_D = ADDI then
           RFILE_out_sel_1  <=  rs_d;
     	    RFILE_out_sel_2  <=  rs_d;
 
       elsif Instr_D = ADDIU then
-            RFILE_out_sel_1  <=  rs_d;
-      	    RFILE_out_sel_2  <=  rs_d;
+          RFILE_out_sel_1  <=  rs_d;
+      	  RFILE_out_sel_2  <=  rs_d;
 
+      elsif Instr_D = SUBU then
+          RFILE_out_sel_1  <=  rt_d;
+      		RFILE_out_sel_2  <=  rs_d;
+      -----------------------logical--------------------------
       elsif Instr_D = AND_inst then
-            RFILE_out_sel_1  <=  rs_d;
-            RFILE_out_sel_2  <=  rt_d;
+          RFILE_out_sel_1  <=  rt_d;
+          RFILE_out_sel_2  <=  rs_d;
 
       elsif Instr_D = ANDI then
           RFILE_out_sel_1  <=  rs_d;
           RFILE_out_sel_2  <=  rs_d;
 
      elsif Instr_D = OR_inst then
-           RFILE_out_sel_1  <=  rs_d;
-           RFILE_out_sel_2  <=  rt_d;
+          RFILE_out_sel_1  <=  rt_d;
+          RFILE_out_sel_2  <=  rs_d;
 
      elsif Instr_D = ORI then
-           RFILE_out_sel_1  <=  rs_d;
-           RFILE_out_sel_2  <=  rs_d;
+          RFILE_out_sel_1  <=  rs_d;
+          RFILE_out_sel_2  <=  rs_d;
 
      elsif Instr_D = NOR_inst then
-           RFILE_out_sel_1  <=  rs_d;
-           RFILE_out_sel_2  <=  rt_d;
+          RFILE_out_sel_1  <=  rt_d;
+          RFILE_out_sel_2  <=  rs_d;
+
     elsif Instr_D = XOR_inst then
-         RFILE_out_sel_1  <=  rs_d;
-         RFILE_out_sel_2  <=  rt_d;
+          RFILE_out_sel_1  <=  rt_d;
+          RFILE_out_sel_2  <=  rs_d;
 
     elsif Instr_D = XORI then
-         RFILE_out_sel_1  <=  rs_d;
-         RFILE_out_sel_2  <=  rs_d;
-      end if;
+          RFILE_out_sel_1  <=  rs_d;
+          RFILE_out_sel_2  <=  rs_d;
+    elsif Instr_D = J  then
+          flush_signal_D <= '1';
+    end if;
   end process;
 
 
   EX_SIGNALS_GEN:
     process(Instr_E, IMMEDIATE)
       begin
-
+        flush_signal_E <= '0';
         DPU_SetFlag    <= DPU_CLEAR_NO_FLAG;
 
         DataToDPU <= (others => '0');
@@ -216,11 +222,14 @@ DEC_SIGNALS_GEN:
               DataToDPU <= "1111111111111111"&IMMEDIATE;
             end if;
 
+        elsif Instr_E = SUBU then
+            DPU_ALUCommand <= ALU_SUB;
+
         elsif Instr_E = LUI then
-          DPU_ALUCommand <= ALU_PASS_B;
-          DPU_Mux_Cont_1 <= DPU_DATA_IN_CONT;
-          DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
-          DataToDPU <= IMMEDIATE & "0000000000000000";
+            DPU_ALUCommand <= ALU_PASS_B;
+            DPU_Mux_Cont_1 <= DPU_DATA_IN_CONT;
+            DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
+            DataToDPU <= IMMEDIATE & "0000000000000000";
         -----------------------logical--------------------------
         elsif Instr_E = AND_inst then
             DPU_ALUCommand <= ALU_AND;
@@ -240,11 +249,11 @@ DEC_SIGNALS_GEN:
             DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
             DataToDPU <= "0000000000000000"&IMMEDIATE;
 
-          elsif Instr_E = NOR_inst then
-                DPU_ALUCommand <= ALU_NOR;
+        elsif Instr_E = NOR_inst then
+            DPU_ALUCommand <= ALU_NOR;
 
         elsif Instr_E = XOR_inst then
-              DPU_ALUCommand <= ALU_XOR;
+            DPU_ALUCommand <= ALU_XOR;
 
         elsif Instr_E = XORI then
             DPU_ALUCommand <= ALU_XOR;
@@ -252,6 +261,8 @@ DEC_SIGNALS_GEN:
             DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
             DataToDPU <= "0000000000000000"&IMMEDIATE;
 
+        elsif Instr_E = J  then
+            flush_signal_E <= '1';
         end if;
     end process;
 
@@ -279,6 +290,10 @@ DEC_SIGNALS_GEN:
           RFILE_data_sel <= RFILE_IN_ACC;
           RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
           RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+      elsif Instr_WB = SUBU then
+          RFILE_data_sel <= RFILE_IN_ACC;
+          RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
+          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
       -----------------------logical--------------------------
       elsif Instr_WB = AND_inst then
           RFILE_data_sel <= RFILE_IN_ACC;
@@ -315,15 +330,17 @@ DEC_SIGNALS_GEN:
 
 --PC handling------------------------------------------------------------------------
 PC_HANDLING:
-process(PC_out, halt_signal)begin
+process(PC_out,Instr_E, halt_signal)begin
 
     halt_signal_in <= halt_signal;
-    flush_signal <= '0';
+
     if halt_signal = '1' then
         pc_in <= PC_out;
     else
         PC_in <= PC_out+1;
-
+        if Instr_E = J then
+          PC_in <= PC_out(31 downto 28) & InstrReg_out_E(25 downto 0) & "00";
+        end if;
     end if;
 end process;
 ------------------------------------------------
@@ -343,14 +360,16 @@ end process;
 -- Instr decoder
 ------------------------------------------------
 INST_DECODER:
-process (SPECIAL_in, flush_signal_FF, opcode_in)
+process (SPECIAL_in, flush_signal_D, flush_signal_E, opcode_in)
 begin
     Instr_F <= NOP;
-    if flush_signal_FF = '0' then
+    if flush_signal_D = '0' and flush_signal_E = '0' then
         case SPECIAL_in is
           when "000000" =>
               if opcode_in = "100000" then
                   Instr_F <= ADDU;
+              elsif opcode_in = "100011" then
+                  Instr_F <= SUBU;
               elsif opcode_in = "100100" then
                   Instr_F <= AND_inst;
               elsif opcode_in = "100101" then
@@ -366,6 +385,7 @@ begin
           when "001101" => Instr_F <= ORI;
           when "001110" => Instr_F <= XORI;
           when "001111" => Instr_F <= LUI;
+          when "000010" => Instr_F <= J;
 
 
           when others =>  Instr_F <= NOP;

@@ -16,9 +16,11 @@ package pico_cpu is
 
     -------------------------------------------------
     TYPE Instruction IS (--arithmetic
-                        ADDU, ADDI, ADDIU, LUI,
+                        ADDU, ADDI, ADDIU, LUI, SUBU,
                         -- logical
-                        AND_inst, ANDI, OR_inst, ORI, NOR_inst, XOR_inst, XORI, NOP
+                        AND_inst, ANDI, OR_inst, ORI, NOR_inst, XOR_inst, XORI, NOP,
+                        -- jumps and branches
+                        J
                         );
 
     -------------------------------------------------ALU COMMANDS
