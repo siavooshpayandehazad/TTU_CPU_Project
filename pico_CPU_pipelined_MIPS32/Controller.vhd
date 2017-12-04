@@ -192,8 +192,13 @@ DEC_SIGNALS_GEN:
           RFILE_out_sel_1  <=  rs_d;
           RFILE_out_sel_2  <=  rs_d;
           flush_signal_D <= '1';
-    elsif Instr_D = B  then
-        flush_signal_D <= '1';
+    elsif Instr_D = BEQ  then
+          RFILE_out_sel_1  <=  rt_d;
+          RFILE_out_sel_2  <=  rs_d;
+          flush_signal_D <= '1';
+    elsif Instr_D = CLO or Instr_D = CLZ  then
+          RFILE_out_sel_1  <=  rs_d;
+          RFILE_out_sel_2  <=  rs_d;
     end if;
   end process;
 
@@ -276,8 +281,23 @@ DEC_SIGNALS_GEN:
             DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
             DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
             flush_signal_E <= '1';
-        elsif Instr_E = B  then
+
+        elsif Instr_E = BEQ  then
+            DPU_ALUCommand <= ALU_COMP;
+            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
+            DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
             flush_signal_E <= '1';
+
+        elsif Instr_E = CLO then
+          DPU_ALUCommand <= ALU_CLO;
+          DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
+          DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
+
+        elsif Instr_E = CLZ  then
+          DPU_ALUCommand <= ALU_CLZ;
+          DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
+          DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
+
         end if;
     end process;
 
@@ -339,13 +359,16 @@ DEC_SIGNALS_GEN:
             RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
             RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
 
-
+      elsif Instr_WB = CLO or Instr_WB = CLZ then
+            RFILE_data_sel <= RFILE_IN_ACC;
+            RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
+            RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
       end if;
     end process;
 
 --PC handling------------------------------------------------------------------------
 PC_HANDLING:
-process(PC_out,Instr_E, halt_signal)begin
+process(PC_out,Instr_E, halt_signal, DPU_RESULT, IMMEDIATE )begin
 
     halt_signal_in <= halt_signal;
 
@@ -357,13 +380,14 @@ process(PC_out,Instr_E, halt_signal)begin
           PC_in <= PC_out(33 downto 28) & InstrReg_out_E(25 downto 0) & "00";
         elsif Instr_E = JR then
           PC_in <= DPU_RESULT;
-        elsif Instr_E = B then
-          if IMMEDIATE(15) = '0' then
-            PC_in <= PC_out +("0000000000000"&IMMEDIATE&"00")-1;
-          else
-            PC_in <= PC_out +("1111111111111"&IMMEDIATE&"00")-1;
+        elsif Instr_E = BEQ then
+          if DPU_RESULT = "11111111111111111111111111111111" then
+            if IMMEDIATE(15) = '0' then
+              PC_in <= PC_out +("0000000000000"&IMMEDIATE&"00")-1;
+            else
+              PC_in <= PC_out +("1111111111111"&IMMEDIATE&"00")-1;
+            end if;
           end if;
-
         end if;
     end if;
 end process;
@@ -412,9 +436,13 @@ begin
           when "001110" => Instr_F <= XORI;
           when "001111" => Instr_F <= LUI;
           when "000010" => Instr_F <= J;
-          when "000100" => Instr_F <= B;
-
-
+          when "000100" => Instr_F <= BEQ;
+          when "011100" =>
+                if opcode_in = "100001" then
+                    Instr_F <= CLO;
+                elsif opcode_in = "100000" then
+                    Instr_F <= CLZ;
+                end if;
           when others =>  Instr_F <= NOP;
         end case;
     else

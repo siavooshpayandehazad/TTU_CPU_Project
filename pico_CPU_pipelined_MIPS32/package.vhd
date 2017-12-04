@@ -16,11 +16,11 @@ package pico_cpu is
 
     -------------------------------------------------
     TYPE Instruction IS (--arithmetic
-                        ADDU, ADDI, ADDIU, LUI, SUBU,
+                        ADDU, ADDI, ADDIU, LUI, SUBU, CLO, CLZ,
                         -- logical
                         AND_inst, ANDI, OR_inst, ORI, NOR_inst, XOR_inst, XORI, NOP,
                         -- jumps and branches
-                        J, JR, B
+                        J, JR, BEQ
                         );
 
     -------------------------------------------------ALU COMMANDS
@@ -42,6 +42,9 @@ package pico_cpu is
     constant ALU_RRC    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "01110";
     constant ALU_RLC    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "01111";
     constant ALU_NOR    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "10000";
+    constant ALU_COMP   : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "10001";
+    constant ALU_CLO    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "10010";
+    constant ALU_CLZ    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "10011";
 
     -------------------------------------------------DPU COMMANDS
     constant DPU_DATA_SEL_WIDTH : integer := 2;
