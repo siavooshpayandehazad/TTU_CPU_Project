@@ -13,7 +13,7 @@ entity ControlUnit is
     clk             : in  std_logic;
     ----------------------------------------
     Instr_In        : in  std_logic_vector (InstructionWidth-1 downto 0);
-    Instr_Add       : out std_logic_vector (BitWidth-1 downto 0);
+    Instr_Add       : out std_logic_vector (BitWidth+1 downto 0);
     ----------------------------------------
     MemRdAddress    : out std_logic_vector (BitWidth-1 downto 0);
 	  MemWrtAddress   : out std_logic_vector (BitWidth-1 downto 0);
@@ -54,7 +54,7 @@ architecture RTL of ControlUnit is
   signal Instr_F, Instr_D, Instr_E, Instr_WB :Instruction := NOP;
 
   signal SP_in, SP_out : std_logic_vector (BitWidth-1 downto 0):= (others => '0');
-  signal PC_in, PC_out : std_logic_vector (BitWidth-1 downto 0):= (others => '0');
+  signal PC_in, PC_out : std_logic_vector (BitWidth+1 downto 0):= (others => '0');
   signal InstrReg_out_D, InstrReg_out_E, InstrReg_out_WB: std_logic_vector (InstructionWidth-1 downto 0) := (others => '0');
   signal arithmetic_operation : std_logic;
   signal halt_signal_in, halt_signal : std_logic := '0';
@@ -84,6 +84,7 @@ architecture RTL of ControlUnit is
 
 
   alias IMMEDIATE : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
+  alias OFFSET : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
 
   begin
     flush_pipeline <= flush_signal_D;
@@ -187,6 +188,12 @@ DEC_SIGNALS_GEN:
           RFILE_out_sel_2  <=  rs_d;
     elsif Instr_D = J  then
           flush_signal_D <= '1';
+    elsif Instr_D = JR  then
+          RFILE_out_sel_1  <=  rs_d;
+          RFILE_out_sel_2  <=  rs_d;
+          flush_signal_D <= '1';
+    elsif Instr_D = B  then
+        flush_signal_D <= '1';
     end if;
   end process;
 
@@ -263,6 +270,14 @@ DEC_SIGNALS_GEN:
 
         elsif Instr_E = J  then
             flush_signal_E <= '1';
+
+        elsif Instr_E = JR then
+            DPU_ALUCommand <= ALU_PASS_A;
+            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
+            DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
+            flush_signal_E <= '1';
+        elsif Instr_E = B  then
+            flush_signal_E <= '1';
         end if;
     end process;
 
@@ -337,9 +352,18 @@ process(PC_out,Instr_E, halt_signal)begin
     if halt_signal = '1' then
         pc_in <= PC_out;
     else
-        PC_in <= PC_out+1;
+        PC_in <= PC_out+4;
         if Instr_E = J then
-          PC_in <= PC_out(31 downto 28) & InstrReg_out_E(25 downto 0) & "00";
+          PC_in <= PC_out(33 downto 28) & InstrReg_out_E(25 downto 0) & "00";
+        elsif Instr_E = JR then
+          PC_in <= DPU_RESULT;
+        elsif Instr_E = B then
+          if IMMEDIATE(15) = '0' then
+            PC_in <= PC_out +("0000000000000"&IMMEDIATE&"00")-1;
+          else
+            PC_in <= PC_out +("1111111111111"&IMMEDIATE&"00")-1;
+          end if;
+
         end if;
     end if;
 end process;
@@ -378,6 +402,8 @@ begin
                   Instr_F <= XOR_inst;
               elsif opcode_in = "100111" then
                   Instr_F <= NOR_inst;
+              elsif opcode_in = "001000" then
+                  Instr_F <= JR;
               end if;
           when "001000" => Instr_F <= ADDI;
           when "001001" => Instr_F <= ADDIU;
@@ -386,6 +412,7 @@ begin
           when "001110" => Instr_F <= XORI;
           when "001111" => Instr_F <= LUI;
           when "000010" => Instr_F <= J;
+          when "000100" => Instr_F <= B;
 
 
           when others =>  Instr_F <= NOP;

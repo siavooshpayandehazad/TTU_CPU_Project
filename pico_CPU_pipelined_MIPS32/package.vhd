@@ -20,7 +20,7 @@ package pico_cpu is
                         -- logical
                         AND_inst, ANDI, OR_inst, ORI, NOR_inst, XOR_inst, XORI, NOP,
                         -- jumps and branches
-                        J
+                        J, JR, B
                         );
 
     -------------------------------------------------ALU COMMANDS

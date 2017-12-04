@@ -21,7 +21,7 @@ architecture RTL of PicoCPU is
 
 
 signal Instr_In        : std_logic_vector (CPU_Bitwidth-1 downto 0);
-signal Instr_Add       : std_logic_vector (CPU_Bitwidth-1 downto 0);
+signal Instr_Add       : std_logic_vector (CPU_Bitwidth+1 downto 0);
  ----------------------------------------
 signal MemRdAddress    : std_logic_vector (CPU_Bitwidth-1 downto 0);
 signal MemWrtAddress   : std_logic_vector (CPU_Bitwidth-1 downto 0);
@@ -129,7 +129,7 @@ begin
   --instruction memory
   InstMem_comp: InstMem
   generic map (BitWidth => CPU_Bitwidth, InstructionWidth => CPU_Instwidth)
-  port map (Instr_Add, Instr_In);
+  port map (Instr_Add(CPU_Bitwidth+1 downto 2), Instr_In);
 
   --register file
   RegFile_comp: RegisterFile
