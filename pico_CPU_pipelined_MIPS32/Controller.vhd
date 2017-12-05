@@ -198,9 +198,19 @@ DEC_SIGNALS_GEN:
           RFILE_out_sel_2  <=  rs_d;
 
     -----------------------SHIFT AND ROTATE-----------------
-    elsif Instr_E = SLL_inst then
+    elsif Instr_D = SLL_inst then
           RFILE_out_sel_1  <=  rt_d;
           RFILE_out_sel_2  <=  rt_d;
+    elsif Instr_D = SRL_inst then
+          RFILE_out_sel_1  <=  rt_d;
+          RFILE_out_sel_2  <=  rt_d;
+    elsif Instr_D = SLLV then
+          RFILE_out_sel_1  <=  rt_d;
+          RFILE_out_sel_2  <=  rs_d;
+    elsif Instr_D = SRLV then
+          RFILE_out_sel_1  <=  rt_d;
+          RFILE_out_sel_2  <=  rs_d;
+
     -----------------------JUMP and BRANCH--------------------------
     elsif Instr_D = J  then
           flush_signal_D <= '1';
@@ -280,6 +290,19 @@ DEC_SIGNALS_GEN:
             DataToDPU <= ZERO16 & "00000000000" & sa_ex;
             DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
             DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
+        elsif Instr_E = SRL_inst then
+            DPU_ALUCommand <= ALU_SLR;
+            DataToDPU <= ZERO16 & "00000000000" & sa_ex;
+            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
+            DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
+        elsif Instr_E = SLLV then
+            DPU_ALUCommand <= ALU_SLL;
+            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
+            DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
+        elsif Instr_E = SRLV then
+            DPU_ALUCommand <= ALU_SLR;
+            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
+            DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
         -----------------------LOGICAL--------------------------
         elsif Instr_E = AND_inst then
             DPU_ALUCommand <= ALU_AND;
@@ -365,10 +388,10 @@ DEC_SIGNALS_GEN:
           RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
           RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
       -----------------------SHIFT AND ROTATE-----------------
-      elsif Instr_WB = SLL_inst then
-        RFILE_data_sel <= RFILE_IN_ACC_LOW;
-        RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-        RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
+      elsif Instr_WB = SLL_inst or Instr_WB = SRL_inst or Instr_WB = SLLV or Instr_WB = SRLV then
+          RFILE_data_sel <= RFILE_IN_ACC_LOW;
+          RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
+          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
       --  MULT and MULTU only WRITES IN ACC
       elsif Instr_WB = MUL then
             RFILE_data_sel <= RFILE_IN_ACC_LOW;
@@ -415,6 +438,12 @@ begin
           when "000000" =>
               if opcode_in = "000000" then
                   Instr_F <= SLL_inst;
+              elsif opcode_in = "000010" then
+                  Instr_F <= SRL_inst;
+              elsif opcode_in = "000100" then
+                  Instr_F <= SLLV;
+              elsif opcode_in = "000110" then
+                  Instr_F <= SRLV;
               elsif opcode_in = "100000" then
                   Instr_F <= ADDU;
               elsif opcode_in = "100011" then
