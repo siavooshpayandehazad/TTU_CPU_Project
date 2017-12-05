@@ -25,8 +25,8 @@ entity DPU is
 
          DPU_Flags   : out std_logic_vector (3 downto 0);
          DPU_Flags_FF: out std_logic_vector (3 downto 0);
-         Result      : out std_logic_vector (BitWidth-1 downto 0);
-         Result_FF   : out std_logic_vector (BitWidth-1 downto 0)
+         Result      : out std_logic_vector (2*BitWidth-1 downto 0);
+         Result_FF   : out std_logic_vector (2*BitWidth-1 downto 0)
     );
 end DPU;
 
@@ -36,7 +36,7 @@ architecture RTL of DPU is
 ---------------------------------------------
 --      Signals
 ---------------------------------------------
-  signal ACC_in,ACC_out: std_logic_vector (BitWidth-1 downto 0);
+  signal ACC_in,ACC_out: std_logic_vector (2*BitWidth-1 downto 0);
   signal Mux_Out_1, Mux_Out_2: std_logic_vector (BitWidth-1 downto 0):= (others=>'0');
 
   ---------------------------------------------
@@ -53,7 +53,7 @@ begin
 
 ALU_comp: ALU
 generic map (BitWidth => BitWidth)
-port map (Mux_Out_2, Mux_Out_1, ALUCommand, C_flag_out, Cout, ACC_in);
+port map (Mux_Out_1, Mux_Out_2, ALUCommand, C_flag_out, Cout, ACC_in);
 
   ---------------------------------------------
   --  Registers and Flags
@@ -115,7 +115,7 @@ port map (Mux_Out_2, Mux_Out_1, ALUCommand, C_flag_out, Cout, ACC_in);
               EQ_Flag_in <= '0';
         else
           if ALUCommand /= "0010" then
-              if (ACC_out = Data_in_control_1) then
+              if (ACC_out(BitWidth-1 downto 0) = Data_in_control_1) then
                   EQ_Flag_in <= '1';
                else
                   EQ_Flag_in <= '0';

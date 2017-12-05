@@ -9,7 +9,7 @@ entity PicoCPU is
     clk: in std_logic;
 	  FlagOut: out std_logic_vector ( 3 downto 0);
     IO: inout std_logic_vector (CPU_Bitwidth-1 downto 0);
-	  output: out std_logic_vector ( CPU_Bitwidth-1 downto 0)
+	  output: out std_logic_vector ( 2*CPU_Bitwidth-1 downto 0)
   );
 end PicoCPU;
 
@@ -47,8 +47,8 @@ signal RFILE_out_sel_1, RFILE_out_sel_1_in : std_logic_vector (RFILE_SEL_WIDTH-1
 signal RFILE_out_sel_2, RFILE_out_sel_2_in : std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 
 signal flush_pipeline  : std_logic;
-signal DPU_RESULT      : std_logic_vector (CPU_Bitwidth-1 downto 0);
-signal DPU_RESULT_FF   : std_logic_vector (CPU_Bitwidth-1 downto 0);
+signal DPU_RESULT      : std_logic_vector (2*CPU_Bitwidth-1 downto 0);
+signal DPU_RESULT_FF   : std_logic_vector (2*CPU_Bitwidth-1 downto 0);
 
 -- Register file outputs
 signal R1, R2          : std_logic_vector (CPU_Bitwidth-1 downto 0);
@@ -140,7 +140,8 @@ begin
     rst                => rst,
     Data_in_mem        => MEMDATA,
     Data_in_CU         => Data_to_RFILE,
-    Data_in_ACC        => DPU_RESULT_FF,
+    Data_in_ACC_HI     => DPU_RESULT_FF(2*CPU_Bitwidth-1 downto CPU_Bitwidth),
+    Data_in_ACC_LOW    => DPU_RESULT_FF(CPU_Bitwidth-1 downto 0),
     Data_in_sel        => RFILE_data_sel,
     Register_in_sel    => RFILE_in_sel,
     Register_out_sel_1 => RFILE_out_sel_1,
@@ -173,7 +174,7 @@ begin
   --memory
   Mem_comp: Mem
   generic map (BitWidth => CPU_Bitwidth)
-  port map (Mem_Rd_Address_in, DPU_Result, Mem_Wrt_Address_2, clk, MemRW_2 , rst , MEMDATA);
+  port map (Mem_Rd_Address_in, DPU_Result(CPU_Bitwidth-1 downto 0), Mem_Wrt_Address_2, clk, MemRW_2 , rst , MEMDATA);
 
   FlagOut <=	DPU_Flags_FF;
   output <= DPU_RESULT_FF;

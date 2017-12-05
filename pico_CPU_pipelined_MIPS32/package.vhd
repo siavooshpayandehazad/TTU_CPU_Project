@@ -19,8 +19,12 @@ package pico_cpu is
                         ADDU, ADDI, ADDIU, LUI, SUBU, CLO, CLZ,
                         -- logical
                         AND_inst, ANDI, OR_inst, ORI, NOR_inst, XOR_inst, XORI, NOP,
+                        -- shift and rotate
+                        SLL_inst, 
                         -- jumps and branches
-                        J, JR, BEQ
+                        J, JR, BEQ,
+                        -- multiplication and division
+                        MUL, MULT, MULTU
                         );
 
     -------------------------------------------------ALU COMMANDS
@@ -45,6 +49,8 @@ package pico_cpu is
     constant ALU_COMP   : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "10001";
     constant ALU_CLO    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "10010";
     constant ALU_CLZ    : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "10011";
+    constant ALU_MULTU  : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "10100";
+    constant ALU_MULT   : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0):= "10101";
 
     -------------------------------------------------DPU COMMANDS
     constant DPU_DATA_SEL_WIDTH : integer := 2;
@@ -61,12 +67,20 @@ package pico_cpu is
     constant DPU_CLEAR_NO_FLAG  : std_logic_vector (DPU_CLEAR_FLAG_WIDTH-1 downto 0):= "000";
     ------------------------------------------------
     constant RFLILE_SEL_WIDTH: integer  := 2;
-    constant RFILE_IN_ZERO  : std_logic_vector (RFLILE_SEL_WIDTH-1 downto 0):= "00";
-    constant RFILE_IN_CU    : std_logic_vector (RFLILE_SEL_WIDTH-1 downto 0):= "01";
-    constant RFILE_IN_ACC   : std_logic_vector (RFLILE_SEL_WIDTH-1 downto 0):= "10";
-    constant RFILE_IN_MEM   : std_logic_vector (RFLILE_SEL_WIDTH-1 downto 0):= "11";
+    constant RFILE_IN_ACC_LOW  : std_logic_vector (RFLILE_SEL_WIDTH-1 downto 0):= "00";
+    constant RFILE_IN_CU       : std_logic_vector (RFLILE_SEL_WIDTH-1 downto 0):= "01";
+    constant RFILE_IN_ACC_HI   : std_logic_vector (RFLILE_SEL_WIDTH-1 downto 0):= "10";
+    constant RFILE_IN_MEM      : std_logic_vector (RFLILE_SEL_WIDTH-1 downto 0):= "11";
 
     constant DPU_COMMAND_WIDTH : integer := 11;
+
+    ------------------------------------------------
+    constant ZERO14 :std_logic_vector(13 downto 0) := "00000000000000";
+    constant ONE14  :std_logic_vector(13 downto 0) := "11111111111111";
+    constant ZERO16 :std_logic_vector(15 downto 0) := "0000000000000000";
+    constant ONE16  :std_logic_vector(15 downto 0) := "1111111111111111";
+    constant ZERO32 :std_logic_vector(31 downto 0) := "00000000000000000000000000000000";
+    constant ONE32  :std_logic_vector(31 downto 0) := "11111111111111111111111111111111";
 
     component GPIO is
       generic (BitWidth: integer);
@@ -84,23 +98,24 @@ package pico_cpu is
              Command: in std_logic_vector (ALU_COMAND_WIDTH-1 downto 0);
              Cflag_in: in std_logic;
              Cflag_out: out std_logic;
-             Result: out std_logic_vector (BitWidth-1 downto 0)
+             Result: out std_logic_vector (2*BitWidth-1 downto 0)
         );
     end component;
 
     component RegisterFile is
       generic (BitWidth: integer);
         port ( clk : in std_logic;
-      			rst: in std_logic;
-      			Data_in_mem: in std_logic_vector (BitWidth-1 downto 0);
-      			Data_in_CU: in std_logic_vector (BitWidth-1 downto 0);
-      			Data_in_ACC: in std_logic_vector (BitWidth-1 downto 0);
-      			Data_in_sel: in std_logic_vector (1 downto 0);
-      			Register_in_sel: in std_logic_vector (RFILE_SEL_WIDTH downto 0);
-      			Register_out_sel_1: in std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
-      			Register_out_sel_2: in std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
-      			Data_out_1: out std_logic_vector (BitWidth-1 downto 0);
-      			Data_out_2: out std_logic_vector (BitWidth-1 downto 0)
+              rst: in std_logic;
+              Data_in_mem        : in std_logic_vector (BitWidth-1 downto 0);
+              Data_in_CU         : in std_logic_vector (BitWidth-1 downto 0);
+              Data_in_ACC_HI     : in std_logic_vector (BitWidth-1 downto 0);
+              Data_in_ACC_LOW    : in std_logic_vector (BitWidth-1 downto 0);
+              Data_in_sel        : in std_logic_vector (1 downto 0);
+              Register_in_sel    : in std_logic_vector (RFILE_SEL_WIDTH downto 0);
+              Register_out_sel_1 : in std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
+              Register_out_sel_2 : in std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
+              Data_out_1         : out std_logic_vector (BitWidth-1 downto 0);
+              Data_out_2         : out std_logic_vector (BitWidth-1 downto 0)
         );
     end component;
 
@@ -148,8 +163,8 @@ package pico_cpu is
         Data_to_RFILE   :  out std_logic_vector (BitWidth-1 downto 0);
         ----------------------------------------
     	  flush_pipeline  : out std_logic;
-        DPU_RESULT      : in std_logic_vector (BitWidth-1 downto 0);
-        DPU_RESULT_FF   : in  std_logic_vector (BitWidth-1 downto 0)
+        DPU_RESULT      : in std_logic_vector (2*BitWidth-1 downto 0);
+        DPU_RESULT_FF   : in  std_logic_vector (2*BitWidth-1 downto 0)
       );
     end component;
 
@@ -180,8 +195,8 @@ package pico_cpu is
 
              DPU_Flags   : out std_logic_vector (3 downto 0);
              DPU_Flags_FF: out std_logic_vector (3 downto 0);
-             Result      : out std_logic_vector (BitWidth-1 downto 0);
-             Result_FF   : out std_logic_vector (BitWidth-1 downto 0)
+             Result      : out std_logic_vector (2*BitWidth-1 downto 0);
+             Result_FF   : out std_logic_vector (2*BitWidth-1 downto 0)
         );
     end component;
     ----------------------------------------

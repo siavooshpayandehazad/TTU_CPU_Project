@@ -12,7 +12,7 @@ entity ALU is
          Command: in std_logic_vector (ALU_COMAND_WIDTH-1 downto 0);
          Cflag_in: in std_logic;
          Cflag_out: out std_logic;
-         Result: out std_logic_vector (BitWidth-1 downto 0)
+         Result: out std_logic_vector (2*BitWidth-1 downto 0)
     );
 end ALU;
 
@@ -38,43 +38,51 @@ PROC_ALU: process(Command,A,B,AddSub_result,Cflag_in)
    begin
     Add_Sub <= '0';  --adding by default
      case Command is
-            WHEN ALU_ADD    =>   Result<= AddSub_result; --add
+            WHEN ALU_ADD    =>   Result(BitWidth-1 downto 0) <= AddSub_result; --add
             WHEN ALU_SUB    =>   Add_Sub <= '1';
-                                 Result<= AddSub_result; -- Subtract
-            WHEN ALU_PASS_A =>   Result <= A;  --Bypass A
-            WHEN ALU_PASS_B =>   Result <= B;  --Bypass B
-            WHEN ALU_AND    =>   Result<= A and B;  --And
-            WHEN ALU_OR     =>   Result<= A or B;  --or
-            WHEN ALU_NOR    =>   Result<= not(A or B);  --or
-            WHEN ALU_XOR    =>   Result<= A xor B;  --xor
-            WHEN ALU_SLR    =>   Result<= '0' & A(BitWidth-1 downto 1) ;  --shift right
-            WHEN ALU_SLL    =>   Result<= A(BitWidth-2 downto 0)& '0' ;  --shift left
-            WHEN ALU_NEG_A  =>   Result<= not A +1;  --negation
-            WHEN ALU_SAR    =>   Result<= A(BitWidth-1) & A(BitWidth-1 downto 1) ;  --shift right Arith
-            WHEN ALU_SAL    =>   Result<= A(BitWidth-1) & A(BitWidth-3 downto 0)& A(0) ;  --shift left Arith
-            WHEN ALU_FLIP_A =>   Result<= not(A); --Not of A
-            WHEN ALU_CLR_A  =>   Result<= (others => '0'); --Clear ACC
-            WHEN ALU_RRC    =>   Result<= Cflag_in & A(BitWidth-1 downto 1); -- RRC
-            WHEN ALU_RLC    =>   Result<= A(BitWidth-2 downto 0)& Cflag_in ; -- RLC
+                                 Result(BitWidth-1 downto 0) <= AddSub_result; -- Subtract
+            WHEN ALU_PASS_A =>   Result(BitWidth-1 downto 0) <= A;  --Bypass A
+            WHEN ALU_PASS_B =>   Result(BitWidth-1 downto 0) <= B;  --Bypass B
+            WHEN ALU_AND    =>   Result(BitWidth-1 downto 0) <= A and B;  --And
+            WHEN ALU_OR     =>   Result(BitWidth-1 downto 0) <= A or B;  --or
+            WHEN ALU_NOR    =>   Result(BitWidth-1 downto 0) <= not(A or B);  --or
+            WHEN ALU_XOR    =>   Result(BitWidth-1 downto 0) <= A xor B;  --xor
+            WHEN ALU_SLR    =>   Result(BitWidth-1 downto 0) <= std_logic_vector(shift_right(unsigned(A), to_integer(unsigned(B(4 downto 0)))));--shift Rigth
+            -------------------------------------------------------------------------------------------------------------------------------------
+            WHEN ALU_SLL    =>   Result(BitWidth-1 downto 0) <= std_logic_vector(shift_left (unsigned(A), to_integer(unsigned(B(4 downto 0)))));--shift left
+            -------------------------------------------------------------------------------------------------------------------------------------
+            WHEN ALU_NEG_A  =>   Result(BitWidth-1 downto 0) <= not A +1;  --negation
+            WHEN ALU_SAR    =>   Result(BitWidth-1 downto 0) <= A(BitWidth-1) & A(BitWidth-1 downto 1) ;  --shift right Arith
+            WHEN ALU_SAL    =>   Result(BitWidth-1 downto 0) <= A(BitWidth-1) & A(BitWidth-3 downto 0)& A(0) ;  --shift left Arith
+            WHEN ALU_FLIP_A =>   Result(BitWidth-1 downto 0) <= not(A); --Not of A
+            WHEN ALU_CLR_A  =>   Result(BitWidth-1 downto 0) <= (others => '0'); --Clear ACC
+            WHEN ALU_RRC    =>   Result(BitWidth-1 downto 0) <= Cflag_in & A(BitWidth-1 downto 1); -- RRC
+            WHEN ALU_RLC    =>   Result(BitWidth-1 downto 0) <= A(BitWidth-2 downto 0)& Cflag_in ; -- RLC
+            WHEN ALU_MULTU  =>   Result <= A*B ; -- RLC
+            WHEN ALU_MULT  =>   Result <= std_logic_vector(signed(A)*signed(B)) ; -- RLC
+            -------------------------------------------------------------------------------------------------------------------------------------
             WHEN ALU_COMP   =>   if A = B then
                                     Result <= (others => '1');
                                  else
                                     Result <= (others => '0');
                                  end if;
+            -------------------------------------------------------------------------------------------------------------------------------------
             WHEN ALU_CLO    =>  temp := 0;
                                 for i in A'range loop
                                    if A(i) = '0' then
                                      temp := temp + 1;
                                    end if;
                                 end loop;
-                                Result <=  std_logic_vector(to_unsigned(temp, Result'length));
+                                Result(BitWidth-1 downto 0) <=  std_logic_vector(to_unsigned(temp,BitWidth));
+            -------------------------------------------------------------------------------------------------------------------------------------
             WHEN ALU_CLZ    =>  temp := 0;
                                 for i in A'range loop
                                   if A(i) = '1' then
                                     temp := temp + 1;
                                   end if;
                                 end loop;
-                                Result <=  std_logic_vector(to_unsigned(temp, Result'length));
+                                Result(BitWidth-1 downto 0) <=  std_logic_vector(to_unsigned(temp, BitWidth));
+            -------------------------------------------------------------------------------------------------------------------------------------
        WHEN OTHERS => Result<= (others => '0');
     END CASE;
 
