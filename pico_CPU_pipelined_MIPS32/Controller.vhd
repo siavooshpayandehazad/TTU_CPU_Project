@@ -32,7 +32,7 @@ entity ControlUnit is
     DPU_Mux_Cont_2  : out std_logic_vector (1 downto 0);
     DPU_SetFlag     : out std_logic_vector (2 downto 0);
     ----------------------------------------
-    RFILE_data_sel  : out std_logic_vector (1 downto 0);
+    RFILE_data_sel  : out std_logic_vector (RFILE_DATA_SEL_WIDTH-1 downto 0);
 	  RFILE_in_sel    : out std_logic_vector (RFILE_SEL_WIDTH downto 0);
 	  RFILE_out_sel_1 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 	  RFILE_out_sel_2 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
@@ -162,8 +162,8 @@ DEC_SIGNALS_GEN:
       	  RFILE_out_sel_2  <=  rs_d;
 
       elsif Instr_D = SUBU then
-          RFILE_out_sel_1  <=  rt_d;
-      		RFILE_out_sel_2  <=  rs_d;
+          RFILE_out_sel_1  <=  rs_d;
+      		RFILE_out_sel_2  <=  rt_d;
 
      elsif Instr_D = CLO or Instr_D = CLZ  then
            RFILE_out_sel_1  <=  rs_d;
@@ -230,6 +230,9 @@ DEC_SIGNALS_GEN:
     elsif Instr_D = MUL then
          RFILE_out_sel_1  <=  rt_d;
          RFILE_out_sel_2  <=  rs_d;
+
+    ----------------------ACCUMULATOR ACCESS -----------------------------------
+    -- we dont read any register here!
     end if;
   end process;
 
@@ -359,44 +362,55 @@ DEC_SIGNALS_GEN:
             DPU_ALUCommand <= ALU_MULT;
             DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
             DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
+            ----------------------ACCUMULATOR ACCESS -----------------------------------
+            -- we dont execute anything!
         end if;
     end process;
 
 
   WB_SIGNALS_GEN:
-    process(Instr_WB, rt_wb, rd_wb)
+    process(Instr_E, rt_wb, rd_wb)
       begin
 
       RFILE_in_sel<= (others => '0');
       RFILE_data_sel<= (others => '0');
       -----------------------Arithmetic--------------------------
-      if Instr_WB = ADDU or Instr_WB = SUBU or Instr_WB = CLO or Instr_WB = CLZ then
-          RFILE_data_sel <= RFILE_IN_ACC_LOW;
+      if Instr_E = ADDU or Instr_E = SUBU or Instr_E = CLO or Instr_E = CLZ then
+          RFILE_data_sel <= RFILE_IN_DPU_LOW;
           RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
-      elsif Instr_WB = ADDI or Instr_WB = ADDIU or Instr_WB = LUI then
-          RFILE_data_sel <= RFILE_IN_ACC_LOW;
+          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+      elsif Instr_E = ADDI or Instr_E = ADDIU or Instr_E = LUI then
+          RFILE_data_sel <= RFILE_IN_DPU_LOW;
           RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rt_ex;
       -----------------------logical--------------------------
-      elsif Instr_WB = AND_inst or Instr_WB = OR_inst or Instr_WB = NOR_inst or Instr_WB = XOR_inst then
-          RFILE_data_sel <= RFILE_IN_ACC_LOW;
+      elsif Instr_E = AND_inst or Instr_E = OR_inst or Instr_E = NOR_inst or Instr_E = XOR_inst then
+          RFILE_data_sel <= RFILE_IN_DPU_LOW;
           RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
-      elsif Instr_WB = ANDI or Instr_WB = ORI or Instr_WB = XORI then
-          RFILE_data_sel <= RFILE_IN_ACC_LOW;
+          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+      elsif Instr_E = ANDI or Instr_E = ORI or Instr_E = XORI then
+          RFILE_data_sel <= RFILE_IN_DPU_LOW;
           RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rt_ex;
       -----------------------SHIFT AND ROTATE-----------------
-      elsif Instr_WB = SLL_inst or Instr_WB = SRL_inst or Instr_WB = SLLV or Instr_WB = SRLV then
+      elsif Instr_E = SLL_inst or Instr_E = SRL_inst or Instr_E = SLLV or Instr_E = SRLV then
+          RFILE_data_sel <= RFILE_IN_DPU_LOW;
+          RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
+          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+      --  MULT and MULTU only WRITES IN ACC
+      elsif Instr_E = MUL then
+            RFILE_data_sel <= RFILE_IN_DPU_LOW;
+            RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
+            RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+      ----------------------ACCUMULATOR ACCESS -----------------------------------
+      elsif Instr_E = MFLO then
           RFILE_data_sel <= RFILE_IN_ACC_LOW;
           RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
-      --  MULT and MULTU only WRITES IN ACC
-      elsif Instr_WB = MUL then
-            RFILE_data_sel <= RFILE_IN_ACC_LOW;
-            RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-            RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
+          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+      elsif Instr_E = MFHI then
+          RFILE_data_sel <= RFILE_IN_ACC_HI;
+          RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
+          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       end if;
     end process;
 
@@ -462,6 +476,10 @@ begin
                   Instr_F <= NOR_inst;
               elsif opcode_in = "001000" then
                   Instr_F <= JR;
+              elsif opcode_in = "010000" then
+                  Instr_F <= MFHI;
+              elsif opcode_in = "010010" then
+                  Instr_F <= MFLO;
               end if;
           when "001000" => Instr_F <= ADDI;
           when "001001" => Instr_F <= ADDIU;

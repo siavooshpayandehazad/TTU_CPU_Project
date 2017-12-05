@@ -67,7 +67,9 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, C_flag_out, Cout, ACC_in);
       EQ_Flag_out <=  '0';
       C_flag_out <= '0';
     elsif clk'event and clk= '1' then
-      ACC_out <= ACC_in;
+      if ALUCommand = ALU_MULT or ALUCommand = ALU_MULTU then
+        ACC_out <= ACC_in;
+      end if;
       OV_Flag_out <= OV_Flag_in;
       Z_Flag_out <= Z_Flag_in;
       EQ_Flag_out <= EQ_Flag_in;

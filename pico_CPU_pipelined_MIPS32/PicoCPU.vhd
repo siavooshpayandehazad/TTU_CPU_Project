@@ -40,7 +40,7 @@ signal DPU_Mux_Cont_1, DPU_Mux_Cont_1_in  : std_logic_vector (1 downto 0);
 signal DPU_Mux_Cont_2, DPU_Mux_Cont_2_in  : std_logic_vector (1 downto 0);
 signal DPU_SetFlag   , DPU_SetFlag_in  : std_logic_vector (2 downto 0);
  ----------------------------------------
-signal RFILE_data_sel  : std_logic_vector (1 downto 0);
+signal RFILE_data_sel  : std_logic_vector (RFILE_DATA_SEL_WIDTH-1 downto 0);
 signal Data_to_RFILE   : std_logic_vector (CPU_Bitwidth-1 downto 0);
 signal RFILE_in_sel    : std_logic_vector (RFILE_SEL_WIDTH downto 0);
 signal RFILE_out_sel_1, RFILE_out_sel_1_in : std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
@@ -140,6 +140,8 @@ begin
     rst                => rst,
     Data_in_mem        => MEMDATA,
     Data_in_CU         => Data_to_RFILE,
+    Data_in_DPU_HI     => DPU_RESULT(2*CPU_Bitwidth-1 downto CPU_Bitwidth),
+    Data_in_DPU_LOW    => DPU_RESULT(CPU_Bitwidth-1 downto 0),
     Data_in_ACC_HI     => DPU_RESULT_FF(2*CPU_Bitwidth-1 downto CPU_Bitwidth),
     Data_in_ACC_LOW    => DPU_RESULT_FF(CPU_Bitwidth-1 downto 0),
     Data_in_sel        => RFILE_data_sel,
