@@ -53,7 +53,7 @@ begin
 
 ALU_comp: ALU
 generic map (BitWidth => BitWidth)
-port map (Mux_Out_1, Mux_Out_2, ALUCommand, C_flag_out, Cout, ACC_in);
+port map (Mux_Out_1, Mux_Out_2, ALUCommand, OV_Flag_Value, Cout, ACC_in);
 
   ---------------------------------------------
   --  Registers and Flags
@@ -104,7 +104,6 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, C_flag_out, Cout, ACC_in);
   end process;
 
 
-  OV_Flag_Value <= (ACC_in(BitWidth-1 ) and Mux_Out_1(BitWidth-1 ) and (not Mux_Out_2(BitWidth-1 ))) or ((not ACC_in(BitWidth-1 )) and (not Mux_Out_1(BitWidth-1)) and Mux_Out_2(BitWidth-1));
   ---------------------------------------------
   --  Flag controls
   ---------------------------------------------
@@ -154,11 +153,11 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, C_flag_out, Cout, ACC_in);
       if SetFlag = "010" then
           OV_Flag_in <= '0';
       else
-          --if (ALUCommand = "0000" or ALUCommand = "0001") then
-              OV_Flag_in <= OV_Flag_Value;
-          --else
-          --    OV_Flag_in <= OV_Flag_out;
-          --end if;
+          if (ALUCommand = ALU_ADD or ALUCommand = ALU_SUB) then
+          OV_Flag_in <= OV_Flag_Value;
+          else
+              OV_Flag_in <= OV_Flag_out;
+          end if;
        end if;
       ----------------------------------
 

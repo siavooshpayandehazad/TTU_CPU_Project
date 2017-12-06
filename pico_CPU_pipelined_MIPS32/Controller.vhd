@@ -17,7 +17,8 @@ entity ControlUnit is
     ----------------------------------------
     MemRdAddress    : out std_logic_vector (BitWidth-1 downto 0);
 	  MemWrtAddress   : out std_logic_vector (BitWidth-1 downto 0);
-    Mem_RW          : out std_logic;
+    Mem_RW          : out std_logic_vector (3 downto 0);
+    MEM_IN_SEL      : out MEM_IN_MUX;
     ----------------------------------------
     IO_DIR          : out std_logic;
     IO_RD           : in std_logic_vector (BitWidth-1 downto 0);
@@ -142,14 +143,13 @@ IO_WR <= IO_WR_in_FF;
 -----------------------------------------------------------
 --Control FSM
 -----------------------------------------------------------
-DEC_SIGNALS_GEN:
-  process(Instr_D, rs_ex, rt_ex)
+DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
     begin
       flush_signal_D <= '0';
       RFILE_out_sel_1 <= (others => '0');
       RFILE_out_sel_2 <= (others => '0');
       -----------------------Arithmetic--------------------------
-      if Instr_D = ADDU or Instr_D = SUBU then
+      if Instr_D = ADD or Instr_D = ADDU or Instr_D = SUB or Instr_D = SUBU  then
           RFILE_out_sel_1  <=  rs_d;
 		      RFILE_out_sel_2  <=  rt_d;
 
@@ -193,39 +193,43 @@ DEC_SIGNALS_GEN:
         RFILE_out_sel_1  <=  rs_d;
         RFILE_out_sel_2  <=  rs_d;
     ----------------------LOAD AND STORE -----------------------------------
-    elsif Instr_D = LBU then
+  elsif Instr_D = LBU or Instr_D = LHU or Instr_D = LW then
         RFILE_out_sel_1  <=  BASE;
         RFILE_out_sel_2  <=  BASE;
+    elsif Instr_D = SB or Instr_D = SH  or Instr_D = SW then
+        RFILE_out_sel_1  <=  BASE;
+        RFILE_out_sel_2  <=  rt_d;
     end if;
   end process;
 
 
-  EX_SIGNALS_GEN:
-    process(Instr_E, IMMEDIATE, DPU_RESULT)
+  EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE, DPU_RESULT)
       begin
         flush_signal_E <= '0';
         DPU_SetFlag    <= DPU_CLEAR_NO_FLAG;
         MemWrtAddress  <= (others => '0');
-        MemRdAddress <= (others => '0');
-        Mem_RW <= '0';
+        MemRdAddress   <= (others => '0');
+        Mem_RW <= "0000";
         DataToDPU_1 <= (others => '0');
         DataToDPU_2 <= (others => '0');
         DPU_ALUCommand <= ALU_PASS_A;
         DPU_Mux_Cont_1 <= RFILE;
         DPU_Mux_Cont_2 <= RFILE;
         -----------------------Arithmetic--------------------------
-        if Instr_E = ADDU then
+        if Instr_E = ADD then
             DPU_ALUCommand <= ALU_ADD;
 
         elsif Instr_E = ADDI then
-
             DPU_ALUCommand <= ALU_ADD;
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= CONT;
             DataToDPU_2 <= ZERO16 & IMMEDIATE;
 
+        elsif Instr_E = ADDU then
+            DPU_ALUCommand <= ALU_ADDU;
+
         elsif Instr_E = ADDIU then
-            DPU_ALUCommand <= ALU_ADD;
+            DPU_ALUCommand <= ALU_ADDU;
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= CONT;
 
@@ -236,7 +240,10 @@ DEC_SIGNALS_GEN:
             end if;
 
         elsif Instr_E = SUBU then
-            DPU_ALUCommand <= ALU_SUB;
+            DPU_ALUCommand <= ALU_SUBU;
+
+          elsif Instr_E = SUB then
+              DPU_ALUCommand <= ALU_SUB;
 
         elsif Instr_E = LUI then
             DPU_ALUCommand <= ALU_PASS_B;
@@ -340,8 +347,8 @@ DEC_SIGNALS_GEN:
           DPU_Mux_Cont_1 <= RFILE;
           DPU_Mux_Cont_2 <= CONT;
       ----------------------LOAD AND STORE -----------------------------------
-        elsif Instr_E = LBU then
-          DPU_ALUCommand <= ALU_ADD;
+    elsif Instr_E = LBU or Instr_E = LHU or Instr_E = LW then
+          DPU_ALUCommand <= ALU_ADDU;
           DPU_Mux_Cont_1 <= RFILE;
           DPU_Mux_Cont_2 <= CONT;
           if OFFSET(15) = '0' then
@@ -350,12 +357,31 @@ DEC_SIGNALS_GEN:
             DataToDPU_2 <= ONE16 & OFFSET;
           end if;
           MemRdAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
+        elsif Instr_E = SB or Instr_E = SH or Instr_E = SW then
+          DPU_ALUCommand <= ALU_ADDU;
+          DPU_Mux_Cont_1 <= RFILE;
+          DPU_Mux_Cont_2 <= CONT;
+          if OFFSET(15) = '0' then
+            DataToDPU_2 <= ZERO16 & OFFSET;
+          else
+            DataToDPU_2 <= ONE16 & OFFSET;
+          end if;
+
+          MemWrtAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
+          MEM_IN_SEL <= RFILE_DATA_2;
+          if Instr_E = SB then
+            Mem_RW <= "0001";
+          elsif Instr_E = SH then
+            Mem_RW <= "0011";
+          elsif Instr_E = SW then
+            Mem_RW <= "1111";
+          end if;
+
         end if;
     end process;
 
 
-  WB_SIGNALS_GEN:
-    process(Instr_E,Instr_WB, rd_ex, rt_ex, rs_ex, rt_wb)
+  WB_SIGNALS_GEN:process(Instr_E,Instr_WB, rd_ex, rt_ex, rs_ex, rt_wb)
       begin
 
       RFILE_in_address   <= (others => '0');
@@ -363,7 +389,7 @@ DEC_SIGNALS_GEN:
       Data_to_RFILE  <= (others => '0');
 
       -----------------------Arithmetic--------------------------
-      if Instr_E = ADDU or Instr_E = SUBU or Instr_E = CLO or Instr_E = CLZ then
+      if Instr_E = ADD or Instr_E = ADDU or Instr_E = SUB or Instr_E = SUBU or Instr_E = CLO or Instr_E = CLZ then
           RFILE_data_sel <= DPU_LOW;
           RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
@@ -402,7 +428,15 @@ DEC_SIGNALS_GEN:
     end if;
       ----------------------LOAD AND STORE -----------------------------------
     if Instr_WB = LBU then
-        RFILE_data_sel <= FROM_MEM;
+        RFILE_data_sel <= FROM_MEM8;
+        RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+    elsif Instr_WB = LHU then
+        RFILE_data_sel <= FROM_MEM16;
+        RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+    elsif Instr_WB = LW then
+        RFILE_data_sel <= FROM_MEM32;
         RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
         RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
     end if;
@@ -467,7 +501,11 @@ begin
               elsif opcode_in = "011001" then
                   Instr_F <= MULTU;
               elsif opcode_in = "100000" then
+                  Instr_F <= ADD;
+              elsif opcode_in = "100001" then
                   Instr_F <= ADDU;
+              elsif opcode_in = "100010" then
+                  Instr_F <= SUB;
               elsif opcode_in = "100011" then
                   Instr_F <= SUBU;
               elsif opcode_in = "100100" then
@@ -496,7 +534,12 @@ begin
                     Instr_F <= CLZ;
                 end if;
           when "100000" => Instr_F <= LB;
+          when "100011" => Instr_F <= LW;
           when "100100" => Instr_F <= LBU;
+          when "100101" => Instr_F <= LHU;
+          when "101000" => Instr_F <= SB;
+          when "101001" => Instr_F <= SH;
+          when "101011" => Instr_F <= SW;
           when others =>  Instr_F <= NOP;
         end case;
     else

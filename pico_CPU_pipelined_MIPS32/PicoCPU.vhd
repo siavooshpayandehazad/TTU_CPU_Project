@@ -25,7 +25,7 @@ signal Instr_Add       : std_logic_vector (CPU_Bitwidth+1 downto 0);
  ----------------------------------------
 signal MemRdAddress    : std_logic_vector (CPU_Bitwidth-1 downto 0);
 signal MemWrtAddress   : std_logic_vector (CPU_Bitwidth-1 downto 0);
-signal Mem_RW          : std_logic;
+signal Mem_RW          : std_logic_vector (3 downto 0);
  ----------------------------------------
 signal IO_DIR          : std_logic;
 signal IO_RD           : std_logic_vector (CPU_Bitwidth-1 downto 0);
@@ -53,10 +53,9 @@ signal DPU_RESULT_FF   : std_logic_vector (2*CPU_Bitwidth-1 downto 0);
 -- Register file outputs
 signal R1, R2          : std_logic_vector (CPU_Bitwidth-1 downto 0);
 
-signal MEMDATA: std_logic_vector (CPU_Bitwidth-1 downto 0) := (others=>'0');
+signal MEMDATA_OUT, MEMDATA_IN: std_logic_vector (CPU_Bitwidth-1 downto 0) := (others=>'0');
 signal Mem_Rd_Address_in : std_logic_vector (CPU_Bitwidth-1 downto 0) := (others=>'0');
-signal MemRW_1, MemRW_2: std_logic := '0';
-signal Mem_Wrt_Address_1, Mem_Wrt_Address_2: std_logic_vector (CPU_Bitwidth-1 downto 0) := (others=>'0');
+signal MEM_IN_SEL  : MEM_IN_MUX;
 
 begin
 
@@ -66,21 +65,11 @@ begin
   process (clk, rst)begin
     if rst = '1' then
 
-      Mem_Wrt_Address_1 <= (others => '0');
-      MemRW_1 <= '0';
-      Mem_Wrt_Address_2 <= (others => '0');
-      MemRW_2 <= '0';
-
       RFILE_out_sel_1<= (others => '0');
       RFILE_out_sel_2<= (others => '0');
     elsif clk'event and clk='1' then
       RFILE_out_sel_1<= RFILE_out_sel_1_in;
       RFILE_out_sel_2<= RFILE_out_sel_2_in;
-
-      Mem_Wrt_Address_1 <= MemWrtAddress;
-      MemRW_1 <= Mem_RW;
-      Mem_Wrt_Address_2 <= Mem_Wrt_Address_1;
-      MemRW_2 <= MemRW_1;
 
     end if;
   end process;
@@ -101,6 +90,7 @@ begin
         MemRdAddress    => MemRdAddress   ,
     	  MemWrtAddress   => MemWrtAddress  ,
         Mem_RW          => Mem_RW         ,
+        MEM_IN_SEL      => MEM_IN_SEL     ,
         ----------------=> ---------------,--------
         IO_DIR          => IO_DIR         ,
         IO_RD           => IO_RD          ,
@@ -139,7 +129,7 @@ begin
 
     clk                => clk,
     rst                => rst,
-    Data_in_mem        => MEMDATA,
+    Data_in_mem        => MEMDATA_OUT,
     Data_in_CU         => Data_to_RFILE,
     Data_in_DPU_HI     => DPU_RESULT(2*CPU_Bitwidth-1 downto CPU_Bitwidth),
     Data_in_DPU_LOW    => DPU_RESULT(CPU_Bitwidth-1 downto 0),
@@ -158,7 +148,7 @@ begin
   port map (
             rst              => rst,
             clk              => clk,
-            Data_in_mem      => MEMDATA,
+            Data_in_mem      => MEMDATA_OUT,
             Data_in_RegFile_1=> R1,
             Data_in_RegFile_2=> R2,
             Data_in_control_1=> DataToDPU_1,
@@ -174,10 +164,20 @@ begin
             Result           => DPU_RESULT,
             Result_FF        => DPU_RESULT_FF);
 
+
+MEM_DATA_IN_SELECT: process(MEM_IN_SEL, RFILE_out_sel_1, RFILE_out_sel_2, DPU_Result)begin
+    case( MEM_IN_SEL ) is
+      when RFILE_DATA_1 => MEMDATA_IN <= R1;
+      when RFILE_DATA_2 => MEMDATA_IN <= R2;
+      when DPU_DATA     => MEMDATA_IN <= DPU_Result(CPU_Bitwidth-1 downto 0);
+      when others => MEMDATA_IN <= (others => '0');
+    end case;
+
+  end process;
   --memory
   Mem_comp: Memory
   generic map (BitWidth => CPU_Bitwidth)
-  port map (MemRdAddress, DPU_Result(CPU_Bitwidth-1 downto 0), Mem_Wrt_Address_2, clk, MemRW_2 , rst , MEMDATA);
+  port map (MemRdAddress, MEMDATA_IN, MemWrtAddress, clk, Mem_RW , rst , MEMDATA_OUT);
 
   FlagOut <=	DPU_Flags_FF;
   output <= DPU_RESULT_FF;

@@ -16,7 +16,7 @@ package pico_cpu is
 
     -------------------------------------------------
     TYPE Instruction IS (--arithmetic
-                        ADDU, ADDI, ADDIU, LUI, SUBU, CLO, CLZ,
+                        ADD, ADDU, ADDI, ADDIU, LUI, SUB, SUBU, CLO, CLZ,
                         -- logical
                         AND_inst, ANDI, OR_inst, ORI, NOR_inst, XOR_inst, XORI, NOP,
                         -- shift and rotate
@@ -28,15 +28,16 @@ package pico_cpu is
                         -- Accumulator Access
                         MFHI, MFLO, MTHI, MTLO,
                         -- load and store
-                        LB, LBU
+                        LB, LBU, LHU, LW, SB, SH, SW
                         );
 
     -------------------------------------------------ALU COMMANDS
 
-    TYPE ALU_COMMAND IS (ALU_ADD   , ALU_SUB   , ALU_PASS_A, ALU_PASS_B,
+    TYPE ALU_COMMAND IS (ALU_ADDU  , ALU_SUBU  , ALU_ADD  , ALU_SUB  ,
+                         ALU_PASS_A, ALU_PASS_B,
                          ALU_AND   , ALU_OR    , ALU_XOR   , ALU_SLR   ,
                          ALU_SLL   , ALU_NEG_A , ALU_SAR   , ALU_SAL   ,
-                         ALU_FLIP_A, ALU_CLR_A , ALU_RRC   , ALU_RLC   ,
+                         ALU_FLIP_A, ALU_CLR_A ,
                          ALU_NOR   , ALU_COMP  , ALU_CLO   , ALU_CLZ   ,
                          ALU_MULTU , ALU_MULT  , ALU_MTLO  , ALU_MTHI);
 
@@ -50,12 +51,13 @@ package pico_cpu is
     constant DPU_CLEAR_FLAG_C   : std_logic_vector (DPU_CLEAR_FLAG_WIDTH-1 downto 0):= "100";
     constant DPU_CLEAR_NO_FLAG  : std_logic_vector (DPU_CLEAR_FLAG_WIDTH-1 downto 0):= "000";
     ------------------------------------------------
-    TYPE RFILE_IN_MUX IS (CU, ACC_HI, ACC_LOW, DPU_HI, DPU_LOW, FROM_MEM, ZERO);
-
+    TYPE RFILE_IN_MUX IS (CU, ACC_HI, ACC_LOW, DPU_HI, DPU_LOW, FROM_MEM8,FROM_MEM16,FROM_MEM32, ZERO);
+    TYPE MEM_IN_MUX IS (RFILE_DATA_1, RFILE_DATA_2, DPU_DATA);
 
     --constant DPU_COMMAND_WIDTH : integer := 12;
 
     ------------------------------------------------
+    constant ZERO8  :std_logic_vector(7 downto 0)  := "00000000";
     constant ZERO14 :std_logic_vector(13 downto 0) := "00000000000000";
     constant ONE14  :std_logic_vector(13 downto 0) := "11111111111111";
     constant ZERO16 :std_logic_vector(15 downto 0) := "0000000000000000";
@@ -77,7 +79,7 @@ package pico_cpu is
       port ( A: in std_logic_vector (BitWidth-1 downto 0);
              B: in std_logic_vector (BitWidth-1 downto 0);
              Command: in ALU_COMMAND;
-             Cflag_in: in std_logic;
+             OV_out: out std_logic;
              Cflag_out: out std_logic;
              Result: out std_logic_vector (2*BitWidth-1 downto 0)
         );
@@ -124,7 +126,8 @@ package pico_cpu is
         ----------------------------------------
         MemRdAddress    : out std_logic_vector (BitWidth-1 downto 0);
     	  MemWrtAddress   : out std_logic_vector (BitWidth-1 downto 0);
-        Mem_RW          : out std_logic;
+        Mem_RW          : out std_logic_vector (3 downto 0);
+        MEM_IN_SEL      : out MEM_IN_MUX;
         ----------------------------------------
         IO_DIR          : out std_logic;
         IO_RD           : in std_logic_vector (BitWidth-1 downto 0);
@@ -190,7 +193,7 @@ package pico_cpu is
            Data_in: in std_logic_vector (BitWidth-1 downto 0);
   			   WrtAddress: in std_logic_vector (BitWidth-1 downto 0);
            clk: in std_logic;
-           RW: in std_logic;
+           RW: in std_logic_vector (3 downto 0);
            rst: in std_logic;
            Data_Out: out std_logic_vector (BitWidth-1 downto 0)
       );

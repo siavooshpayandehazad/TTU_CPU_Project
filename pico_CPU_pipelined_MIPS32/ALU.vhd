@@ -10,7 +10,7 @@ entity ALU is
   port ( A: in std_logic_vector (BitWidth-1 downto 0);
          B: in std_logic_vector (BitWidth-1 downto 0);
          Command: in ALU_COMMAND;
-         Cflag_in: in std_logic;
+         OV_out: out std_logic;
          Cflag_out: out std_logic;
          Result: out std_logic_vector (2*BitWidth-1 downto 0)
     );
@@ -21,27 +21,39 @@ architecture RTL of ALU is
 ---------------------------------------------
 --      Signals
 ---------------------------------------------
- signal AddSub_result: std_logic_vector (BitWidth-1 downto 0) := (others => '0');
- signal Cout,Add_Sub: std_logic := '0';
+ signal Cout: std_logic := '0';
 
 begin
----------------------------------------------
---      component instantiation
----------------------------------------------
-Adder_comp: Adder_Sub generic map (BitWidth => BitWidth)  port map (A,B,Add_Sub,AddSub_result,Cout);
+
+
 ---------------------------------------------
 Cflag_out <= Cout;
 
 
-PROC_ALU: process(Command,A,B,AddSub_result,Cflag_in)
+PROC_ALU: process(Command,A,B)
    variable temp : integer := 0;
+   variable result_tmp : std_logic_vector(BitWidth downto 0);
    begin
-    Add_Sub <= '0';  
     Result <= (others => '0');
      case Command is
-            WHEN ALU_ADD    =>   Result(BitWidth-1 downto 0) <= AddSub_result; --add
-            WHEN ALU_SUB    =>   Add_Sub <= '1';
-                                 Result(BitWidth-1 downto 0) <= AddSub_result; -- Subtract
+            WHEN ALU_ADDU    =>  result_tmp := std_logic_vector(unsigned('0'& A) + unsigned('0'& B)); --add
+                                 Result(BitWidth-1 downto 0) <= result_tmp(BitWidth-1 downto 0);
+                                 COUT <= result_tmp(BitWidth);
+            WHEN ALU_SUBU    =>  result_tmp := std_logic_vector(unsigned('0'& A) - unsigned('0'& B)); --subtract
+                                 Result(BitWidth-1 downto 0) <= result_tmp(BitWidth-1 downto 0);
+                                 COUT <= result_tmp(BitWidth);
+            WHEN ALU_ADD     =>  result_tmp := std_logic_vector(signed(A(BitWidth-1) & A) + signed(B(BitWidth-1) & B)); --add
+                                Result(BitWidth-1 downto 0) <= result_tmp(BitWidth-1 downto 0);
+                                COUT <= result_tmp(BitWidth);
+                                if result_tmp(BitWidth) /= result_tmp(BitWidth-1) then
+                                    OV_out <= '1';
+                                end if;
+            WHEN ALU_SUB     =>  result_tmp := std_logic_vector(signed(A(BitWidth-1) & A) - signed(B(BitWidth-1) & B)); --subtract
+                                Result(BitWidth-1 downto 0) <= result_tmp(BitWidth-1 downto 0);
+                                COUT <= result_tmp(BitWidth);
+                                if result_tmp(BitWidth) /= result_tmp(BitWidth-1) then
+                                    OV_out <= '1';
+                                end if;
             WHEN ALU_PASS_A =>   Result(BitWidth-1 downto 0) <= A;  --Bypass A
             WHEN ALU_PASS_B =>   Result(BitWidth-1 downto 0) <= B;  --Bypass B
             WHEN ALU_MTLO   =>   Result(BitWidth-1 downto 0) <= A;  --Bypass A
@@ -59,8 +71,6 @@ PROC_ALU: process(Command,A,B,AddSub_result,Cflag_in)
             WHEN ALU_SAL    =>   Result(BitWidth-1 downto 0) <= A(BitWidth-1) & A(BitWidth-3 downto 0)& A(0) ;  --shift left Arith
             WHEN ALU_FLIP_A =>   Result(BitWidth-1 downto 0) <= not(A); --Not of A
             WHEN ALU_CLR_A  =>   Result(BitWidth-1 downto 0) <= (others => '0'); --Clear ACC
-            WHEN ALU_RRC    =>   Result(BitWidth-1 downto 0) <= Cflag_in & A(BitWidth-1 downto 1); -- RRC
-            WHEN ALU_RLC    =>   Result(BitWidth-1 downto 0) <= A(BitWidth-2 downto 0)& Cflag_in ; -- RLC
             WHEN ALU_MULTU  =>   Result <= A*B ; -- RLC
             WHEN ALU_MULT  =>   Result <= std_logic_vector(signed(A)*signed(B)) ; -- RLC
             -------------------------------------------------------------------------------------------------------------------------------------
