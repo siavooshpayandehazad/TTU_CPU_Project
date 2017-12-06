@@ -33,16 +33,16 @@ signal IO_WR           : std_logic_vector (CPU_Bitwidth-1 downto 0);
  ----------------------------------------
 signal DPU_Flags       : std_logic_vector (3 downto 0);
 signal DPU_Flags_FF    : std_logic_vector (3 downto 0);
-signal DataToDPU,DataToDPU_in       : std_logic_vector (CPU_Bitwidth-1 downto 0);
+signal DataToDPU_1, DataToDPU_2       : std_logic_vector (CPU_Bitwidth-1 downto 0);
  ----------------------------------------
-signal DPU_ALUCommand, DPU_ALUCommand_in  : std_logic_vector (ALU_COMAND_WIDTH-1 downto 0);
-signal DPU_Mux_Cont_1, DPU_Mux_Cont_1_in  : std_logic_vector (1 downto 0);
-signal DPU_Mux_Cont_2, DPU_Mux_Cont_2_in  : std_logic_vector (1 downto 0);
+signal DPU_ALUCommand, DPU_ALUCommand_in  : ALU_COMMAND;
+signal DPU_Mux_Cont_1, DPU_Mux_Cont_1_in  : DPU_IN_MUX;
+signal DPU_Mux_Cont_2, DPU_Mux_Cont_2_in  : DPU_IN_MUX;
 signal DPU_SetFlag   , DPU_SetFlag_in  : std_logic_vector (2 downto 0);
  ----------------------------------------
-signal RFILE_data_sel  : std_logic_vector (RFILE_DATA_SEL_WIDTH-1 downto 0);
+signal RFILE_data_sel  : RFILE_IN_MUX;
 signal Data_to_RFILE   : std_logic_vector (CPU_Bitwidth-1 downto 0);
-signal RFILE_in_sel    : std_logic_vector (RFILE_SEL_WIDTH downto 0);
+signal RFILE_in_address: std_logic_vector (RFILE_SEL_WIDTH downto 0);
 signal RFILE_out_sel_1, RFILE_out_sel_1_in : std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 signal RFILE_out_sel_2, RFILE_out_sel_2_in : std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 
@@ -108,7 +108,8 @@ begin
         ----------------=> ---------------,--------
         DPU_Flags       => DPU_Flags      ,
         DPU_Flags_FF    => DPU_Flags_FF   ,
-        DataToDPU       => DataToDPU      ,
+        DataToDPU_1     => DataToDPU_1    ,
+        DataToDPU_2     => DataToDPU_2    ,
 
         DPU_ALUCommand  => DPU_ALUCommand ,
         DPU_Mux_Cont_1  => DPU_Mux_Cont_1 ,
@@ -116,7 +117,7 @@ begin
         DPU_SetFlag     => DPU_SetFlag    ,
         ----------------=> ---------------,--------
         RFILE_data_sel  => RFILE_data_sel ,
-    	  RFILE_in_sel    => RFILE_in_sel   ,
+    	  RFILE_in_address    => RFILE_in_address   ,
     	  RFILE_out_sel_1 => RFILE_out_sel_1_in,
     	  RFILE_out_sel_2 => RFILE_out_sel_2_in,
         Data_to_RFILE   => Data_to_RFILE ,
@@ -145,7 +146,7 @@ begin
     Data_in_ACC_HI     => DPU_RESULT_FF(2*CPU_Bitwidth-1 downto CPU_Bitwidth),
     Data_in_ACC_LOW    => DPU_RESULT_FF(CPU_Bitwidth-1 downto 0),
     Data_in_sel        => RFILE_data_sel,
-    Register_in_sel    => RFILE_in_sel,
+    RFILE_in_address    => RFILE_in_address,
     Register_out_sel_1 => RFILE_out_sel_1,
     Register_out_sel_2 => RFILE_out_sel_2,
     Data_out_1         => R1,
@@ -160,8 +161,8 @@ begin
             Data_in_mem      => MEMDATA,
             Data_in_RegFile_1=> R1,
             Data_in_RegFile_2=> R2,
-            Data_in_control_1=> DataToDPU,
-            Data_in_control_2=> DataToDPU,
+            Data_in_control_1=> DataToDPU_1,
+            Data_in_control_2=> DataToDPU_2,
 
             ALUCommand       => DPU_ALUCommand,
             Mux_Cont_1       => DPU_Mux_Cont_1,
@@ -174,9 +175,9 @@ begin
             Result_FF        => DPU_RESULT_FF);
 
   --memory
-  Mem_comp: Mem
+  Mem_comp: Memory
   generic map (BitWidth => CPU_Bitwidth)
-  port map (Mem_Rd_Address_in, DPU_Result(CPU_Bitwidth-1 downto 0), Mem_Wrt_Address_2, clk, MemRW_2 , rst , MEMDATA);
+  port map (MemRdAddress, DPU_Result(CPU_Bitwidth-1 downto 0), Mem_Wrt_Address_2, clk, MemRW_2 , rst , MEMDATA);
 
   FlagOut <=	DPU_Flags_FF;
   output <= DPU_RESULT_FF;

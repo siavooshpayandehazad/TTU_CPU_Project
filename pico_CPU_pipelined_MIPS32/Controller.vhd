@@ -25,15 +25,16 @@ entity ControlUnit is
     ----------------------------------------
     DPU_Flags       : in  std_logic_vector (3 downto 0);
     DPU_Flags_FF    : in  std_logic_vector (3 downto 0);
-    DataToDPU       : out std_logic_vector (BitWidth-1 downto 0);
+    DataToDPU_1     : out std_logic_vector (BitWidth-1 downto 0);
+    DataToDPU_2     : out std_logic_vector (BitWidth-1 downto 0);
 
-    DPU_ALUCommand  : out std_logic_vector (ALU_COMAND_WIDTH-1 downto 0);
-    DPU_Mux_Cont_1  : out std_logic_vector (1 downto 0);
-    DPU_Mux_Cont_2  : out std_logic_vector (1 downto 0);
+    DPU_ALUCommand  : out ALU_COMMAND;
+    DPU_Mux_Cont_1  : out DPU_IN_MUX;
+    DPU_Mux_Cont_2  : out DPU_IN_MUX;
     DPU_SetFlag     : out std_logic_vector (2 downto 0);
     ----------------------------------------
-    RFILE_data_sel  : out std_logic_vector (RFILE_DATA_SEL_WIDTH-1 downto 0);
-	  RFILE_in_sel    : out std_logic_vector (RFILE_SEL_WIDTH downto 0);
+    RFILE_data_sel  : out RFILE_IN_MUX;
+	  RFILE_in_address: out std_logic_vector (RFILE_SEL_WIDTH downto 0);
 	  RFILE_out_sel_1 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 	  RFILE_out_sel_2 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
     Data_to_RFILE   :  out std_logic_vector (BitWidth-1 downto 0);
@@ -91,6 +92,7 @@ architecture RTL of ControlUnit is
 
   alias IMMEDIATE : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
   alias OFFSET : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
+  alias BASE   : std_logic_vector (4 downto 0) is InstrReg_out_D (25 downto 21);
 
   begin
     flush_pipeline <= flush_signal_D;
@@ -100,7 +102,6 @@ architecture RTL of ControlUnit is
   process (clk,rst)
     begin
     if rst = '1' then
-       SP_out <= (others => '0');
        PC_out <= (others => '0');
        --InstrReg_out(InstructionWidth-1 downto BitWidth) <= "111110";
        InstrReg_out_D <= (others=> '0');
@@ -115,7 +116,6 @@ architecture RTL of ControlUnit is
     elsif clk'event and clk='1' then
        IO_WR_in_FF <= IO_WR_in;
        IO_DIR_FF <= IO_DIR_in;
-       SP_out <= SP_in;
        PC_out <= PC_in;
        halt_signal<= halt_signal_in;
        if halt_signal = '0' then
@@ -149,68 +149,29 @@ DEC_SIGNALS_GEN:
       RFILE_out_sel_1 <= (others => '0');
       RFILE_out_sel_2 <= (others => '0');
       -----------------------Arithmetic--------------------------
-      if Instr_D = ADDU then
-          RFILE_out_sel_1  <=  rt_d;
-		      RFILE_out_sel_2  <=  rs_d;
+      if Instr_D = ADDU or Instr_D = SUBU then
+          RFILE_out_sel_1  <=  rs_d;
+		      RFILE_out_sel_2  <=  rt_d;
 
-      elsif Instr_D = ADDI then
+      elsif Instr_D = ADDI or Instr_D = ADDIU or  Instr_D = CLO or Instr_D = CLZ then
           RFILE_out_sel_1  <=  rs_d;
     	    RFILE_out_sel_2  <=  rs_d;
 
-      elsif Instr_D = ADDIU then
-          RFILE_out_sel_1  <=  rs_d;
-      	  RFILE_out_sel_2  <=  rs_d;
-
-      elsif Instr_D = SUBU then
-          RFILE_out_sel_1  <=  rs_d;
-      		RFILE_out_sel_2  <=  rt_d;
-
-     elsif Instr_D = CLO or Instr_D = CLZ  then
-           RFILE_out_sel_1  <=  rs_d;
-           RFILE_out_sel_2  <=  rs_d;
       -----------------------LOGICAL--------------------------
-      elsif Instr_D = AND_inst then
+    elsif Instr_D = AND_inst or Instr_D = OR_inst or Instr_D = NOR_inst or Instr_D = XOR_inst then
           RFILE_out_sel_1  <=  rt_d;
           RFILE_out_sel_2  <=  rs_d;
-
-      elsif Instr_D = ANDI then
-          RFILE_out_sel_1  <=  rs_d;
-          RFILE_out_sel_2  <=  rs_d;
-
-     elsif Instr_D = OR_inst then
-          RFILE_out_sel_1  <=  rt_d;
-          RFILE_out_sel_2  <=  rs_d;
-
-     elsif Instr_D = ORI then
-          RFILE_out_sel_1  <=  rs_d;
-          RFILE_out_sel_2  <=  rs_d;
-
-     elsif Instr_D = NOR_inst then
-          RFILE_out_sel_1  <=  rt_d;
-          RFILE_out_sel_2  <=  rs_d;
-
-    elsif Instr_D = XOR_inst then
-          RFILE_out_sel_1  <=  rt_d;
-          RFILE_out_sel_2  <=  rs_d;
-
-    elsif Instr_D = XORI then
+      elsif Instr_D = ANDI or Instr_D = ORI or Instr_D = XORI then
           RFILE_out_sel_1  <=  rs_d;
           RFILE_out_sel_2  <=  rs_d;
 
     -----------------------SHIFT AND ROTATE-----------------
-    elsif Instr_D = SLL_inst then
+  elsif Instr_D = SLL_inst or Instr_D = SRL_inst then
           RFILE_out_sel_1  <=  rt_d;
           RFILE_out_sel_2  <=  rt_d;
-    elsif Instr_D = SRL_inst then
-          RFILE_out_sel_1  <=  rt_d;
-          RFILE_out_sel_2  <=  rt_d;
-    elsif Instr_D = SLLV then
+    elsif Instr_D = SLLV or Instr_D = SRLV then
           RFILE_out_sel_1  <=  rt_d;
           RFILE_out_sel_2  <=  rs_d;
-    elsif Instr_D = SRLV then
-          RFILE_out_sel_1  <=  rt_d;
-          RFILE_out_sel_2  <=  rs_d;
-
     -----------------------JUMP and BRANCH--------------------------
     elsif Instr_D = J  then
           flush_signal_D <= '1';
@@ -224,29 +185,34 @@ DEC_SIGNALS_GEN:
           flush_signal_D <= '1';
 
     -----------------------MULTIPLICATION AND DIVISION--------------------------
-   elsif Instr_D = MULTU or Instr_D = MULT then
+    elsif Instr_D = MULTU or Instr_D = MULT or Instr_D = MUL then
          RFILE_out_sel_1  <=  rt_d;
          RFILE_out_sel_2  <=  rs_d;
-    elsif Instr_D = MUL then
-         RFILE_out_sel_1  <=  rt_d;
-         RFILE_out_sel_2  <=  rs_d;
-
     ----------------------ACCUMULATOR ACCESS -----------------------------------
-    -- we dont read any register here!
+    elsif Instr_D = MTHI or Instr_D = MTLO then
+        RFILE_out_sel_1  <=  rs_d;
+        RFILE_out_sel_2  <=  rs_d;
+    ----------------------LOAD AND STORE -----------------------------------
+    elsif Instr_D = LBU then
+        RFILE_out_sel_1  <=  BASE;
+        RFILE_out_sel_2  <=  BASE;
     end if;
   end process;
 
 
   EX_SIGNALS_GEN:
-    process(Instr_E, IMMEDIATE)
+    process(Instr_E, IMMEDIATE, DPU_RESULT)
       begin
         flush_signal_E <= '0';
         DPU_SetFlag    <= DPU_CLEAR_NO_FLAG;
-
-        DataToDPU <= (others => '0');
+        MemWrtAddress  <= (others => '0');
+        MemRdAddress <= (others => '0');
+        Mem_RW <= '0';
+        DataToDPU_1 <= (others => '0');
+        DataToDPU_2 <= (others => '0');
         DPU_ALUCommand <= ALU_PASS_A;
-        DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-        DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
+        DPU_Mux_Cont_1 <= RFILE;
+        DPU_Mux_Cont_2 <= RFILE;
         -----------------------Arithmetic--------------------------
         if Instr_E = ADDU then
             DPU_ALUCommand <= ALU_ADD;
@@ -254,19 +220,19 @@ DEC_SIGNALS_GEN:
         elsif Instr_E = ADDI then
 
             DPU_ALUCommand <= ALU_ADD;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
-            DataToDPU <= ZERO16 & IMMEDIATE;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= CONT;
+            DataToDPU_2 <= ZERO16 & IMMEDIATE;
 
         elsif Instr_E = ADDIU then
             DPU_ALUCommand <= ALU_ADD;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= CONT;
 
             if IMMEDIATE(15) = '0' then
-              DataToDPU <= ZERO16 & IMMEDIATE;
+              DataToDPU_2 <= ZERO16 & IMMEDIATE;
             else
-              DataToDPU <= ONE16 & IMMEDIATE;
+              DataToDPU_2 <= ONE16 & IMMEDIATE;
             end if;
 
         elsif Instr_E = SUBU then
@@ -274,56 +240,56 @@ DEC_SIGNALS_GEN:
 
         elsif Instr_E = LUI then
             DPU_ALUCommand <= ALU_PASS_B;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_CONT;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
-            DataToDPU <= IMMEDIATE & ZERO16;
+            DPU_Mux_Cont_1 <= CONT;
+            DPU_Mux_Cont_2 <= CONT;
+            DataToDPU_2 <= IMMEDIATE & ZERO16;
 
         elsif Instr_E = CLO then
             DPU_ALUCommand <= ALU_CLO;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= RFILE;
 
         elsif Instr_E = CLZ  then
             DPU_ALUCommand <= ALU_CLZ;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= RFILE;
         -----------------------SHIFT AND ROTATE-----------------
         elsif Instr_E = SLL_inst then
             DPU_ALUCommand <= ALU_SLL;
-            DataToDPU <= ZERO16 & "00000000000" & sa_ex;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
+            DataToDPU_2 <= ZERO16 & "00000000000" & sa_ex;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= CONT;
         elsif Instr_E = SRL_inst then
             DPU_ALUCommand <= ALU_SLR;
-            DataToDPU <= ZERO16 & "00000000000" & sa_ex;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
+            DataToDPU_2 <= ZERO16 & "00000000000" & sa_ex;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= CONT;
         elsif Instr_E = SLLV then
             DPU_ALUCommand <= ALU_SLL;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= RFILE;
         elsif Instr_E = SRLV then
             DPU_ALUCommand <= ALU_SLR;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= RFILE;
         -----------------------LOGICAL--------------------------
         elsif Instr_E = AND_inst then
             DPU_ALUCommand <= ALU_AND;
 
         elsif Instr_E = ANDI then
             DPU_ALUCommand <= ALU_AND;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
-            DataToDPU <= ZERO16 & IMMEDIATE;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= CONT;
+            DataToDPU_2 <= ZERO16 & IMMEDIATE;
 
         elsif Instr_E = OR_inst then
               DPU_ALUCommand <= ALU_OR;
 
         elsif Instr_E = ORI then
             DPU_ALUCommand <= ALU_OR;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
-            DataToDPU <= ZERO16 & IMMEDIATE;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= CONT;
+            DataToDPU_2 <= ZERO16 & IMMEDIATE;
 
         elsif Instr_E = NOR_inst then
             DPU_ALUCommand <= ALU_NOR;
@@ -333,85 +299,113 @@ DEC_SIGNALS_GEN:
 
         elsif Instr_E = XORI then
             DPU_ALUCommand <= ALU_XOR;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_CONT;
-            DataToDPU <= ZERO16 & IMMEDIATE;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= CONT;
+            DataToDPU_2 <= ZERO16 & IMMEDIATE;
         -----------------------JUMP and BRANCH--------------------------
         elsif Instr_E = J  then
             flush_signal_E <= '1';
 
         elsif Instr_E = JR then
             DPU_ALUCommand <= ALU_PASS_A;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= RFILE;
             flush_signal_E <= '1';
 
         elsif Instr_E = BEQ  then
             DPU_ALUCommand <= ALU_COMP;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= RFILE;
             if LOW = ONE32 then
               flush_signal_E <= '1';
             end if;
         -----------------------MULTIPLICATION AND DIVISION--------------------------
       elsif Instr_E = MULTU  then
             DPU_ALUCommand <= ALU_MULTU;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= RFILE;
       elsif Instr_E = MUL  or Instr_E = MULT then
             DPU_ALUCommand <= ALU_MULT;
-            DPU_Mux_Cont_1 <= DPU_DATA_IN_RFILE;
-            DPU_Mux_Cont_2 <= DPU_DATA_IN_RFILE;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= RFILE;
             ----------------------ACCUMULATOR ACCESS -----------------------------------
             -- we dont execute anything!
+        elsif Instr_E = MTLO then
+          DPU_ALUCommand <= ALU_MTLO;
+          DPU_Mux_Cont_1 <= RFILE;
+          DPU_Mux_Cont_2 <= RFILE;
+        elsif Instr_E = MTHI then
+          DPU_ALUCommand <= ALU_MTHI;
+          DataToDPU_2 <= ZERO16 & "0000000000010000";
+          DPU_Mux_Cont_1 <= RFILE;
+          DPU_Mux_Cont_2 <= CONT;
+      ----------------------LOAD AND STORE -----------------------------------
+        elsif Instr_E = LBU then
+          DPU_ALUCommand <= ALU_ADD;
+          DPU_Mux_Cont_1 <= RFILE;
+          DPU_Mux_Cont_2 <= CONT;
+          if OFFSET(15) = '0' then
+            DataToDPU_2 <= ZERO16 & OFFSET;
+          else
+            DataToDPU_2 <= ONE16 & OFFSET;
+          end if;
+          MemRdAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
         end if;
     end process;
 
 
   WB_SIGNALS_GEN:
-    process(Instr_E, rt_wb, rd_wb)
+    process(Instr_E,Instr_WB, rt_wb, rd_wb)
       begin
 
-      RFILE_in_sel<= (others => '0');
-      RFILE_data_sel<= (others => '0');
+      RFILE_in_address   <= (others => '0');
+      RFILE_data_sel <= ZERO;
+      Data_to_RFILE  <= (others => '0');
+
       -----------------------Arithmetic--------------------------
       if Instr_E = ADDU or Instr_E = SUBU or Instr_E = CLO or Instr_E = CLZ then
-          RFILE_data_sel <= RFILE_IN_DPU_LOW;
-          RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+          RFILE_data_sel <= DPU_LOW;
+          RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       elsif Instr_E = ADDI or Instr_E = ADDIU or Instr_E = LUI then
-          RFILE_data_sel <= RFILE_IN_DPU_LOW;
-          RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rt_ex;
+          RFILE_data_sel <= DPU_LOW;
+          RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_ex;
       -----------------------logical--------------------------
       elsif Instr_E = AND_inst or Instr_E = OR_inst or Instr_E = NOR_inst or Instr_E = XOR_inst then
-          RFILE_data_sel <= RFILE_IN_DPU_LOW;
-          RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+          RFILE_data_sel <= DPU_LOW;
+          RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       elsif Instr_E = ANDI or Instr_E = ORI or Instr_E = XORI then
-          RFILE_data_sel <= RFILE_IN_DPU_LOW;
-          RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rt_ex;
+          RFILE_data_sel <= DPU_LOW;
+          RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_ex;
       -----------------------SHIFT AND ROTATE-----------------
       elsif Instr_E = SLL_inst or Instr_E = SRL_inst or Instr_E = SLLV or Instr_E = SRLV then
-          RFILE_data_sel <= RFILE_IN_DPU_LOW;
-          RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+          RFILE_data_sel <= DPU_LOW;
+          RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       --  MULT and MULTU only WRITES IN ACC
       elsif Instr_E = MUL then
-            RFILE_data_sel <= RFILE_IN_DPU_LOW;
-            RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-            RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+            RFILE_data_sel <= DPU_LOW;
+            RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+            RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       ----------------------ACCUMULATOR ACCESS -----------------------------------
       elsif Instr_E = MFLO then
-          RFILE_data_sel <= RFILE_IN_ACC_LOW;
-          RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+          RFILE_data_sel <= ACC_LOW;
+          RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rs_ex;
       elsif Instr_E = MFHI then
-          RFILE_data_sel <= RFILE_IN_ACC_HI;
-          RFILE_in_sel(RFILE_SEL_WIDTH)<= '1';
-          RFILE_in_sel(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
-      end if;
+          RFILE_data_sel <= ACC_HI;
+          RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rs_ex;
+    end if;
+      ----------------------LOAD AND STORE -----------------------------------
+    if Instr_WB = LBU then
+        RFILE_data_sel <= FROM_MEM;
+        RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+    end if;
     end process;
 
 --PC handling------------------------------------------------------------------------
@@ -458,14 +452,24 @@ begin
                   Instr_F <= SLLV;
               elsif opcode_in = "000110" then
                   Instr_F <= SRLV;
-              elsif opcode_in = "100000" then
-                  Instr_F <= ADDU;
-              elsif opcode_in = "100011" then
-                  Instr_F <= SUBU;
+              elsif opcode_in = "001000" then
+                  Instr_F <= JR;
+              elsif opcode_in = "010000" then
+                  Instr_F <= MFHI;
+              elsif opcode_in = "010001" then
+                  Instr_F <= MTHI;
+              elsif opcode_in = "010010" then
+                  Instr_F <= MFLO;
+              elsif opcode_in = "010011" then
+                  Instr_F <= MTLO;
               elsif opcode_in = "011000" then
                   Instr_F <= MULT;
               elsif opcode_in = "011001" then
                   Instr_F <= MULTU;
+              elsif opcode_in = "100000" then
+                  Instr_F <= ADDU;
+              elsif opcode_in = "100011" then
+                  Instr_F <= SUBU;
               elsif opcode_in = "100100" then
                   Instr_F <= AND_inst;
               elsif opcode_in = "100101" then
@@ -474,21 +478,15 @@ begin
                   Instr_F <= XOR_inst;
               elsif opcode_in = "100111" then
                   Instr_F <= NOR_inst;
-              elsif opcode_in = "001000" then
-                  Instr_F <= JR;
-              elsif opcode_in = "010000" then
-                  Instr_F <= MFHI;
-              elsif opcode_in = "010010" then
-                  Instr_F <= MFLO;
               end if;
+          when "000010" => Instr_F <= J;
+          when "000100" => Instr_F <= BEQ;
           when "001000" => Instr_F <= ADDI;
           when "001001" => Instr_F <= ADDIU;
           when "001100" => Instr_F <= ANDI;
           when "001101" => Instr_F <= ORI;
           when "001110" => Instr_F <= XORI;
           when "001111" => Instr_F <= LUI;
-          when "000010" => Instr_F <= J;
-          when "000100" => Instr_F <= BEQ;
           when "011100" =>
                 if opcode_in = "000010" then
                     Instr_F <= MUL;
@@ -497,6 +495,8 @@ begin
                 elsif opcode_in = "100000" then
                     Instr_F <= CLZ;
                 end if;
+          when "100000" => Instr_F <= LB;
+          when "100100" => Instr_F <= LBU;
           when others =>  Instr_F <= NOP;
         end case;
     else

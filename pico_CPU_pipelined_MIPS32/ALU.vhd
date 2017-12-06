@@ -9,7 +9,7 @@ entity ALU is
   generic (BitWidth: integer);
   port ( A: in std_logic_vector (BitWidth-1 downto 0);
          B: in std_logic_vector (BitWidth-1 downto 0);
-         Command: in std_logic_vector (ALU_COMAND_WIDTH-1 downto 0);
+         Command: in ALU_COMMAND;
          Cflag_in: in std_logic;
          Cflag_out: out std_logic;
          Result: out std_logic_vector (2*BitWidth-1 downto 0)
@@ -36,13 +36,16 @@ Cflag_out <= Cout;
 PROC_ALU: process(Command,A,B,AddSub_result,Cflag_in)
    variable temp : integer := 0;
    begin
-    Add_Sub <= '0';  --adding by default
+    Add_Sub <= '0';  
+    Result <= (others => '0');
      case Command is
             WHEN ALU_ADD    =>   Result(BitWidth-1 downto 0) <= AddSub_result; --add
             WHEN ALU_SUB    =>   Add_Sub <= '1';
                                  Result(BitWidth-1 downto 0) <= AddSub_result; -- Subtract
             WHEN ALU_PASS_A =>   Result(BitWidth-1 downto 0) <= A;  --Bypass A
             WHEN ALU_PASS_B =>   Result(BitWidth-1 downto 0) <= B;  --Bypass B
+            WHEN ALU_MTLO   =>   Result(BitWidth-1 downto 0) <= A;  --Bypass A
+            WHEN ALU_MTHI   =>   Result(BitWidth-1 downto 0) <= std_logic_vector(shift_left(unsigned(A), 16));  --Bypass B
             WHEN ALU_AND    =>   Result(BitWidth-1 downto 0) <= A and B;  --And
             WHEN ALU_OR     =>   Result(BitWidth-1 downto 0) <= A or B;  --or
             WHEN ALU_NOR    =>   Result(BitWidth-1 downto 0) <= not(A or B);  --or

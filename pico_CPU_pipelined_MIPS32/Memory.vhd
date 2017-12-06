@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.all;
 use IEEE.Numeric_Std.all;
 use work.pico_cpu.all;
 
-entity Mem is
+entity Memory is
   generic (BitWidth: integer);
   port ( RdAddress: in std_logic_vector (BitWidth-1 downto 0);
          Data_in: in std_logic_vector (BitWidth-1 downto 0);
@@ -13,9 +13,9 @@ entity Mem is
          rst: in std_logic;
          Data_Out: out std_logic_vector (BitWidth-1 downto 0)
     );
-end Mem;
+end Memory;
 
-architecture beh of Mem is
+architecture beh of Memory is
 
   type Mem_type is array (0 to DataMem_depth-1) of std_logic_vector(BitWidth-1 downto 0) ;
    signal Mem : Mem_type := ((others=> (others=>'0')));
@@ -28,6 +28,7 @@ begin
     if rst = '1' then
       Mem<= ((others=> (others=>'0')));
     elsif rising_edge(clk) then
+      Mem(1)<= "00000000000000000000000000000001";
       if RW = '1' then
         if to_integer(unsigned(WrtAddress(BitWidth-1 downto 0))) <= DataMem_depth-1 then
           Mem(to_integer(unsigned(WrtAddress(BitWidth-1 downto 0)))) <= Data_in;

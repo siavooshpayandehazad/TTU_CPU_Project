@@ -18,9 +18,9 @@ entity DPU is
          Data_in_control_1: in std_logic_vector (BitWidth-1 downto 0);
          Data_in_control_2: in std_logic_vector (BitWidth-1 downto 0);
 
-         ALUCommand: in std_logic_vector (ALU_COMAND_WIDTH-1 downto 0);
-         Mux_Cont_1: in std_logic_vector (1 downto 0);
-         Mux_Cont_2: in std_logic_vector (1 downto 0);
+         ALUCommand: in ALU_COMMAND;
+         Mux_Cont_1: in DPU_IN_MUX;
+         Mux_Cont_2: in DPU_IN_MUX;
          SetFlag   : in std_logic_vector (2 downto 0);
 
          DPU_Flags   : out std_logic_vector (3 downto 0);
@@ -67,7 +67,7 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, C_flag_out, Cout, ACC_in);
       EQ_Flag_out <=  '0';
       C_flag_out <= '0';
     elsif clk'event and clk= '1' then
-      if ALUCommand = ALU_MULT or ALUCommand = ALU_MULTU then
+      if ALUCommand = ALU_MULT or ALUCommand = ALU_MULTU or ALUCommand = ALU_MTHI or ALUCommand = ALU_MTLO then
         ACC_out <= ACC_in;
       end if;
       OV_Flag_out <= OV_Flag_in;
@@ -83,10 +83,10 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, C_flag_out, Cout, ACC_in);
   process (Data_in_mem, Data_in_control_1, Data_in_RegFile_1, Mux_Cont_1)
     begin
       case Mux_Cont_1 is
-        when "00" => Mux_Out_1 <= Data_in_mem;
-        when "01" => Mux_Out_1 <= Data_in_control_1;
-        when "10" => Mux_Out_1 <= Data_in_RegFile_1;
-        when "11" => Mux_Out_1 <= std_logic_vector(to_unsigned(1, BitWidth));
+        when MEM   => Mux_Out_1 <= Data_in_mem;
+        when CONT  => Mux_Out_1 <= Data_in_control_1;
+        when RFILE => Mux_Out_1 <= Data_in_RegFile_1;
+        when ONE   => Mux_Out_1 <= std_logic_vector(to_unsigned(1, BitWidth));
       when others => Mux_Out_1 <= std_logic_vector(to_unsigned(0, BitWidth));
       end case;
   end process;
@@ -95,10 +95,10 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, C_flag_out, Cout, ACC_in);
   process (Data_in_mem, Data_in_control_2, Data_in_RegFile_2, Mux_Cont_2)
     begin
       case Mux_Cont_2 is
-        when "00" => Mux_Out_2 <= Data_in_mem;
-        when "01" => Mux_Out_2 <= Data_in_control_2;
-        when "10" => Mux_Out_2 <= Data_in_RegFile_2;
-        when "11" => Mux_Out_2 <= std_logic_vector(to_unsigned(1, BitWidth));
+        when MEM   => Mux_Out_2 <= Data_in_mem;
+        when CONT  => Mux_Out_2 <= Data_in_control_2;
+        when RFILE => Mux_Out_2 <= Data_in_RegFile_2;
+        when ONE   => Mux_Out_2 <= std_logic_vector(to_unsigned(1, BitWidth));
       when others => Mux_Out_2 <= std_logic_vector(to_unsigned(0, BitWidth));
       end case;
   end process;
@@ -116,49 +116,49 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, C_flag_out, Cout, ACC_in);
         if SetFlag = "011" then
               EQ_Flag_in <= '0';
         else
-          if ALUCommand /= "0010" then
+          --if ALUCommand /= "0010" then
               if (ACC_out(BitWidth-1 downto 0) = Data_in_control_1) then
                   EQ_Flag_in <= '1';
                else
                   EQ_Flag_in <= '0';
               end if;
-          else
-              EQ_Flag_in <= EQ_Flag_out;
-          end if;
+          --else
+          --    EQ_Flag_in <= EQ_Flag_out;
+          --end if;
         end if;
       ----------------------------------
       if SetFlag = "001" then
         Z_Flag_in <= '0';
       else
-        if  ALUCommand /= "0010" then
+        --if  ALUCommand /= "0010" then
           Z_Flag_in <=  not (or_reduce(ACC_in));
-        else
-          Z_Flag_in <= Z_Flag_out;
-        end if;
+       --  else
+        --  Z_Flag_in <= Z_Flag_out;
+        --end if;
       end if;
       ----------------------------------
       if SetFlag = "100" then
         C_flag_in <= '0';
       else
-        if  ALUCommand /= "0010" and ALUCommand /= "1110" and ALUCommand /= "1111" then
-          C_flag_in <= Cout;
-        elsif  ALUCommand = "1110" then --RRC
-           C_flag_in <= ACC_out(0);
-        elsif  ALUCommand = "1111" then --RLC
+        --if  ALUCommand /= "0010" and ALUCommand /= "1110" and ALUCommand /= "1111" then
+        --  C_flag_in <= Cout;
+        --elsif  ALUCommand = "1110" then --RRC
+        --   C_flag_in <= ACC_out(0);
+        --elsif  ALUCommand = "1111" then --RLC
           C_flag_in <= ACC_out(BitWidth-1);
-        else
-          C_flag_in <= C_flag_out;
-        END IF;
+        --else
+        --  C_flag_in <= C_flag_out;
+        --END IF;
       end if;
       ----------------------------------
       if SetFlag = "010" then
           OV_Flag_in <= '0';
       else
-          if (ALUCommand = "0000" or ALUCommand = "0001") then
+          --if (ALUCommand = "0000" or ALUCommand = "0001") then
               OV_Flag_in <= OV_Flag_Value;
-          else
-              OV_Flag_in <= OV_Flag_out;
-          end if;
+          --else
+          --    OV_Flag_in <= OV_Flag_out;
+          --end if;
        end if;
       ----------------------------------
 
