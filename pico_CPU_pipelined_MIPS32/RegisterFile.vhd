@@ -40,6 +40,7 @@ begin
       if RFILE_in_address(RFILE_SEL_WIDTH) = '1' then
   		    RFILE(to_integer(unsigned(address_in))) <= Data_in;
       end if;
+       RFILE(0) <= (others=>'0');
   	end if;
   end process;
 

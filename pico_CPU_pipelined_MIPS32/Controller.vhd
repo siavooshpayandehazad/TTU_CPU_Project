@@ -355,7 +355,7 @@ DEC_SIGNALS_GEN:
 
 
   WB_SIGNALS_GEN:
-    process(Instr_E,Instr_WB, rt_wb, rd_wb)
+    process(Instr_E,Instr_WB, rd_ex, rt_ex, rs_ex, rt_wb)
       begin
 
       RFILE_in_address   <= (others => '0');
