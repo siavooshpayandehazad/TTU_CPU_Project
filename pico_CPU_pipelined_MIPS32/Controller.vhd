@@ -35,7 +35,8 @@ entity ControlUnit is
     DPU_SetFlag     : out std_logic_vector (2 downto 0);
     ----------------------------------------
     RFILE_data_sel  : out RFILE_IN_MUX;
-	  RFILE_in_address: out std_logic_vector (RFILE_SEL_WIDTH downto 0);
+	  RFILE_in_address: out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
+    RFILE_WB_enable : out std_logic_vector (3 downto 0);
 	  RFILE_out_sel_1 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 	  RFILE_out_sel_2 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
     Data_to_RFILE   :  out std_logic_vector (BitWidth-1 downto 0);
@@ -193,7 +194,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
         RFILE_out_sel_1  <=  rs_d;
         RFILE_out_sel_2  <=  rs_d;
     ----------------------LOAD AND STORE -----------------------------------
-  elsif Instr_D = LBU or Instr_D = LHU or Instr_D = LW then
+  elsif Instr_D = LB or Instr_D = LBU or Instr_D = LH or Instr_D = LHU or Instr_D = LW then
         RFILE_out_sel_1  <=  BASE;
         RFILE_out_sel_2  <=  BASE;
     elsif Instr_D = SB or Instr_D = SH  or Instr_D = SW then
@@ -347,7 +348,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
           DPU_Mux_Cont_1 <= RFILE;
           DPU_Mux_Cont_2 <= CONT;
       ----------------------LOAD AND STORE -----------------------------------
-    elsif Instr_E = LBU or Instr_E = LHU or Instr_E = LW then
+      elsif Instr_E = LBU or Instr_E = LHU or Instr_E = LW  then
           DPU_ALUCommand <= ALU_ADDU;
           DPU_Mux_Cont_1 <= RFILE;
           DPU_Mux_Cont_2 <= CONT;
@@ -357,6 +358,17 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             DataToDPU_2 <= ONE16 & OFFSET;
           end if;
           MemRdAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
+        elsif Instr_E = LB or Instr_E = LH then
+          DPU_ALUCommand <= ALU_ADD;
+          DPU_Mux_Cont_1 <= RFILE;
+          DPU_Mux_Cont_2 <= CONT;
+          if OFFSET(15) = '0' then
+            DataToDPU_2 <= ZERO16 & OFFSET;
+          else
+            DataToDPU_2 <= ONE16 & OFFSET;
+          end if;
+          MemRdAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
+
         elsif Instr_E = SB or Instr_E = SH or Instr_E = SW then
           DPU_ALUCommand <= ALU_ADDU;
           DPU_Mux_Cont_1 <= RFILE;
@@ -387,58 +399,63 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
       RFILE_in_address   <= (others => '0');
       RFILE_data_sel <= ZERO;
       Data_to_RFILE  <= (others => '0');
-
+      RFILE_WB_enable <= "0000";
       -----------------------Arithmetic--------------------------
       if Instr_E = ADD or Instr_E = ADDU or Instr_E = SUB or Instr_E = SUBU or Instr_E = CLO or Instr_E = CLZ then
           RFILE_data_sel <= DPU_LOW;
-          RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+          RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       elsif Instr_E = ADDI or Instr_E = ADDIU or Instr_E = LUI then
           RFILE_data_sel <= DPU_LOW;
-          RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+          RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_ex;
       -----------------------logical--------------------------
       elsif Instr_E = AND_inst or Instr_E = OR_inst or Instr_E = NOR_inst or Instr_E = XOR_inst then
           RFILE_data_sel <= DPU_LOW;
-          RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+          RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+
       elsif Instr_E = ANDI or Instr_E = ORI or Instr_E = XORI then
           RFILE_data_sel <= DPU_LOW;
-          RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+          RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_ex;
       -----------------------SHIFT AND ROTATE-----------------
       elsif Instr_E = SLL_inst or Instr_E = SRL_inst or Instr_E = SLLV or Instr_E = SRLV then
           RFILE_data_sel <= DPU_LOW;
-          RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+          RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       --  MULT and MULTU only WRITES IN ACC
       elsif Instr_E = MUL then
             RFILE_data_sel <= DPU_LOW;
-            RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+            RFILE_WB_enable <= "1111";
             RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       ----------------------ACCUMULATOR ACCESS -----------------------------------
       elsif Instr_E = MFLO then
           RFILE_data_sel <= ACC_LOW;
-          RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+          RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rs_ex;
       elsif Instr_E = MFHI then
           RFILE_data_sel <= ACC_HI;
-          RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+          RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rs_ex;
     end if;
       ----------------------LOAD AND STORE -----------------------------------
-    if Instr_WB = LBU then
-        RFILE_data_sel <= FROM_MEM8;
-        RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
+
+    if Instr_WB = LBU or Instr_WB = LB or Instr_WB = LH or Instr_WB = LW then
+        RFILE_WB_enable <= "1111";
         RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
-    elsif Instr_WB = LHU then
-        RFILE_data_sel <= FROM_MEM16;
-        RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
-        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
-    elsif Instr_WB = LW then
-        RFILE_data_sel <= FROM_MEM32;
-        RFILE_in_address(RFILE_SEL_WIDTH)<= '1';
-        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+
+        if Instr_WB = LBU then
+            RFILE_data_sel <= FROM_MEM8;
+        elsif Instr_WB = LB then
+            RFILE_data_sel <= FROM_MEM8_SGINED;
+        elsif Instr_WB = LH then
+            RFILE_data_sel <= FROM_MEM16_SGINED;
+        elsif Instr_WB = LHU then
+            RFILE_data_sel <= FROM_MEM16;
+        elsif Instr_WB = LW then
+            RFILE_data_sel <= FROM_MEM32;
+        end if;
     end if;
     end process;
 
@@ -534,6 +551,7 @@ begin
                     Instr_F <= CLZ;
                 end if;
           when "100000" => Instr_F <= LB;
+          when "100001" => Instr_F <= LH;
           when "100011" => Instr_F <= LW;
           when "100100" => Instr_F <= LBU;
           when "100101" => Instr_F <= LHU;

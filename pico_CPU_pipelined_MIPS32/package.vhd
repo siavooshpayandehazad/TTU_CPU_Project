@@ -28,7 +28,7 @@ package pico_cpu is
                         -- Accumulator Access
                         MFHI, MFLO, MTHI, MTLO,
                         -- load and store
-                        LB, LBU, LHU, LW, SB, SH, SW
+                        LB, LBU, LH, LHU, LW, SB, SH, SW
                         );
 
     -------------------------------------------------ALU COMMANDS
@@ -51,13 +51,16 @@ package pico_cpu is
     constant DPU_CLEAR_FLAG_C   : std_logic_vector (DPU_CLEAR_FLAG_WIDTH-1 downto 0):= "100";
     constant DPU_CLEAR_NO_FLAG  : std_logic_vector (DPU_CLEAR_FLAG_WIDTH-1 downto 0):= "000";
     ------------------------------------------------
-    TYPE RFILE_IN_MUX IS (CU, ACC_HI, ACC_LOW, DPU_HI, DPU_LOW, FROM_MEM8,FROM_MEM16,FROM_MEM32, ZERO);
+    TYPE RFILE_IN_MUX IS (CU, ACC_HI, ACC_LOW, DPU_HI, DPU_LOW,
+                          FROM_MEM8,FROM_MEM16,FROM_MEM32,
+                          FROM_MEM8_SGINED, FROM_MEM16_SGINED, ZERO);
     TYPE MEM_IN_MUX IS (RFILE_DATA_1, RFILE_DATA_2, DPU_DATA);
 
     --constant DPU_COMMAND_WIDTH : integer := 12;
 
     ------------------------------------------------
     constant ZERO8  :std_logic_vector(7 downto 0)  := "00000000";
+    constant ONE8   :std_logic_vector(7 downto 0)  := "11111111";
     constant ZERO14 :std_logic_vector(13 downto 0) := "00000000000000";
     constant ONE14  :std_logic_vector(13 downto 0) := "11111111111111";
     constant ZERO16 :std_logic_vector(15 downto 0) := "0000000000000000";
@@ -96,7 +99,8 @@ package pico_cpu is
               Data_in_ACC_HI     : in std_logic_vector (BitWidth-1 downto 0);
               Data_in_ACC_LOW    : in std_logic_vector (BitWidth-1 downto 0);
               Data_in_sel        : in RFILE_IN_MUX;
-              RFILE_in_address   : in std_logic_vector (RFILE_SEL_WIDTH downto 0);
+              RFILE_in_address   : in std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
+              WB_enable          : in std_logic_vector (3 downto 0);
               Register_out_sel_1 : in std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
               Register_out_sel_2 : in std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
               Data_out_1         : out std_logic_vector (BitWidth-1 downto 0);
@@ -144,7 +148,8 @@ package pico_cpu is
         DPU_SetFlag     : out std_logic_vector (2 downto 0);
         ----------------------------------------
         RFILE_data_sel  : out RFILE_IN_MUX;
-    	  RFILE_in_address: out std_logic_vector (RFILE_SEL_WIDTH downto 0);
+    	  RFILE_in_address: out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
+        RFILE_WB_enable : out std_logic_vector (3 downto 0);
     	  RFILE_out_sel_1 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
     	  RFILE_out_sel_2 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
         Data_to_RFILE   :  out std_logic_vector (BitWidth-1 downto 0);

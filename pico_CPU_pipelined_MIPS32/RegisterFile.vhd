@@ -16,7 +16,8 @@ generic (BitWidth: integer);
 			Data_in_ACC_LOW    : in std_logic_vector (BitWidth-1 downto 0);
 			Data_in_ACC_HI     : in std_logic_vector (BitWidth-1 downto 0);
 			Data_in_sel        : in RFILE_IN_MUX;
-			RFILE_in_address   : in std_logic_vector (RFILE_SEL_WIDTH downto 0);
+			RFILE_in_address   : in std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
+			WB_enable          : in std_logic_vector (3 downto 0);
 			Register_out_sel_1 : in std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 			Register_out_sel_2 : in std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 			Data_out_1         : out std_logic_vector (BitWidth-1 downto 0);
@@ -37,8 +38,14 @@ begin
   	if rst = '1' then
   		RFILE <= ((others=> (others=>'0')));
   	elsif clk'event and clk='1' then
-      if RFILE_in_address(RFILE_SEL_WIDTH) = '1' then
-  		    RFILE(to_integer(unsigned(address_in))) <= Data_in;
+      if WB_enable(0) = '1' then
+  		    RFILE(to_integer(unsigned(RFILE_in_address)))(7 downto 0) <= Data_in(7 downto 0);
+      elsif WB_enable(1) = '1' then
+          RFILE(to_integer(unsigned(RFILE_in_address)))(15 downto 8) <= Data_in(15 downto 8);
+      elsif WB_enable(2) = '1' then
+          RFILE(to_integer(unsigned(RFILE_in_address)))(23 downto 16) <= Data_in(23 downto 16);
+      elsif WB_enable(3) = '1' then
+          RFILE(to_integer(unsigned(RFILE_in_address)))(31 downto 23) <= Data_in(31 downto 23);
       end if;
        RFILE(0) <= (others=>'0');
   	end if;
@@ -47,14 +54,26 @@ begin
 
   process(Data_in_mem,Data_in_CU,Data_in_ACC_HI, Data_in_ACC_LOW, Data_in_DPU_LOW, Data_in_DPU_HI,Data_in_sel)begin
    case Data_in_sel is
-  	when CU         => Data_in <= Data_in_CU;
-    when DPU_LOW    => Data_in <= Data_in_DPU_LOW;
-  	when DPU_HI     => Data_in <= Data_in_DPU_HI;
-    when ACC_LOW    => Data_in <= Data_in_ACC_LOW;
-  	when ACC_HI     => Data_in <= Data_in_ACC_HI;
-  	when FROM_MEM8  => Data_in  <= ZERO16 & ZERO8 & Data_in_mem(7 downto 0);
-  	when FROM_MEM16 => Data_in  <= ZERO16 & Data_in_mem(15 downto 0);
-  	when FROM_MEM32 => Data_in <= Data_in_mem;
+  	when CU                => Data_in <= Data_in_CU;
+    when DPU_LOW           => Data_in <= Data_in_DPU_LOW;
+  	when DPU_HI            => Data_in <= Data_in_DPU_HI;
+    when ACC_LOW           => Data_in <= Data_in_ACC_LOW;
+  	when ACC_HI            => Data_in <= Data_in_ACC_HI;
+  	when FROM_MEM8         => Data_in  <= ZERO16 & ZERO8 & Data_in_mem(7 downto 0);
+  	when FROM_MEM16        => Data_in  <= ZERO16 & Data_in_mem(15 downto 0);
+    when FROM_MEM8_SGINED  =>
+                               if Data_in_mem(7) = '0' then
+                                    Data_in  <= ZERO16 & ZERO8 & Data_in_mem(7 downto 0);
+                               else
+                                    Data_in  <= ONE16 & ONE8 & Data_in_mem(7 downto 0);
+                               end if;
+    when FROM_MEM16_SGINED  =>
+                               if Data_in_mem(15) = '0' then
+                                    Data_in  <= ZERO16 & Data_in_mem(15 downto 0);
+                               else
+                                    Data_in  <= ONE16 & Data_in_mem(15 downto 0);
+                               end if;
+  	when FROM_MEM32         => Data_in <= Data_in_mem;
   	when others => Data_in <= (others=>'0');
    end case;
   end process;

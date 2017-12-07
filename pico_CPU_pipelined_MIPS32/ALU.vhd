@@ -35,6 +35,7 @@ PROC_ALU: process(Command,A,B)
    variable result_tmp : std_logic_vector(BitWidth downto 0);
    begin
     Result <= (others => '0');
+    OV_out <= '0';
      case Command is
             WHEN ALU_ADDU    =>  result_tmp := std_logic_vector(unsigned('0'& A) + unsigned('0'& B)); --add
                                  Result(BitWidth-1 downto 0) <= result_tmp(BitWidth-1 downto 0);

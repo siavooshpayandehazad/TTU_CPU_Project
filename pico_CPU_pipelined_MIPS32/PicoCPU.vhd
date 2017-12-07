@@ -42,7 +42,8 @@ signal DPU_SetFlag   , DPU_SetFlag_in  : std_logic_vector (2 downto 0);
  ----------------------------------------
 signal RFILE_data_sel  : RFILE_IN_MUX;
 signal Data_to_RFILE   : std_logic_vector (CPU_Bitwidth-1 downto 0);
-signal RFILE_in_address: std_logic_vector (RFILE_SEL_WIDTH downto 0);
+signal RFILE_in_address: std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
+signal WB_enable       :  std_logic_vector (3 downto 0);
 signal RFILE_out_sel_1, RFILE_out_sel_1_in : std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 signal RFILE_out_sel_2, RFILE_out_sel_2_in : std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 
@@ -107,7 +108,8 @@ begin
         DPU_SetFlag     => DPU_SetFlag    ,
         ----------------=> ---------------,--------
         RFILE_data_sel  => RFILE_data_sel ,
-    	  RFILE_in_address    => RFILE_in_address   ,
+    	  RFILE_in_address=> RFILE_in_address   ,
+        RFILE_WB_enable => WB_enable,
     	  RFILE_out_sel_1 => RFILE_out_sel_1_in,
     	  RFILE_out_sel_2 => RFILE_out_sel_2_in,
         Data_to_RFILE   => Data_to_RFILE ,
@@ -136,7 +138,8 @@ begin
     Data_in_ACC_HI     => DPU_RESULT_FF(2*CPU_Bitwidth-1 downto CPU_Bitwidth),
     Data_in_ACC_LOW    => DPU_RESULT_FF(CPU_Bitwidth-1 downto 0),
     Data_in_sel        => RFILE_data_sel,
-    RFILE_in_address    => RFILE_in_address,
+    RFILE_in_address   => RFILE_in_address,
+    WB_enable          => WB_enable,
     Register_out_sel_1 => RFILE_out_sel_1,
     Register_out_sel_2 => RFILE_out_sel_2,
     Data_out_1         => R1,
