@@ -28,7 +28,9 @@ package pico_cpu is
                         -- Accumulator Access
                         MFHI, MFLO, MTHI, MTLO,
                         -- load and store
-                        LB, LBU, LH, LHU, LW, LWL, LWR, SB, SH, SW, SWL, SWR
+                        LB, LBU, LH, LHU, LW, LWL, LWR, SB, SH, SW, SWL, SWR,
+                        -- conditional move
+                        MOVZ, MOVN
                         );
 
     -------------------------------------------------ALU COMMANDS
@@ -39,6 +41,7 @@ package pico_cpu is
                          ALU_SLL   , ALU_NEG_A , ALU_SAR   , ALU_SAL   ,
                          ALU_FLIP_A, ALU_CLR_A ,
                          ALU_NOR   , ALU_COMP  , ALU_CLO   , ALU_CLZ   ,
+                         ALU_COMP_Z,
                          ALU_MULTU , ALU_MULT  , ALU_MTLO  , ALU_MTHI);
 
     -------------------------------------------------DPU COMMANDS
@@ -51,9 +54,10 @@ package pico_cpu is
     constant DPU_CLEAR_FLAG_C   : std_logic_vector (DPU_CLEAR_FLAG_WIDTH-1 downto 0):= "100";
     constant DPU_CLEAR_NO_FLAG  : std_logic_vector (DPU_CLEAR_FLAG_WIDTH-1 downto 0):= "000";
     ------------------------------------------------
-    TYPE RFILE_IN_MUX IS (CU, ACC_HI, ACC_LOW, DPU_HI, DPU_LOW,
+    TYPE RFILE_IN_MUX IS (CU, ACC_HI, ACC_LOW, DPU_HI, DPU_LOW, R2,
                           FROM_MEM8,FROM_MEM16,FROM_MEM32,
-                          FROM_MEM8_SGINED, FROM_MEM16_SGINED, ZERO);
+                          FROM_MEM8_SGINED, FROM_MEM16_SGINED,
+                          ZERO);
     TYPE MEM_IN_MUX IS (RFILE_DATA_1, RFILE_DATA_2, DPU_DATA);
 
     --constant DPU_COMMAND_WIDTH : integer := 12;
@@ -98,6 +102,7 @@ package pico_cpu is
         			Data_in_DPU_HI     : in std_logic_vector (BitWidth-1 downto 0);
               Data_in_ACC_HI     : in std_logic_vector (BitWidth-1 downto 0);
               Data_in_ACC_LOW    : in std_logic_vector (BitWidth-1 downto 0);
+              Data_in_R2         : in std_logic_vector (BitWidth-1 downto 0);
               Data_in_sel        : in RFILE_IN_MUX;
               RFILE_in_address   : in std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
               WB_enable          : in std_logic_vector (3 downto 0);

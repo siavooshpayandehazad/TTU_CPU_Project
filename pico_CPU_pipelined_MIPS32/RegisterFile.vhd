@@ -15,6 +15,7 @@ generic (BitWidth: integer);
 			Data_in_DPU_HI     : in std_logic_vector (BitWidth-1 downto 0);
 			Data_in_ACC_LOW    : in std_logic_vector (BitWidth-1 downto 0);
 			Data_in_ACC_HI     : in std_logic_vector (BitWidth-1 downto 0);
+			Data_in_R2         : in std_logic_vector (BitWidth-1 downto 0);
 			Data_in_sel        : in RFILE_IN_MUX;
 			RFILE_in_address   : in std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 			WB_enable          : in std_logic_vector (3 downto 0);
@@ -59,6 +60,7 @@ begin
   	when DPU_HI            => Data_in <= Data_in_DPU_HI;
     when ACC_LOW           => Data_in <= Data_in_ACC_LOW;
   	when ACC_HI            => Data_in <= Data_in_ACC_HI;
+  	when R2                => Data_in <= Data_in_R2;
   	when FROM_MEM8         => Data_in  <= ZERO16 & ZERO8 & Data_in_mem(7 downto 0);
   	when FROM_MEM16        => Data_in  <= ZERO16 & Data_in_mem(15 downto 0);
     when FROM_MEM8_SGINED  =>

@@ -80,6 +80,12 @@ PROC_ALU: process(Command,A,B)
                                  else
                                     Result <= (others => '0');
                                  end if;
+                                 
+            WHEN ALU_COMP_Z =>   if A = ZERO32 then
+                                   Result <= (others => '1');
+                                else
+                                   Result <= (others => '0');
+                                end if;
             -------------------------------------------------------------------------------------------------------------------------------------
             WHEN ALU_CLO    =>  temp := 0;
                                 for i in A'range loop

@@ -202,6 +202,10 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
     elsif Instr_D = SB or Instr_D = SH  or Instr_D = SW or Instr_D = SWL or Instr_D = SWR then
         RFILE_out_sel_1  <=  BASE;
         RFILE_out_sel_2  <=  rt_d;
+      ----------------------conditional move -----------------------------------
+    elsif Instr_D = MOVN or Instr_D = MOVZ then
+        RFILE_out_sel_1  <=  rt_d;
+        RFILE_out_sel_2  <=  rs_d;
     end if;
   end process;
 
@@ -324,6 +328,12 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             if (Instr_E = BEQ and LOW = ONE32) or (Instr_E = BNE and LOW = ZERO32) then
               flush_signal_E <= '1';
             end if;
+
+        elsif Instr_E = MOVN or Instr_E = MOVZ then
+            DPU_ALUCommand <= ALU_COMP_Z;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= RFILE;
+
         -----------------------MULTIPLICATION AND DIVISION--------------------------
         elsif Instr_E = MULTU  then
               DPU_ALUCommand <= ALU_MULTU;
@@ -403,7 +413,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
     end process;
 
 
-  WB_SIGNALS_GEN:process(Instr_E,Instr_WB, rd_ex, rt_ex, rs_ex, rt_wb, PC_out)
+  WB_SIGNALS_GEN:process(Instr_E,Instr_WB, rd_ex, rt_ex, rs_ex, rt_wb, PC_out, LOW)
       begin
 
       RFILE_in_address   <= (others => '0');
@@ -496,6 +506,18 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
       RFILE_data_sel <= FROM_MEM32;
     end if;
 
+    if  Instr_E = MOVZ and LOW = ONE32 then
+      RFILE_WB_enable <= "1111";
+      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+      RFILE_data_sel <= R2;
+    end if;
+
+    if  Instr_E = MOVN and LOW = ZERO32 then
+      RFILE_WB_enable <= "1111";
+      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+      RFILE_data_sel <= R2;
+    end if;
+
     end process;
 
 --PC handling------------------------------------------------------------------------
@@ -558,6 +580,10 @@ begin
                   Instr_F <= SRAV;
               elsif opcode_in = "001000" then
                   Instr_F <= JR;
+              elsif opcode_in = "001010" then
+                  Instr_F <= MOVZ;
+              elsif opcode_in = "001011" then
+                  Instr_F <= MOVN;
               elsif opcode_in = "010000" then
                   Instr_F <= MFHI;
               elsif opcode_in = "010001" then
