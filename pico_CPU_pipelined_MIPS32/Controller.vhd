@@ -168,10 +168,10 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
           RFILE_out_sel_2  <=  rs_d;
 
     -----------------------SHIFT AND ROTATE-----------------
-    elsif Instr_D = SLL_inst or Instr_D = SRL_inst then
+  elsif Instr_D = SLL_inst or Instr_D = SRL_inst or Instr_D = SRA_inst then
           RFILE_out_sel_1  <=  rt_d;
           RFILE_out_sel_2  <=  rt_d;
-    elsif Instr_D = SLLV or Instr_D = SRLV then
+    elsif Instr_D = SLLV or Instr_D = SRLV or Instr_D = SRAV then
           RFILE_out_sel_1  <=  rt_d;
           RFILE_out_sel_2  <=  rs_d;
     -----------------------JUMP and BRANCH--------------------------
@@ -263,24 +263,27 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= RFILE;
         -----------------------SHIFT AND ROTATE-----------------
-        elsif Instr_E = SLL_inst then
-            DPU_ALUCommand <= ALU_SLL;
+        elsif Instr_E = SLL_inst or Instr_E = SRL_inst or Instr_E = SRA_inst then
             DataToDPU_2 <= ZERO16 & "00000000000" & sa_ex;
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= CONT;
-        elsif Instr_E = SRL_inst then
-            DPU_ALUCommand <= ALU_SLR;
-            DataToDPU_2 <= ZERO16 & "00000000000" & sa_ex;
-            DPU_Mux_Cont_1 <= RFILE;
-            DPU_Mux_Cont_2 <= CONT;
-        elsif Instr_E = SLLV then
-            DPU_ALUCommand <= ALU_SLL;
-            DPU_Mux_Cont_1 <= RFILE;
-            DPU_Mux_Cont_2 <= RFILE;
-        elsif Instr_E = SRLV then
-            DPU_ALUCommand <= ALU_SLR;
+            if Instr_E = SLL_inst then
+                DPU_ALUCommand <= ALU_SLL;
+            elsif Instr_E = SRL_inst then
+                DPU_ALUCommand <= ALU_SLR;
+            elsif Instr_E = SRA_inst then
+                DPU_ALUCommand <= ALU_SAR;
+            end if;
+        elsif Instr_E = SLLV or Instr_E = SRLV or Instr_E = SRAV then
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= RFILE;
+            if Instr_E = SLLV then
+                DPU_ALUCommand <= ALU_SLL;
+            elsif Instr_E = SRLV then
+                DPU_ALUCommand <= ALU_SLR;
+            elsif Instr_E = SRAV then
+                DPU_ALUCommand <= ALU_SAR;
+            end if;
         -----------------------LOGICAL--------------------------
         elsif Instr_E = ANDI or Instr_E = ORI or Instr_E = XORI then
 
@@ -427,7 +430,8 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
           RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_ex;
       -----------------------SHIFT AND ROTATE-----------------
-      elsif Instr_E = SLL_inst or Instr_E = SRL_inst or Instr_E = SLLV or Instr_E = SRLV then
+      elsif Instr_E = SLL_inst or Instr_E = SRL_inst or Instr_E = SLLV or
+            Instr_E = SRLV or Instr_E = SRA_inst or Instr_E = SRAV then
           RFILE_data_sel <= DPU_LOW;
           RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
@@ -544,10 +548,14 @@ begin
                   Instr_F <= SLL_inst;
               elsif opcode_in = "000010" then
                   Instr_F <= SRL_inst;
+              elsif opcode_in = "000011" then
+                  Instr_F <= SRA_inst;
               elsif opcode_in = "000100" then
                   Instr_F <= SLLV;
               elsif opcode_in = "000110" then
                   Instr_F <= SRLV;
+              elsif opcode_in = "000111" then
+                  Instr_F <= SRAV;
               elsif opcode_in = "001000" then
                   Instr_F <= JR;
               elsif opcode_in = "010000" then

@@ -20,7 +20,7 @@ package pico_cpu is
                         -- logical
                         AND_inst, ANDI, OR_inst, ORI, NOR_inst, XOR_inst, XORI, NOP,
                         -- shift and rotate
-                        SLL_inst, SRL_inst, SLLV, SRLV,
+                        SLL_inst, SRL_inst, SLLV, SRLV, SRA_inst, SRAV,
                         -- jumps and branches
                         J, JR, JAL, JALR, BEQ, BNE,
                         -- multiplication and division

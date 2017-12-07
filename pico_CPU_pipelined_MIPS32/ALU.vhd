@@ -68,8 +68,8 @@ PROC_ALU: process(Command,A,B)
             WHEN ALU_SLL    =>   Result(BitWidth-1 downto 0) <= std_logic_vector(shift_left (unsigned(A), to_integer(unsigned(B(4 downto 0)))));--shift left
             -------------------------------------------------------------------------------------------------------------------------------------
             WHEN ALU_NEG_A  =>   Result(BitWidth-1 downto 0) <= not A +1;  --negation
-            WHEN ALU_SAR    =>   Result(BitWidth-1 downto 0) <= A(BitWidth-1) & A(BitWidth-1 downto 1) ;  --shift right Arith
-            WHEN ALU_SAL    =>   Result(BitWidth-1 downto 0) <= A(BitWidth-1) & A(BitWidth-3 downto 0)& A(0) ;  --shift left Arith
+            WHEN ALU_SAR    =>   Result(BitWidth-1 downto 0) <= A(BitWidth-1) & std_logic_vector(shift_right(unsigned(A(BitWidth-2 downto 0)), to_integer(unsigned(B(4 downto 0)))-1));  --shift right Arith
+            WHEN ALU_SAL    =>   Result(BitWidth-1 downto 0) <= A(BitWidth-1) & std_logic_vector(shift_left(unsigned(A(BitWidth-2 downto 0)), to_integer(unsigned(B(4 downto 0)))-1));  --shift left Arith
             WHEN ALU_FLIP_A =>   Result(BitWidth-1 downto 0) <= not(A); --Not of A
             WHEN ALU_CLR_A  =>   Result(BitWidth-1 downto 0) <= (others => '0'); --Clear ACC
             WHEN ALU_MULTU  =>   Result <= A*B ; -- RLC
