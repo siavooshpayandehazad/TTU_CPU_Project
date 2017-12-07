@@ -175,22 +175,16 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
           RFILE_out_sel_1  <=  rt_d;
           RFILE_out_sel_2  <=  rs_d;
     -----------------------JUMP and BRANCH--------------------------
-    elsif Instr_D = J  then
+    elsif Instr_D = J or Instr_D = JAL or Instr_D = JR or Instr_D = BEQ or Instr_D = BNE then
           flush_signal_D <= '1';
-    elsif Instr_D = JAL  then
-          flush_signal_D <= '1';
-    elsif Instr_D = JAL  then
-          flush_signal_D <= '1';
-          RFILE_out_sel_1  <=  rs_d;
-          RFILE_out_sel_2  <=  rs_d;
-    elsif Instr_D = JR  then
-          RFILE_out_sel_1  <=  rs_d;
-          RFILE_out_sel_2  <=  rs_d;
-          flush_signal_D <= '1';
-    elsif Instr_D = BEQ  then
-          RFILE_out_sel_1  <=  rt_d;
-          RFILE_out_sel_2  <=  rs_d;
-          flush_signal_D <= '1';
+
+          if Instr_D = JALR or Instr_D = JR then
+                RFILE_out_sel_1  <=  rs_d;
+                RFILE_out_sel_2  <=  rs_d;
+          elsif Instr_D = BEQ  or Instr_D = BNE then
+                RFILE_out_sel_1  <=  rt_d;
+                RFILE_out_sel_2  <=  rs_d;
+          end if;
 
     -----------------------MULTIPLICATION AND DIVISION--------------------------
     elsif Instr_D = MULTU or Instr_D = MULT or Instr_D = MUL then
@@ -228,15 +222,18 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
         -----------------------Arithmetic--------------------------
         if Instr_E = ADD then
             DPU_ALUCommand <= ALU_ADD;
+        elsif Instr_E = ADDU then
+            DPU_ALUCommand <= ALU_ADDU;
+        elsif Instr_E = SUBU then
+            DPU_ALUCommand <= ALU_SUBU;
+        elsif Instr_E = SUB then
+            DPU_ALUCommand <= ALU_SUB;
 
         elsif Instr_E = ADDI then
             DPU_ALUCommand <= ALU_ADD;
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= CONT;
             DataToDPU_2 <= ZERO16 & IMMEDIATE;
-
-        elsif Instr_E = ADDU then
-            DPU_ALUCommand <= ALU_ADDU;
 
         elsif Instr_E = ADDIU then
             DPU_ALUCommand <= ALU_ADDU;
@@ -249,11 +246,6 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
               DataToDPU_2 <= ONE16 & IMMEDIATE;
             end if;
 
-        elsif Instr_E = SUBU then
-            DPU_ALUCommand <= ALU_SUBU;
-
-          elsif Instr_E = SUB then
-              DPU_ALUCommand <= ALU_SUB;
 
         elsif Instr_E = LUI then
             DPU_ALUCommand <= ALU_PASS_B;
@@ -295,7 +287,6 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= CONT;
             DataToDPU_2 <= ZERO16 & IMMEDIATE;
-
             if Instr_E = ORI then
               DPU_ALUCommand <= ALU_OR;
             elsif Instr_E = ANDI then
@@ -306,13 +297,10 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
 
         elsif Instr_E = AND_inst then
             DPU_ALUCommand <= ALU_AND;
-
         elsif Instr_E = OR_inst then
               DPU_ALUCommand <= ALU_OR;
-
         elsif Instr_E = NOR_inst then
             DPU_ALUCommand <= ALU_NOR;
-
         elsif Instr_E = XOR_inst then
             DPU_ALUCommand <= ALU_XOR;
 
@@ -320,93 +308,93 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
         elsif Instr_E = J  then
             flush_signal_E <= '1';
 
-        elsif Instr_E = JR then
+        elsif Instr_E = JR or Instr_E = JALR then
             DPU_ALUCommand <= ALU_PASS_A;
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= RFILE;
             flush_signal_E <= '1';
 
-        elsif Instr_E = BEQ  then
+        elsif Instr_E = BEQ or Instr_E = BNE then
             DPU_ALUCommand <= ALU_COMP;
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= RFILE;
-            if LOW = ONE32 then
+            if (Instr_E = BEQ and LOW = ONE32) or (Instr_E = BNE and LOW = ZERO32) then
               flush_signal_E <= '1';
             end if;
         -----------------------MULTIPLICATION AND DIVISION--------------------------
-      elsif Instr_E = MULTU  then
-            DPU_ALUCommand <= ALU_MULTU;
-            DPU_Mux_Cont_1 <= RFILE;
-            DPU_Mux_Cont_2 <= RFILE;
-      elsif Instr_E = MUL  or Instr_E = MULT then
-            DPU_ALUCommand <= ALU_MULT;
-            DPU_Mux_Cont_1 <= RFILE;
-            DPU_Mux_Cont_2 <= RFILE;
+        elsif Instr_E = MULTU  then
+              DPU_ALUCommand <= ALU_MULTU;
+              DPU_Mux_Cont_1 <= RFILE;
+              DPU_Mux_Cont_2 <= RFILE;
+        elsif Instr_E = MUL  or Instr_E = MULT then
+              DPU_ALUCommand <= ALU_MULT;
+              DPU_Mux_Cont_1 <= RFILE;
+              DPU_Mux_Cont_2 <= RFILE;
             ----------------------ACCUMULATOR ACCESS -----------------------------------
             -- we dont execute anything!
         elsif Instr_E = MTLO then
-          DPU_ALUCommand <= ALU_MTLO;
-          DPU_Mux_Cont_1 <= RFILE;
-          DPU_Mux_Cont_2 <= RFILE;
+              DPU_ALUCommand <= ALU_MTLO;
+              DPU_Mux_Cont_1 <= RFILE;
+              DPU_Mux_Cont_2 <= RFILE;
         elsif Instr_E = MTHI then
-          DPU_ALUCommand <= ALU_MTHI;
-          DataToDPU_2 <= ZERO16 & "0000000000010000";
-          DPU_Mux_Cont_1 <= RFILE;
-          DPU_Mux_Cont_2 <= CONT;
+              DPU_ALUCommand <= ALU_MTHI;
+              DataToDPU_2 <= ZERO16 & "0000000000010000";
+              DPU_Mux_Cont_1 <= RFILE;
+              DPU_Mux_Cont_2 <= CONT;
       ----------------------LOAD AND STORE -----------------------------------
-    elsif Instr_E = LBU or Instr_E = LHU or Instr_E = LW  or
-          Instr_E = LWL or Instr_E = LWR then
-          DPU_ALUCommand <= ALU_ADDU;
-          DPU_Mux_Cont_1 <= RFILE;
-          DPU_Mux_Cont_2 <= CONT;
-          if OFFSET(15) = '0' then
-            DataToDPU_2 <= ZERO16 & OFFSET;
-          else
-            DataToDPU_2 <= ONE16 & OFFSET;
-          end if;
-          MemRdAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
+        elsif Instr_E = LBU or Instr_E = LHU or Instr_E = LW  or
+              Instr_E = LWL or Instr_E = LWR then
+              DPU_ALUCommand <= ALU_ADDU;
+              DPU_Mux_Cont_1 <= RFILE;
+              DPU_Mux_Cont_2 <= CONT;
+              if OFFSET(15) = '0' then
+                DataToDPU_2 <= ZERO16 & OFFSET;
+              else
+                DataToDPU_2 <= ONE16 & OFFSET;
+              end if;
+              MemRdAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
 
         elsif Instr_E = LB or Instr_E = LH then
-          DPU_ALUCommand <= ALU_ADD;
-          DPU_Mux_Cont_1 <= RFILE;
-          DPU_Mux_Cont_2 <= CONT;
-          if OFFSET(15) = '0' then
-            DataToDPU_2 <= ZERO16 & OFFSET;
-          else
-            DataToDPU_2 <= ONE16 & OFFSET;
-          end if;
-          MemRdAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
+              DPU_ALUCommand <= ALU_ADD;
+              DPU_Mux_Cont_1 <= RFILE;
+              DPU_Mux_Cont_2 <= CONT;
+              if OFFSET(15) = '0' then
+                DataToDPU_2 <= ZERO16 & OFFSET;
+              else
+                DataToDPU_2 <= ONE16 & OFFSET;
+              end if;
+              MemRdAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
         ------------------------store----------------
         elsif Instr_E = SB or Instr_E = SH or Instr_E = SW  or Instr_E = SWL or Instr_E = SWR then
-          DPU_ALUCommand <= ALU_ADDU;
-          DPU_Mux_Cont_1 <= RFILE;
-          DPU_Mux_Cont_2 <= CONT;
-          if OFFSET(15) = '0' then
-            DataToDPU_2 <= ZERO16 & OFFSET;
-          else
-            DataToDPU_2 <= ONE16 & OFFSET;
-          end if;
+              DPU_ALUCommand <= ALU_ADDU;
+              DPU_Mux_Cont_1 <= RFILE;
+              DPU_Mux_Cont_2 <= CONT;
+              if OFFSET(15) = '0' then
+                DataToDPU_2 <= ZERO16 & OFFSET;
+              else
+                DataToDPU_2 <= ONE16 & OFFSET;
+              end if;
 
-          -- Address Error Generration!
-          if (Instr_E = SH) and DPU_RESULT(0) /= '0' then
-            address_error <= '1';
-          elsif (Instr_E = SW) and DPU_RESULT(1 downto 0) /= "00" then
-            address_error <= '1';
-          end if;
+              -- Address Error Generration!
+              if (Instr_E = SH) and DPU_RESULT(0) /= '0' then
+                address_error <= '1';
+              elsif (Instr_E = SW) and DPU_RESULT(1 downto 0) /= "00" then
+                address_error <= '1';
+              end if;
 
-          MemWrtAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
-          MEM_IN_SEL <= RFILE_DATA_2;
-          if Instr_E = SB then
-            Mem_RW <= "0001";
-          elsif Instr_E = SH then
-            Mem_RW <= "0011";
-          elsif Instr_E = SW then
-            Mem_RW <= "1111";
-          elsif Instr_E = SWL then
-            Mem_RW <= "1100";
-          elsif Instr_E = SWR then
-            Mem_RW <= "0011";
-          end if;
+              MemWrtAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
+              MEM_IN_SEL <= RFILE_DATA_2;
+              if Instr_E = SB then
+                Mem_RW <= "0001";
+              elsif Instr_E = SH then
+                Mem_RW <= "0011";
+              elsif Instr_E = SW then
+                Mem_RW <= "1111";
+              elsif Instr_E = SWL then
+                Mem_RW <= "1100";
+              elsif Instr_E = SWR then
+                Mem_RW <= "0011";
+              end if;
 
         end if;
     end process;
@@ -530,6 +518,14 @@ process(PC_out,Instr_E, halt_signal, LOW, IMMEDIATE )begin
               PC_in <= PC_out +(ONE14 & IMMEDIATE & "00")-1;
             end if;
           end if;
+        elsif Instr_E = BNE then
+          if LOW = ZERO32 then
+            if IMMEDIATE(15) = '0' then
+              PC_in <= PC_out +(ZERO14 & IMMEDIATE & "00")-1;
+            else
+              PC_in <= PC_out +(ONE14 & IMMEDIATE & "00")-1;
+            end if;
+          end if;
         end if;
     end if;
 end process;
@@ -588,6 +584,7 @@ begin
           when "000010" => Instr_F <= J;
           when "000011" => Instr_F <= JAL;
           when "000100" => Instr_F <= BEQ;
+          when "000101" => Instr_F <= BNE;
           when "001000" => Instr_F <= ADDI;
           when "001001" => Instr_F <= ADDIU;
           when "001100" => Instr_F <= ANDI;
