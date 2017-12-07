@@ -28,7 +28,7 @@ package pico_cpu is
                         -- Accumulator Access
                         MFHI, MFLO, MTHI, MTLO,
                         -- load and store
-                        LB, LBU, LH, LHU, LW, SB, SH, SW
+                        LB, LBU, LH, LHU, LW, LWL, LWR, SB, SH, SW, SWL, SWR
                         );
 
     -------------------------------------------------ALU COMMANDS

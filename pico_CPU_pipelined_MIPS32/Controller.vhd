@@ -64,6 +64,7 @@ architecture RTL of ControlUnit is
   signal flush_signal_D, flush_signal_E: std_logic;
   signal IO_WR_in, IO_WR_in_FF : std_logic_vector(BitWidth-1 downto 0);
   signal IO_DIR_in, IO_DIR_FF :std_logic;
+  signal address_error : std_logic;
   ---------------------------------------------
   --      OpCode Aliases
   ---------------------------------------------
@@ -159,7 +160,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
     	    RFILE_out_sel_2  <=  rs_d;
 
       -----------------------LOGICAL--------------------------
-    elsif Instr_D = AND_inst or Instr_D = OR_inst or Instr_D = NOR_inst or Instr_D = XOR_inst then
+      elsif Instr_D = AND_inst or Instr_D = OR_inst or Instr_D = NOR_inst or Instr_D = XOR_inst then
           RFILE_out_sel_1  <=  rt_d;
           RFILE_out_sel_2  <=  rs_d;
       elsif Instr_D = ANDI or Instr_D = ORI or Instr_D = XORI then
@@ -167,7 +168,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
           RFILE_out_sel_2  <=  rs_d;
 
     -----------------------SHIFT AND ROTATE-----------------
-  elsif Instr_D = SLL_inst or Instr_D = SRL_inst then
+    elsif Instr_D = SLL_inst or Instr_D = SRL_inst then
           RFILE_out_sel_1  <=  rt_d;
           RFILE_out_sel_2  <=  rt_d;
     elsif Instr_D = SLLV or Instr_D = SRLV then
@@ -194,10 +195,11 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
         RFILE_out_sel_1  <=  rs_d;
         RFILE_out_sel_2  <=  rs_d;
     ----------------------LOAD AND STORE -----------------------------------
-  elsif Instr_D = LB or Instr_D = LBU or Instr_D = LH or Instr_D = LHU or Instr_D = LW then
+  elsif Instr_D = LB or Instr_D = LBU or Instr_D = LH or Instr_D = LHU or
+        Instr_D = LW or Instr_D = LWL  or Instr_D = LWR then
         RFILE_out_sel_1  <=  BASE;
         RFILE_out_sel_2  <=  BASE;
-    elsif Instr_D = SB or Instr_D = SH  or Instr_D = SW then
+    elsif Instr_D = SB or Instr_D = SH  or Instr_D = SW or Instr_D = SWL or Instr_D = SWR then
         RFILE_out_sel_1  <=  BASE;
         RFILE_out_sel_2  <=  rt_d;
     end if;
@@ -206,6 +208,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
 
   EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE, DPU_RESULT)
       begin
+        address_error <= '0';
         flush_signal_E <= '0';
         DPU_SetFlag    <= DPU_CLEAR_NO_FLAG;
         MemWrtAddress  <= (others => '0');
@@ -281,23 +284,25 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= RFILE;
         -----------------------LOGICAL--------------------------
+        elsif Instr_E = ANDI or Instr_E = ORI or Instr_E = XORI then
+
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= CONT;
+            DataToDPU_2 <= ZERO16 & IMMEDIATE;
+
+            if Instr_E = ORI then
+              DPU_ALUCommand <= ALU_OR;
+            elsif Instr_E = ANDI then
+              DPU_ALUCommand <= ALU_AND;
+            elsif Instr_E = XORI then
+              DPU_ALUCommand <= ALU_XOR;
+            end if;
+
         elsif Instr_E = AND_inst then
             DPU_ALUCommand <= ALU_AND;
 
-        elsif Instr_E = ANDI then
-            DPU_ALUCommand <= ALU_AND;
-            DPU_Mux_Cont_1 <= RFILE;
-            DPU_Mux_Cont_2 <= CONT;
-            DataToDPU_2 <= ZERO16 & IMMEDIATE;
-
         elsif Instr_E = OR_inst then
               DPU_ALUCommand <= ALU_OR;
-
-        elsif Instr_E = ORI then
-            DPU_ALUCommand <= ALU_OR;
-            DPU_Mux_Cont_1 <= RFILE;
-            DPU_Mux_Cont_2 <= CONT;
-            DataToDPU_2 <= ZERO16 & IMMEDIATE;
 
         elsif Instr_E = NOR_inst then
             DPU_ALUCommand <= ALU_NOR;
@@ -305,11 +310,6 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
         elsif Instr_E = XOR_inst then
             DPU_ALUCommand <= ALU_XOR;
 
-        elsif Instr_E = XORI then
-            DPU_ALUCommand <= ALU_XOR;
-            DPU_Mux_Cont_1 <= RFILE;
-            DPU_Mux_Cont_2 <= CONT;
-            DataToDPU_2 <= ZERO16 & IMMEDIATE;
         -----------------------JUMP and BRANCH--------------------------
         elsif Instr_E = J  then
             flush_signal_E <= '1';
@@ -348,7 +348,8 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
           DPU_Mux_Cont_1 <= RFILE;
           DPU_Mux_Cont_2 <= CONT;
       ----------------------LOAD AND STORE -----------------------------------
-      elsif Instr_E = LBU or Instr_E = LHU or Instr_E = LW  then
+    elsif Instr_E = LBU or Instr_E = LHU or Instr_E = LW  or
+          Instr_E = LWL or Instr_E = LWR then
           DPU_ALUCommand <= ALU_ADDU;
           DPU_Mux_Cont_1 <= RFILE;
           DPU_Mux_Cont_2 <= CONT;
@@ -358,6 +359,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             DataToDPU_2 <= ONE16 & OFFSET;
           end if;
           MemRdAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
+
         elsif Instr_E = LB or Instr_E = LH then
           DPU_ALUCommand <= ALU_ADD;
           DPU_Mux_Cont_1 <= RFILE;
@@ -368,8 +370,8 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             DataToDPU_2 <= ONE16 & OFFSET;
           end if;
           MemRdAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
-
-        elsif Instr_E = SB or Instr_E = SH or Instr_E = SW then
+        ------------------------store----------------
+        elsif Instr_E = SB or Instr_E = SH or Instr_E = SW  or Instr_E = SWL or Instr_E = SWR then
           DPU_ALUCommand <= ALU_ADDU;
           DPU_Mux_Cont_1 <= RFILE;
           DPU_Mux_Cont_2 <= CONT;
@@ -377,6 +379,13 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             DataToDPU_2 <= ZERO16 & OFFSET;
           else
             DataToDPU_2 <= ONE16 & OFFSET;
+          end if;
+
+          -- Address Error Generration!
+          if (Instr_E = SH) and DPU_RESULT(0) /= '0' then
+            address_error <= '1';
+          elsif (Instr_E = SW) and DPU_RESULT(1 downto 0) /= '00' then
+            address_error <= '1';
           end if;
 
           MemWrtAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
@@ -387,6 +396,10 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             Mem_RW <= "0011";
           elsif Instr_E = SW then
             Mem_RW <= "1111";
+          elsif Instr_E = SWL then
+            Mem_RW <= "1100";
+          elsif Instr_E = SWR then
+            Mem_RW <= "0011";
           end if;
 
         end if;
@@ -457,6 +470,19 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             RFILE_data_sel <= FROM_MEM32;
         end if;
     end if;
+
+    if Instr_WB = LWL then
+      RFILE_WB_enable <= "1100";
+      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+      RFILE_data_sel <= FROM_MEM32;
+    end if;
+
+    if Instr_WB = LWR then
+      RFILE_WB_enable <= "0011";
+      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+      RFILE_data_sel <= FROM_MEM32;
+    end if;
+
     end process;
 
 --PC handling------------------------------------------------------------------------
@@ -552,12 +578,16 @@ begin
                 end if;
           when "100000" => Instr_F <= LB;
           when "100001" => Instr_F <= LH;
+          when "100010" => Instr_F <= LWL;
           when "100011" => Instr_F <= LW;
           when "100100" => Instr_F <= LBU;
           when "100101" => Instr_F <= LHU;
+          when "100110" => Instr_F <= LWR;
           when "101000" => Instr_F <= SB;
           when "101001" => Instr_F <= SH;
+          when "101010" => Instr_F <= SWL;
           when "101011" => Instr_F <= SW;
+          when "101110" => Instr_F <= SWR;
           when others =>  Instr_F <= NOP;
         end case;
     else
