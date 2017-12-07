@@ -22,7 +22,7 @@ package pico_cpu is
                         -- shift and rotate
                         SLL_inst, SRL_inst, SLLV, SRLV,
                         -- jumps and branches
-                        J, JR, BEQ,
+                        J, JR, JAL, JALR, BEQ,
                         -- multiplication and division
                         MUL, MULT, MULTU,
                         -- Accumulator Access

@@ -177,6 +177,12 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
     -----------------------JUMP and BRANCH--------------------------
     elsif Instr_D = J  then
           flush_signal_D <= '1';
+    elsif Instr_D = JAL  then
+          flush_signal_D <= '1';
+    elsif Instr_D = JAL  then
+          flush_signal_D <= '1';
+          RFILE_out_sel_1  <=  rs_d;
+          RFILE_out_sel_2  <=  rs_d;
     elsif Instr_D = JR  then
           RFILE_out_sel_1  <=  rs_d;
           RFILE_out_sel_2  <=  rs_d;
@@ -384,7 +390,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
           -- Address Error Generration!
           if (Instr_E = SH) and DPU_RESULT(0) /= '0' then
             address_error <= '1';
-          elsif (Instr_E = SW) and DPU_RESULT(1 downto 0) /= '00' then
+          elsif (Instr_E = SW) and DPU_RESULT(1 downto 0) /= "00" then
             address_error <= '1';
           end if;
 
@@ -406,7 +412,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
     end process;
 
 
-  WB_SIGNALS_GEN:process(Instr_E,Instr_WB, rd_ex, rt_ex, rs_ex, rt_wb)
+  WB_SIGNALS_GEN:process(Instr_E,Instr_WB, rd_ex, rt_ex, rs_ex, rt_wb, PC_out)
       begin
 
       RFILE_in_address   <= (others => '0');
@@ -451,6 +457,21 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
           RFILE_data_sel <= ACC_HI;
           RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rs_ex;
+    end if;
+
+
+    if Instr_E = JAL then
+      RFILE_WB_enable <= "1111";
+      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= "11111"; --REG(31)
+      RFILE_data_sel <= CU;
+      Data_to_RFILE  <= PC_out+8;
+    end if;
+
+    if Instr_E = JALR then
+      RFILE_WB_enable <= "1111";
+      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+      RFILE_data_sel <= DPU_LOW;
+      Data_to_RFILE  <= PC_out+8;
     end if;
       ----------------------LOAD AND STORE -----------------------------------
 
@@ -498,6 +519,8 @@ process(PC_out,Instr_E, halt_signal, LOW, IMMEDIATE )begin
         if Instr_E = J then
           PC_in <= PC_out(33 downto 28) & InstrReg_out_E(25 downto 0) & "00";
         elsif Instr_E = JR then
+          PC_in <= LOW;
+        elsif Instr_E = JAL then
           PC_in <= LOW;
         elsif Instr_E = BEQ then
           if LOW = ONE32 then
@@ -559,8 +582,11 @@ begin
                   Instr_F <= XOR_inst;
               elsif opcode_in = "100111" then
                   Instr_F <= NOR_inst;
+              elsif opcode_in = "001001" then
+                  Instr_F <= JALR;
               end if;
           when "000010" => Instr_F <= J;
+          when "000011" => Instr_F <= JAL;
           when "000100" => Instr_F <= BEQ;
           when "001000" => Instr_F <= ADDI;
           when "001001" => Instr_F <= ADDIU;
