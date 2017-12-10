@@ -73,19 +73,25 @@ PROC_ALU: process(Command,A,B)
             WHEN ALU_FLIP_A =>   Result(BitWidth-1 downto 0) <= not(A); --Not of A
             WHEN ALU_CLR_A  =>   Result(BitWidth-1 downto 0) <= (others => '0'); --Clear ACC
             WHEN ALU_MULTU  =>   Result <= A*B ; -- RLC
-            WHEN ALU_MULT  =>   Result <= std_logic_vector(signed(A)*signed(B)) ; -- RLC
+            WHEN ALU_MULT   =>   Result <= std_logic_vector(signed(A)*signed(B)) ; -- RLC
             -------------------------------------------------------------------------------------------------------------------------------------
-            WHEN ALU_COMP   =>   if A = B then
+            WHEN ALU_EQ     =>   if A = B then
                                     Result <= (others => '1');
                                  else
                                     Result <= (others => '0');
                                  end if;
-                                 
-            WHEN ALU_COMP_Z =>   if A = ZERO32 then
+
+            WHEN ALU_COMP_EQ=>   if A >= B then
+                                     Result <= (others => '1');
+                                  else
+                                     Result <= (others => '0');
+                                  end if;
+                                  
+            WHEN ALU_COMP   =>   if A > B then
                                    Result <= (others => '1');
-                                else
+                                 else
                                    Result <= (others => '0');
-                                end if;
+                                 end if;
             -------------------------------------------------------------------------------------------------------------------------------------
             WHEN ALU_CLO    =>  temp := 0;
                                 for i in A'range loop

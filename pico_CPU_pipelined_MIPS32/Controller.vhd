@@ -96,6 +96,7 @@ architecture RTL of ControlUnit is
   alias IMMEDIATE : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
   alias OFFSET : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
   alias BASE   : std_logic_vector (4 downto 0) is InstrReg_out_D (25 downto 21);
+  alias BGEZ_field: std_logic_vector (4 downto 0) is InstrReg_out_D (20 downto 16);
 
   begin
     flush_pipeline <= flush_signal_D;
@@ -168,17 +169,19 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
           RFILE_out_sel_2  <=  rs_d;
 
     -----------------------SHIFT AND ROTATE-----------------
-  elsif Instr_D = SLL_inst or Instr_D = SRL_inst or Instr_D = SRA_inst then
+    elsif Instr_D = SLL_inst or Instr_D = SRL_inst or Instr_D = SRA_inst then
           RFILE_out_sel_1  <=  rt_d;
           RFILE_out_sel_2  <=  rt_d;
     elsif Instr_D = SLLV or Instr_D = SRLV or Instr_D = SRAV then
           RFILE_out_sel_1  <=  rt_d;
           RFILE_out_sel_2  <=  rs_d;
     -----------------------JUMP and BRANCH--------------------------
-    elsif Instr_D = J or Instr_D = JAL or Instr_D = JR or Instr_D = BEQ or Instr_D = BNE then
+    elsif Instr_D = J or Instr_D = JAL or Instr_D = JALR or Instr_D = JR or
+          Instr_D = BEQ or Instr_D = BNE or Instr_D = BGEZ or Instr_D = BGEZAL or
+          Instr_D = BLEZ or Instr_D = BGTZ or Instr_D =  BLTZ or Instr_D = BLTZAL then
           flush_signal_D <= '1';
-
-          if Instr_D = JALR or Instr_D = JR then
+          if Instr_D = JALR or Instr_D = JR or Instr_D = BGEZ or Instr_D = BGEZAL
+             or Instr_D = BLEZ or Instr_D = BGTZ  or Instr_D = BLTZ or Instr_D = BLTZAL then
                 RFILE_out_sel_1  <=  rs_d;
                 RFILE_out_sel_2  <=  rs_d;
           elsif Instr_D = BEQ  or Instr_D = BNE then
@@ -322,17 +325,42 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             flush_signal_E <= '1';
 
         elsif Instr_E = BEQ or Instr_E = BNE then
-            DPU_ALUCommand <= ALU_COMP;
+            DPU_ALUCommand <= ALU_EQ;
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= RFILE;
             if (Instr_E = BEQ and LOW = ONE32) or (Instr_E = BNE and LOW = ZERO32) then
               flush_signal_E <= '1';
             end if;
+        elsif Instr_E = BGTZ or (Instr_E = BGEZ  or Instr_E = BGEZAL)then
+          if Instr_E = BGTZ then
+            DPU_ALUCommand <= ALU_COMP;
+          elsif Instr_E = BGEZ  or Instr_E = BGEZAL then
+            DPU_ALUCommand <= ALU_COMP_EQ;
+          end if;
+          DPU_Mux_Cont_1 <= RFILE;
+          DPU_Mux_Cont_2 <= CONT;
+          DataToDPU_2 <= (others => '0');
+          if  LOW = ONE32  then
+            flush_signal_E <= '1';
+          end if;
+        elsif Instr_E = BLEZ or Instr_E = BLTZ or Instr_E = BLTZAL then
+            if Instr_E = BLTZ  or Instr_E = BLTZAL then
+              DPU_ALUCommand <= ALU_COMP;
+            elsif Instr_E = BLEZ then
+              DPU_ALUCommand <= ALU_COMP_EQ;
+            end if;
+            DPU_Mux_Cont_1 <= CONT;
+            DPU_Mux_Cont_2 <= RFILE;
+            DataToDPU_1 <= (others => '0');
+            if  LOW = ONE32  then
+              flush_signal_E <= '1';
+            end if;
 
         elsif Instr_E = MOVN or Instr_E = MOVZ then
-            DPU_ALUCommand <= ALU_COMP_Z;
+            DPU_ALUCommand <= ALU_EQ;
             DPU_Mux_Cont_1 <= RFILE;
-            DPU_Mux_Cont_2 <= RFILE;
+            DPU_Mux_Cont_2 <= CONT;
+            DataToDPU_2 <= (others => '0');
 
         -----------------------MULTIPLICATION AND DIVISION--------------------------
         elsif Instr_E = MULTU  then
@@ -461,22 +489,18 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rs_ex;
     end if;
 
-
-    if Instr_E = JAL then
+      ----------------------LOAD AND STORE -----------------------------------
+    if Instr_E = JAL  or ((Instr_E = BGEZAL or Instr_E = BLTZAL) and LOW = ONE32) or Instr_E = JALR then
       RFILE_WB_enable <= "1111";
-      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= "11111"; --REG(31)
+      if Instr_E = JAL or ((Instr_E = BGEZAL or Instr_E = BLTZAL) and LOW = ONE32) then
+        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= "11111"; --REG(31)
+      elsif Instr_E = JALR then
+        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+      end if;
       RFILE_data_sel <= CU;
       Data_to_RFILE  <= PC_out+8;
     end if;
-
-    if Instr_E = JALR then
-      RFILE_WB_enable <= "1111";
-      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
-      RFILE_data_sel <= DPU_LOW;
-      Data_to_RFILE  <= PC_out+8;
-    end if;
-      ----------------------LOAD AND STORE -----------------------------------
-
+    -------------------------------------------------------------------------
     if Instr_WB = LBU or Instr_WB = LB or Instr_WB = LH or Instr_WB = LW then
         RFILE_WB_enable <= "1111";
         RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
@@ -493,7 +517,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             RFILE_data_sel <= FROM_MEM32;
         end if;
     end if;
-
+    -----------------------JUMP and BRANCH--------------------------
     if Instr_WB = LWL then
       RFILE_WB_enable <= "1100";
       RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
@@ -517,7 +541,6 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
       RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       RFILE_data_sel <= R2;
     end if;
-
     end process;
 
 --PC handling------------------------------------------------------------------------
@@ -529,29 +552,31 @@ process(PC_out,Instr_E, halt_signal, LOW, IMMEDIATE )begin
     if halt_signal = '1' then
         pc_in <= PC_out;
     else
-        PC_in <= PC_out+4;
+        PC_in <= PC_out + 4;
         if Instr_E = J then
           PC_in <= PC_out(33 downto 28) & InstrReg_out_E(25 downto 0) & "00";
         elsif Instr_E = JR then
           PC_in <= LOW;
         elsif Instr_E = JAL then
           PC_in <= LOW;
-        elsif Instr_E = BEQ then
-          if LOW = ONE32 then
-            if IMMEDIATE(15) = '0' then
-              PC_in <= PC_out +(ZERO14 & IMMEDIATE & "00")-1;
-            else
-              PC_in <= PC_out +(ONE14 & IMMEDIATE & "00")-1;
+        elsif Instr_E = BEQ or Instr_E = BGTZ or Instr_E = BGEZ or
+              Instr_E = BGEZAL or Instr_E = BLEZ or Instr_E = BLTZ or
+              Instr_E = BLTZAL then
+            if LOW = ONE32 then
+                if IMMEDIATE(15) = '0' then
+                  PC_in <= PC_out +(ZERO14 & IMMEDIATE & "00")-1;
+                else
+                  PC_in <= PC_out +(ONE14 & IMMEDIATE & "00")-1;
+                end if;
             end if;
-          end if;
         elsif Instr_E = BNE then
-          if LOW = ZERO32 then
-            if IMMEDIATE(15) = '0' then
-              PC_in <= PC_out +(ZERO14 & IMMEDIATE & "00")-1;
-            else
-              PC_in <= PC_out +(ONE14 & IMMEDIATE & "00")-1;
+            if LOW = ZERO32 then
+                if IMMEDIATE(15) = '0' then
+                  PC_in <= PC_out +(ZERO14 & IMMEDIATE & "00")-1;
+                else
+                  PC_in <= PC_out +(ONE14 & IMMEDIATE & "00")-1;
+                end if;
             end if;
-          end if;
         end if;
     end if;
 end process;
@@ -615,10 +640,22 @@ begin
               elsif opcode_in = "001001" then
                   Instr_F <= JALR;
               end if;
+          when "000001" =>
+              if BGEZ_field = "00000" then
+                Instr_F <= BLTZ;
+              elsif BGEZ_field = "10000" then
+                Instr_F <= BLTZAL;
+              elsif BGEZ_field = "00001" then
+                Instr_F <= BGEZ;
+              elsif BGEZ_field = "10001" then
+                Instr_F <= BGEZAL;
+              end if;
           when "000010" => Instr_F <= J;
           when "000011" => Instr_F <= JAL;
           when "000100" => Instr_F <= BEQ;
           when "000101" => Instr_F <= BNE;
+          when "000110" => Instr_F <= BLEZ;
+          when "000111" => Instr_F <= BGTZ;
           when "001000" => Instr_F <= ADDI;
           when "001001" => Instr_F <= ADDIU;
           when "001100" => Instr_F <= ANDI;

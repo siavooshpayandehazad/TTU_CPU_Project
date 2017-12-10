@@ -22,7 +22,7 @@ package pico_cpu is
                         -- shift and rotate
                         SLL_inst, SRL_inst, SLLV, SRLV, SRA_inst, SRAV,
                         -- jumps and branches
-                        J, JR, JAL, JALR, BEQ, BNE,
+                        J, JR, JAL, JALR, BEQ, BNE, BGEZ, BGEZAL, BLEZ, BGTZ, BLTZ, BLTZAL,
                         -- multiplication and division
                         MUL, MULT, MULTU,
                         -- Accumulator Access
@@ -41,7 +41,7 @@ package pico_cpu is
                          ALU_SLL   , ALU_NEG_A , ALU_SAR   , ALU_SAL   ,
                          ALU_FLIP_A, ALU_CLR_A ,
                          ALU_NOR   , ALU_COMP  , ALU_CLO   , ALU_CLZ   ,
-                         ALU_COMP_Z,
+                         ALU_EQ_Z  , ALU_EQ    , ALU_COMP_EQ,
                          ALU_MULTU , ALU_MULT  , ALU_MTLO  , ALU_MTHI);
 
     -------------------------------------------------DPU COMMANDS
