@@ -86,11 +86,17 @@ PROC_ALU: process(Command,A,B)
                                   else
                                      Result <= (others => '0');
                                   end if;
-                                  
+
             WHEN ALU_COMP   =>   if A > B then
                                    Result <= (others => '1');
                                  else
                                    Result <= (others => '0');
+                                 end if;
+                                 
+            WHEN ALU_COMPU  =>   if ("0" & A) >  ("0" & B) then
+                                  Result <= (others => '1');
+                                 else
+                                  Result <= (others => '0');
                                  end if;
             -------------------------------------------------------------------------------------------------------------------------------------
             WHEN ALU_CLO    =>  temp := 0;

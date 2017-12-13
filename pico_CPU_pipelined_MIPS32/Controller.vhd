@@ -206,8 +206,11 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
         RFILE_out_sel_1  <=  BASE;
         RFILE_out_sel_2  <=  rt_d;
       ----------------------conditional move -----------------------------------
-    elsif Instr_D = MOVN or Instr_D = MOVZ then
+    elsif Instr_D = MOVN or Instr_D = MOVZ or Instr_D = SLT or Instr_D = SLTU then
         RFILE_out_sel_1  <=  rt_d;
+        RFILE_out_sel_2  <=  rs_d;
+    elsif Instr_D = SLTI or Instr_D = SLTIU then
+        RFILE_out_sel_1  <=  rs_d;
         RFILE_out_sel_2  <=  rs_d;
     end if;
   end process;
@@ -362,6 +365,35 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             DPU_Mux_Cont_2 <= CONT;
             DataToDPU_2 <= (others => '0');
 
+        elsif Instr_E = SLT then
+            DPU_ALUCommand <= ALU_COMP;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= RFILE;
+
+        elsif Instr_E = SLTI then
+            DPU_ALUCommand <= ALU_COMP;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= CONT;
+            if IMMEDIATE(15) = '0' then
+              DataToDPU_2 <= ZERO16 & IMMEDIATE;
+            else
+              DataToDPU_2 <= ONE16 & IMMEDIATE;
+            end if;
+
+        elsif Instr_E = SLTU then
+            DPU_ALUCommand <= ALU_COMPU;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= RFILE;
+
+        elsif Instr_E = SLTIU then
+            DPU_ALUCommand <= ALU_COMPU;
+            DPU_Mux_Cont_1 <= RFILE;
+            DPU_Mux_Cont_2 <= CONT;
+            if IMMEDIATE(15) = '0' then
+              DataToDPU_2 <= ZERO16 & IMMEDIATE;
+            else
+              DataToDPU_2 <= ONE16 & IMMEDIATE;
+            end if;
         -----------------------MULTIPLICATION AND DIVISION--------------------------
         elsif Instr_E = MULTU  then
               DPU_ALUCommand <= ALU_MULTU;
@@ -541,6 +573,17 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
       RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       RFILE_data_sel <= R2;
     end if;
+
+    if Instr_E = SLT or Instr_E = SLTI or Instr_E =  SLTU or Instr_E = SLTIU then
+      RFILE_WB_enable <= "1111";
+      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+      RFILE_data_sel <= CU;
+      if low = ONE32 then
+        Data_to_RFILE  <= "00000000000000000000000000000001";
+      else
+        Data_to_RFILE  <= (others => '0');
+      end if;
+    end if;
     end process;
 
 --PC handling------------------------------------------------------------------------
@@ -605,6 +648,8 @@ begin
                   Instr_F <= SRAV;
               elsif opcode_in = "001000" then
                   Instr_F <= JR;
+              elsif opcode_in = "001001" then
+                  Instr_F <= JALR;
               elsif opcode_in = "001010" then
                   Instr_F <= MOVZ;
               elsif opcode_in = "001011" then
@@ -637,8 +682,10 @@ begin
                   Instr_F <= XOR_inst;
               elsif opcode_in = "100111" then
                   Instr_F <= NOR_inst;
-              elsif opcode_in = "001001" then
-                  Instr_F <= JALR;
+              elsif opcode_in = "101010" then
+                  Instr_F <= SLT;
+              elsif opcode_in = "101011" then
+                  Instr_F <= SLTU;
               end if;
           when "000001" =>
               if BGEZ_field = "00000" then
@@ -658,6 +705,8 @@ begin
           when "000111" => Instr_F <= BGTZ;
           when "001000" => Instr_F <= ADDI;
           when "001001" => Instr_F <= ADDIU;
+          when "001010" => Instr_F <= SLTI;
+          when "001011" => Instr_F <= SLTIU;
           when "001100" => Instr_F <= ANDI;
           when "001101" => Instr_F <= ORI;
           when "001110" => Instr_F <= XORI;

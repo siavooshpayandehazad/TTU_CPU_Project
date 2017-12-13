@@ -30,7 +30,7 @@ package pico_cpu is
                         -- load and store
                         LB, LBU, LH, LHU, LW, LWL, LWR, SB, SH, SW, SWL, SWR,
                         -- conditional move
-                        MOVZ, MOVN
+                        MOVZ, MOVN, SLT, SLTI, SLTIU, SLTU
                         );
 
     -------------------------------------------------ALU COMMANDS
@@ -41,7 +41,7 @@ package pico_cpu is
                          ALU_SLL   , ALU_NEG_A , ALU_SAR   , ALU_SAL   ,
                          ALU_FLIP_A, ALU_CLR_A ,
                          ALU_NOR   , ALU_COMP  , ALU_CLO   , ALU_CLZ   ,
-                         ALU_EQ_Z  , ALU_EQ    , ALU_COMP_EQ,
+                         ALU_EQ_Z  , ALU_EQ    , ALU_COMP_EQ, ALU_COMPU,
                          ALU_MULTU , ALU_MULT  , ALU_MTLO  , ALU_MTHI);
 
     -------------------------------------------------DPU COMMANDS
