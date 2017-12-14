@@ -1,3 +1,5 @@
+--Copyright (C) 2017 Siavoosh Payandeh Azad
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
@@ -72,8 +74,12 @@ PROC_ALU: process(Command,A,B)
             WHEN ALU_SAL    =>   Result(BitWidth-1 downto 0) <= A(BitWidth-1) & std_logic_vector(shift_left(unsigned(A(BitWidth-2 downto 0)), to_integer(unsigned(B(4 downto 0)))-1));  --shift left Arith
             WHEN ALU_FLIP_A =>   Result(BitWidth-1 downto 0) <= not(A); --Not of A
             WHEN ALU_CLR_A  =>   Result(BitWidth-1 downto 0) <= (others => '0'); --Clear ACC
-            WHEN ALU_MULTU  =>   Result <= A*B ; -- RLC
+            WHEN ALU_MULTU  =>   Result <= std_logic_vector(unsigned(A)*unsigned(B)) ; -- RLC
+            WHEN ALU_MADDU  =>   Result <= std_logic_vector(unsigned(A)*unsigned(B)) ; -- RLC
+            WHEN ALU_MSUBU  =>   Result <= std_logic_vector(unsigned(A)*unsigned(B)) ; -- RLC
             WHEN ALU_MULT   =>   Result <= std_logic_vector(signed(A)*signed(B)) ; -- RLC
+            WHEN ALU_MADD   =>   Result <= std_logic_vector(signed(A)*signed(B)) ; -- RLC
+            WHEN ALU_MSUB   =>   Result <= std_logic_vector(signed(A)*signed(B)) ; -- RLC
             -------------------------------------------------------------------------------------------------------------------------------------
             WHEN ALU_EQ     =>   if A = B then
                                     Result <= (others => '1');
@@ -92,7 +98,7 @@ PROC_ALU: process(Command,A,B)
                                  else
                                    Result <= (others => '0');
                                  end if;
-                                 
+
             WHEN ALU_COMPU  =>   if ("0" & A) >  ("0" & B) then
                                   Result <= (others => '1');
                                  else

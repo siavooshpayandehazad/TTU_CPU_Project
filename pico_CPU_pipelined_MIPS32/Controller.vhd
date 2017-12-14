@@ -1,9 +1,14 @@
+--Copyright (C) 2017 Siavoosh Payandeh Azad
 
 library IEEE;
 use IEEE.std_logic_1164.all;
 USE ieee.std_logic_unsigned.ALL;
 USE ieee.numeric_std.ALL;
 use work.pico_cpu.all;
+
+-- Regarding the jumps, we assume that the compiler always executes 2 instructions
+-- after the jump! so we will not have to insert any bubble into the pipeline!
+
 
 entity ControlUnit is
   generic (BitWidth: integer;
@@ -61,7 +66,6 @@ architecture RTL of ControlUnit is
   signal InstrReg_out_D, InstrReg_out_E, InstrReg_out_WB: std_logic_vector (InstructionWidth-1 downto 0) := (others => '0');
   signal arithmetic_operation : std_logic;
   signal halt_signal_in, halt_signal : std_logic := '0';
-  signal flush_signal_D, flush_signal_E: std_logic;
   signal IO_WR_in, IO_WR_in_FF : std_logic_vector(BitWidth-1 downto 0);
   signal IO_DIR_in, IO_DIR_FF :std_logic;
   signal address_error : std_logic;
@@ -99,7 +103,7 @@ architecture RTL of ControlUnit is
   alias BGEZ_field: std_logic_vector (4 downto 0) is InstrReg_out_D (20 downto 16);
 
   begin
-    flush_pipeline <= flush_signal_D;
+    flush_pipeline <= '0';
   ---------------------------------------------
   -- Registers setting
   ---------------------------------------------
@@ -148,7 +152,7 @@ IO_WR <= IO_WR_in_FF;
 -----------------------------------------------------------
 DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
     begin
-      flush_signal_D <= '0';
+
       RFILE_out_sel_1 <= (others => '0');
       RFILE_out_sel_2 <= (others => '0');
       -----------------------Arithmetic--------------------------
@@ -179,7 +183,6 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
     elsif Instr_D = J or Instr_D = JAL or Instr_D = JALR or Instr_D = JR or
           Instr_D = BEQ or Instr_D = BNE or Instr_D = BGEZ or Instr_D = BGEZAL or
           Instr_D = BLEZ or Instr_D = BGTZ or Instr_D =  BLTZ or Instr_D = BLTZAL then
-          flush_signal_D <= '1';
           if Instr_D = JALR or Instr_D = JR or Instr_D = BGEZ or Instr_D = BGEZAL
              or Instr_D = BLEZ or Instr_D = BGTZ  or Instr_D = BLTZ or Instr_D = BLTZAL then
                 RFILE_out_sel_1  <=  rs_d;
@@ -190,7 +193,9 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
           end if;
 
     -----------------------MULTIPLICATION AND DIVISION--------------------------
-    elsif Instr_D = MULTU or Instr_D = MULT or Instr_D = MUL then
+  elsif Instr_D = MULTU or Instr_D = MULT or Instr_D = MUL or Instr_D = DIV or
+        Instr_D = DIVU or Instr_D = MADD  or Instr_D = MADDU or Instr_D = MSUB or
+        Instr_D = MSUBU then
          RFILE_out_sel_1  <=  rt_d;
          RFILE_out_sel_2  <=  rs_d;
     ----------------------ACCUMULATOR ACCESS -----------------------------------
@@ -219,7 +224,6 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
   EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE, DPU_RESULT)
       begin
         address_error <= '0';
-        flush_signal_E <= '0';
         DPU_SetFlag    <= DPU_CLEAR_NO_FLAG;
         MemWrtAddress  <= (others => '0');
         MemRdAddress   <= (others => '0');
@@ -318,22 +322,16 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             DPU_ALUCommand <= ALU_XOR;
 
         -----------------------JUMP and BRANCH--------------------------
-        elsif Instr_E = J  then
-            flush_signal_E <= '1';
-
         elsif Instr_E = JR or Instr_E = JALR then
             DPU_ALUCommand <= ALU_PASS_A;
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= RFILE;
-            flush_signal_E <= '1';
 
         elsif Instr_E = BEQ or Instr_E = BNE then
             DPU_ALUCommand <= ALU_EQ;
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= RFILE;
-            if (Instr_E = BEQ and LOW = ONE32) or (Instr_E = BNE and LOW = ZERO32) then
-              flush_signal_E <= '1';
-            end if;
+
         elsif Instr_E = BGTZ or (Instr_E = BGEZ  or Instr_E = BGEZAL)then
           if Instr_E = BGTZ then
             DPU_ALUCommand <= ALU_COMP;
@@ -343,9 +341,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
           DPU_Mux_Cont_1 <= RFILE;
           DPU_Mux_Cont_2 <= CONT;
           DataToDPU_2 <= (others => '0');
-          if  LOW = ONE32  then
-            flush_signal_E <= '1';
-          end if;
+
         elsif Instr_E = BLEZ or Instr_E = BLTZ or Instr_E = BLTZAL then
             if Instr_E = BLTZ  or Instr_E = BLTZAL then
               DPU_ALUCommand <= ALU_COMP;
@@ -355,9 +351,6 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             DPU_Mux_Cont_1 <= CONT;
             DPU_Mux_Cont_2 <= RFILE;
             DataToDPU_1 <= (others => '0');
-            if  LOW = ONE32  then
-              flush_signal_E <= '1';
-            end if;
 
         elsif Instr_E = MOVN or Instr_E = MOVZ then
             DPU_ALUCommand <= ALU_EQ;
@@ -395,14 +388,25 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
               DataToDPU_2 <= ONE16 & IMMEDIATE;
             end if;
         -----------------------MULTIPLICATION AND DIVISION--------------------------
-        elsif Instr_E = MULTU  then
-              DPU_ALUCommand <= ALU_MULTU;
+        elsif Instr_D = MULTU or Instr_D = MULT or Instr_D = MUL or Instr_D = DIV or
+              Instr_D = DIVU or Instr_D = MADD  or Instr_D = MADDU or Instr_D = MSUB or
+              Instr_D = MSUBU then
+
               DPU_Mux_Cont_1 <= RFILE;
               DPU_Mux_Cont_2 <= RFILE;
-        elsif Instr_E = MUL  or Instr_E = MULT then
-              DPU_ALUCommand <= ALU_MULT;
-              DPU_Mux_Cont_1 <= RFILE;
-              DPU_Mux_Cont_2 <= RFILE;
+              if Instr_E = MULTU  then
+                    DPU_ALUCommand <= ALU_MULTU;
+              elsif Instr_E = MUL  or Instr_E = MULT then
+                    DPU_ALUCommand <= ALU_MULT;
+              elsif Instr_E = MADD then
+                    DPU_ALUCommand <= ALU_MADD;
+              elsif Instr_E = MADDU then
+                    DPU_ALUCommand <= ALU_MADDU;
+              elsif Instr_E = MSUB then
+                    DPU_ALUCommand <= ALU_MSUB;
+              elsif Instr_E = MSUBU then
+                    DPU_ALUCommand <= ALU_MSUBU;
+              end if;
             ----------------------ACCUMULATOR ACCESS -----------------------------------
             -- we dont execute anything!
         elsif Instr_E = MTLO then
@@ -628,10 +632,9 @@ end process;
 -- Instr decoder
 ------------------------------------------------
 INST_DECODER:
-process (SPECIAL_in, flush_signal_D, flush_signal_E, opcode_in)
+process (SPECIAL_in, opcode_in)
 begin
     Instr_F <= NOP;
-    if flush_signal_D = '0' and flush_signal_E = '0' then
         case SPECIAL_in is
           when "000000" =>
               if opcode_in = "000000" then
@@ -712,8 +715,16 @@ begin
           when "001110" => Instr_F <= XORI;
           when "001111" => Instr_F <= LUI;
           when "011100" =>
-                if opcode_in = "000010" then
+                if opcode_in = "000000" then
+                    Instr_F <= MADD;
+                elsif  opcode_in = "000001" then
+                    Instr_F <= MADDU;
+                elsif opcode_in = "000010" then
                     Instr_F <= MUL;
+                elsif opcode_in = "000100" then
+                    Instr_F <= MSUB;
+                elsif opcode_in = "000101" then
+                    Instr_F <= MSUBU;
                 elsif opcode_in = "100001" then
                     Instr_F <= CLO;
                 elsif opcode_in = "100000" then
@@ -733,9 +744,6 @@ begin
           when "101110" => Instr_F <= SWR;
           when others =>  Instr_F <= NOP;
         end case;
-    else
-      Instr_F <= NOP;
-    end if;
 end process;
 
 end RTL;

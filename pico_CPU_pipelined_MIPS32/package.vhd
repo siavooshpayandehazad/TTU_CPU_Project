@@ -1,3 +1,5 @@
+--Copyright (C) 2017 Siavoosh Payandeh Azad
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -24,7 +26,7 @@ package pico_cpu is
                         -- jumps and branches
                         J, JR, JAL, JALR, BEQ, BNE, BGEZ, BGEZAL, BLEZ, BGTZ, BLTZ, BLTZAL,
                         -- multiplication and division
-                        MUL, MULT, MULTU,
+                        MUL, MULT, MULTU, MADD, MADDU, MSUB, MSUBU, DIV, DIVU,
                         -- Accumulator Access
                         MFHI, MFLO, MTHI, MTLO,
                         -- load and store
@@ -35,14 +37,15 @@ package pico_cpu is
 
     -------------------------------------------------ALU COMMANDS
 
-    TYPE ALU_COMMAND IS (ALU_ADDU  , ALU_SUBU  , ALU_ADD  , ALU_SUB  ,
+    TYPE ALU_COMMAND IS (ALU_ADDU,   ALU_SUBU,  ALU_ADD  , ALU_SUB,
                          ALU_PASS_A, ALU_PASS_B,
-                         ALU_AND   , ALU_OR    , ALU_XOR   , ALU_SLR   ,
-                         ALU_SLL   , ALU_NEG_A , ALU_SAR   , ALU_SAL   ,
-                         ALU_FLIP_A, ALU_CLR_A ,
-                         ALU_NOR   , ALU_COMP  , ALU_CLO   , ALU_CLZ   ,
-                         ALU_EQ_Z  , ALU_EQ    , ALU_COMP_EQ, ALU_COMPU,
-                         ALU_MULTU , ALU_MULT  , ALU_MTLO  , ALU_MTHI);
+                         ALU_AND,    ALU_OR,    ALU_XOR   , ALU_SLR,
+                         ALU_SLL,    ALU_NEG_A, ALU_SAR   , ALU_SAL,
+                         ALU_FLIP_A, ALU_CLR_A,
+                         ALU_NOR,    ALU_COMP,  ALU_CLO   , ALU_CLZ,
+                         ALU_EQ_Z,   ALU_EQ,    ALU_COMP_EQ, ALU_COMPU,
+                         ALU_MULTU,  ALU_MULT,  ALU_MTLO  , ALU_MTHI,
+                         ALU_MADD,   ALU_MADDU, ALU_MSUB, ALU_MSUBU);
 
     -------------------------------------------------DPU COMMANDS
     TYPE DPU_IN_MUX IS (MEM, CONT, RFILE, ONE);

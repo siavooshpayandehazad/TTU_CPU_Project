@@ -1,3 +1,5 @@
+--Copyright (C) 2017 Siavoosh Payandeh Azad
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 USE ieee.std_logic_unsigned.ALL;
@@ -36,7 +38,7 @@ architecture RTL of DPU is
 ---------------------------------------------
 --      Signals
 ---------------------------------------------
-  signal ACC_in,ACC_out: std_logic_vector (2*BitWidth-1 downto 0);
+  signal ACC_in, ACC_out: std_logic_vector (2*BitWidth-1 downto 0);
   signal Mux_Out_1, Mux_Out_2: std_logic_vector (BitWidth-1 downto 0):= (others=>'0');
 
   ---------------------------------------------
@@ -69,6 +71,14 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, OV_Flag_Value, Cout, ACC_in);
     elsif clk'event and clk= '1' then
       if ALUCommand = ALU_MULT or ALUCommand = ALU_MULTU or ALUCommand = ALU_MTHI or ALUCommand = ALU_MTLO then
         ACC_out <= ACC_in;
+      elsif ALUCommand = ALU_MADD then
+        ACC_out <= std_logic_vector(signed(ACC_in) + signed(ACC_out));
+      elsif ALUCommand = ALU_MADDU then
+        ACC_out <= std_logic_vector(unsigned(ACC_in) + unsigned(ACC_out));
+      elsif ALUCommand = ALU_MSUB then
+        ACC_out <= std_logic_vector(signed(ACC_in) - signed(ACC_out));
+      elsif ALUCommand = ALU_MSUBU then
+        ACC_out <= std_logic_vector(unsigned(ACC_in) - unsigned(ACC_out));
       end if;
       OV_Flag_out <= OV_Flag_in;
       Z_Flag_out <= Z_Flag_in;
@@ -107,7 +117,6 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, OV_Flag_Value, Cout, ACC_in);
   ---------------------------------------------
   --  Flag controls
   ---------------------------------------------
-
   process(SetFlag, ALUCommand, ACC_in, OV_Flag_Value, Data_in_control_1, Cout, ACC_out, EQ_Flag_out,
 				Z_Flag_out, C_flag_out, OV_Flag_out)
     begin
@@ -115,39 +124,23 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, OV_Flag_Value, Cout, ACC_in);
         if SetFlag = "011" then
               EQ_Flag_in <= '0';
         else
-          --if ALUCommand /= "0010" then
-              if (ACC_out(BitWidth-1 downto 0) = Data_in_control_1) then
-                  EQ_Flag_in <= '1';
-               else
-                  EQ_Flag_in <= '0';
-              end if;
-          --else
-          --    EQ_Flag_in <= EQ_Flag_out;
-          --end if;
+            if (ACC_out(BitWidth-1 downto 0) = Data_in_control_1) then
+                EQ_Flag_in <= '1';
+             else
+                EQ_Flag_in <= '0';
+            end if;
         end if;
       ----------------------------------
       if SetFlag = "001" then
         Z_Flag_in <= '0';
       else
-        --if  ALUCommand /= "0010" then
           Z_Flag_in <=  not (or_reduce(ACC_in));
-       --  else
-        --  Z_Flag_in <= Z_Flag_out;
-        --end if;
       end if;
       ----------------------------------
       if SetFlag = "100" then
         C_flag_in <= '0';
       else
-        --if  ALUCommand /= "0010" and ALUCommand /= "1110" and ALUCommand /= "1111" then
-        --  C_flag_in <= Cout;
-        --elsif  ALUCommand = "1110" then --RRC
-        --   C_flag_in <= ACC_out(0);
-        --elsif  ALUCommand = "1111" then --RLC
           C_flag_in <= ACC_out(BitWidth-1);
-        --else
-        --  C_flag_in <= C_flag_out;
-        --END IF;
       end if;
       ----------------------------------
       if SetFlag = "010" then
