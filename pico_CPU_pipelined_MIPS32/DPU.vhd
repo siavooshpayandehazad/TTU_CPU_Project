@@ -69,7 +69,8 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, OV_Flag_Value, Cout, ACC_in);
       EQ_Flag_out <=  '0';
       C_flag_out <= '0';
     elsif clk'event and clk= '1' then
-      if ALUCommand = ALU_MULT or ALUCommand = ALU_MULTU or ALUCommand = ALU_MTHI or ALUCommand = ALU_MTLO then
+      if ALUCommand = ALU_MULT or ALUCommand = ALU_MULTU or ALUCommand = ALU_MTHI or
+         ALUCommand = ALU_MTLO or ALUCommand = ALU_DIV or ALUCommand = ALU_DIVU then
         ACC_out <= ACC_in;
       elsif ALUCommand = ALU_MADD then
         ACC_out <= std_logic_vector(signed(ACC_in) + signed(ACC_out));

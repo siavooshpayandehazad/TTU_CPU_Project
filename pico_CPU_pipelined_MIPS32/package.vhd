@@ -45,7 +45,8 @@ package pico_cpu is
                          ALU_NOR,    ALU_COMP,  ALU_CLO   , ALU_CLZ,
                          ALU_EQ_Z,   ALU_EQ,    ALU_COMP_EQ, ALU_COMPU,
                          ALU_MULTU,  ALU_MULT,  ALU_MTLO  , ALU_MTHI,
-                         ALU_MADD,   ALU_MADDU, ALU_MSUB, ALU_MSUBU);
+                         ALU_MADD,   ALU_MADDU, ALU_MSUB, ALU_MSUBU,
+                         ALU_DIV, ALU_DIVU);
 
     -------------------------------------------------DPU COMMANDS
     TYPE DPU_IN_MUX IS (MEM, CONT, RFILE, ONE);

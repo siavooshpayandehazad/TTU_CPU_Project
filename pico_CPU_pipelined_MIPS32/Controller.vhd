@@ -406,6 +406,10 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
                     DPU_ALUCommand <= ALU_MSUB;
               elsif Instr_E = MSUBU then
                     DPU_ALUCommand <= ALU_MSUBU;
+              elsif Instr_E = DIV then
+                    DPU_ALUCommand <= ALU_DIV;
+              elsif Instr_E = DIVU then
+                    DPU_ALUCommand <= ALU_DIVU;
               end if;
             ----------------------ACCUMULATOR ACCESS -----------------------------------
             -- we dont execute anything!
@@ -669,6 +673,10 @@ begin
                   Instr_F <= MULT;
               elsif opcode_in = "011001" then
                   Instr_F <= MULTU;
+              elsif opcode_in = "011010" then
+                  Instr_F <= DIV;
+                elsif opcode_in = "011011" then
+                    Instr_F <= DIVU;
               elsif opcode_in = "100000" then
                   Instr_F <= ADD;
               elsif opcode_in = "100001" then
