@@ -120,10 +120,7 @@ begin
         DPU_RESULT_FF   => DPU_RESULT_FF
         );
 
-  --instruction memory
-  InstMem_comp: InstMem
-  generic map (BitWidth => CPU_Bitwidth, InstructionWidth => CPU_Instwidth)
-  port map (Instr_Add(CPU_Bitwidth+1 downto 2), Instr_In);
+
 
   --register file
   RegFile_comp: RegisterFile
@@ -180,9 +177,10 @@ MEM_DATA_IN_SELECT: process(MEM_IN_SEL, RFILE_out_sel_1, RFILE_out_sel_2, DPU_Re
 
   end process;
   --memory
+
   Mem_comp: Memory
-  generic map (BitWidth => CPU_Bitwidth)
-  port map (MemRdAddress, MEMDATA_IN, MemWrtAddress, clk, Mem_RW , rst , MEMDATA_OUT);
+  generic map (BitWidth => CPU_Bitwidth, preload_file => "code.txt")
+  port map (MemRdAddress, Instr_Add(CPU_Bitwidth+1 downto 2), MEMDATA_IN, MemWrtAddress, clk, Mem_RW , rst , MEMDATA_OUT,  Instr_In);
 
   FlagOut <=	DPU_Flags_FF;
   output <= DPU_RESULT_FF;

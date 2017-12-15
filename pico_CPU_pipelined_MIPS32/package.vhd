@@ -170,13 +170,6 @@ package pico_cpu is
     end component;
 
     ----------------------------------------
-    component InstMem is
-      generic (BitWidth : integer;
-             InstructionWidth:integer);
-      port ( address : in std_logic_vector(BitWidth-1 downto 0);
-           data : out std_logic_vector(InstructionWidth-1 downto 0) );
-    end component;
-    ----------------------------------------
     component DPU is
       generic (BitWidth: integer);
       port (
@@ -202,36 +195,18 @@ package pico_cpu is
     end component;
     ----------------------------------------
     component Memory is
-      generic (BitWidth: integer);
-      port ( RdAddress: in std_logic_vector (BitWidth-1 downto 0);
-           Data_in: in std_logic_vector (BitWidth-1 downto 0);
-  			   WrtAddress: in std_logic_vector (BitWidth-1 downto 0);
-           clk: in std_logic;
-           RW: in std_logic_vector (3 downto 0);
-           rst: in std_logic;
-           Data_Out: out std_logic_vector (BitWidth-1 downto 0)
-      );
-    end component;
-
-    component  Adder_Sub is
-      generic (BitWidth: integer);
-      port (
-            A: in std_logic_vector (BitWidth-1 downto 0);
-            B: in std_logic_vector (BitWidth-1 downto 0);
-            Add_Sub: in std_logic;
-            result: out std_logic_vector (BitWidth-1 downto 0);
-            Cout: out std_logic
+      generic (BitWidth: integer;
+               preload_file: string :="code.txt");
+      port ( RdAddress_1: in std_logic_vector (BitWidth-1 downto 0);
+             RdAddress_2: in std_logic_vector (BitWidth-1 downto 0);
+             Data_in: in std_logic_vector (BitWidth-1 downto 0);
+    			   WrtAddress: in std_logic_vector (BitWidth-1 downto 0);
+             clk: in std_logic;
+             RW: in std_logic_vector(3 downto 0);
+             rst: in std_logic;
+             Data_Out_1: out std_logic_vector (BitWidth-1 downto 0);
+             Data_Out_2: out std_logic_vector (BitWidth-1 downto 0)
         );
     end component;
-
-     component FullAdderSub is
-        Port ( C_in : in  STD_LOGIC;
-               A : in  STD_LOGIC;
-               B : in  STD_LOGIC;
-               Add_Sub: in STD_LOGIC;
-               C_out : out  STD_LOGIC;
-               Sum : out  STD_LOGIC);
-      end component;
-
 
 end; --package body

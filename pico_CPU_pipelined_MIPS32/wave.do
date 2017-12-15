@@ -91,15 +91,15 @@ add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_com
 add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:OV_Flag_out
 add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:Z_Flag_out
 add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:C_flag_out
-add wave -noupdate -expand -group {Inst Memory} :picocputestbench:PicoCPU_comp:InstMem_comp:address
-add wave -noupdate -expand -group {Inst Memory} :picocputestbench:PicoCPU_comp:InstMem_comp:data
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:rst
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:clk
-add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:RdAddress
+add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:RdAddress_1
+add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:RdAddress_2
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:Data_in
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:WrtAddress
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:RW
-add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:Data_Out
+add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:Data_Out_1
+add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:Data_Out_2
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:read_enable
 add wave -noupdate -expand -group {Data Memory} -color Cyan :picocputestbench:PicoCPU_comp:Mem_comp:Mem
 TreeUpdate [SetDefaultTree]
