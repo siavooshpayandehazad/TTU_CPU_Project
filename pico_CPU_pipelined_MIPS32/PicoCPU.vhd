@@ -20,8 +20,6 @@ architecture RTL of PicoCPU is
 ---------------------------------------------
 --      Signals
 ---------------------------------------------
-
-
 signal Instr_In        : std_logic_vector (CPU_Bitwidth-1 downto 0);
 signal Instr_Add       : std_logic_vector (CPU_Bitwidth+1 downto 0);
  ----------------------------------------

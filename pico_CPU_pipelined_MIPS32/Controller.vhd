@@ -60,12 +60,9 @@ architecture RTL of ControlUnit is
   ---------------------------------------------
 
   signal Instr_F, Instr_D, Instr_E, Instr_WB :Instruction := NOP;
-
-  signal SP_in, SP_out : std_logic_vector (BitWidth-1 downto 0):= (others => '0');
   signal PC_in, PC_out : std_logic_vector (BitWidth+1 downto 0):= (others => '0');
   signal InstrReg_out_D, InstrReg_out_E, InstrReg_out_WB: std_logic_vector (InstructionWidth-1 downto 0) := (others => '0');
   signal arithmetic_operation : std_logic;
-  signal halt_signal_in, halt_signal : std_logic := '0';
   signal IO_WR_in, IO_WR_in_FF : std_logic_vector(BitWidth-1 downto 0);
   signal IO_DIR_in, IO_DIR_FF :std_logic;
   signal address_error : std_logic;
@@ -74,14 +71,12 @@ architecture RTL of ControlUnit is
   ---------------------------------------------
   alias LOW  : std_logic_vector is DPU_RESULT(31 downto 0);
   alias HIGH : std_logic_vector is DPU_RESULT(63 downto 32);
-
+  
   alias LOW_FF  : std_logic_vector is DPU_RESULT_FF(31 downto 0);
   alias HIGH_FF : std_logic_vector is DPU_RESULT_FF(63 downto 32);
 
-  alias SPECIAL_in : std_logic_vector (5 downto 0) is Instr_In (31 downto 26);
-  alias opcode_in  : std_logic_vector (5 downto 0) is Instr_In (5 downto 0);
-
-  alias SPECIAL : std_logic_vector (5 downto 0) is InstrReg_out_D (31 downto 26);
+  alias SPECIAL_F : std_logic_vector (5 downto 0) is Instr_In (31 downto 26);
+  alias opcode_F  : std_logic_vector (5 downto 0) is Instr_In (5 downto 0);
 
   alias rs_wb : std_logic_vector (4 downto 0) is InstrReg_out_WB (25 downto 21);
   alias rt_wb : std_logic_vector (4 downto 0) is InstrReg_out_WB (20 downto 16);
@@ -97,9 +92,9 @@ architecture RTL of ControlUnit is
   alias rd_d : std_logic_vector (4 downto 0) is InstrReg_out_D (15 downto 11);
 
 
-  alias IMMEDIATE : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
-  alias OFFSET : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
-  alias BASE   : std_logic_vector (4 downto 0) is InstrReg_out_D (25 downto 21);
+  alias IMMEDIATE_EX : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
+  alias OFFSET_EX : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
+  alias BASE_D   : std_logic_vector (4 downto 0) is InstrReg_out_D (25 downto 21);
   alias BGEZ_field: std_logic_vector (4 downto 0) is InstrReg_out_D (20 downto 16);
 
   begin
@@ -118,22 +113,18 @@ architecture RTL of ControlUnit is
        Instr_D <= NOP;
        Instr_E <= NOP;
        Instr_WB <= NOP;
-       halt_signal<= '0';
        IO_WR_in_FF <=  (others=> '0');
        IO_DIR_FF <= '0';
     elsif clk'event and clk='1' then
        IO_WR_in_FF <= IO_WR_in;
        IO_DIR_FF <= IO_DIR_in;
        PC_out <= PC_in;
-       halt_signal<= halt_signal_in;
-       if halt_signal = '0' then
-         InstrReg_out_D <= Instr_In;
-         InstrReg_out_E <= InstrReg_out_D;
-         InstrReg_out_WB <= InstrReg_out_E;
-         Instr_D <= Instr_F;
-         Instr_E <= Instr_D;
-         Instr_WB <= Instr_E;
-       end if;
+       InstrReg_out_D <= Instr_In;
+       InstrReg_out_E <= InstrReg_out_D;
+       InstrReg_out_WB <= InstrReg_out_E;
+       Instr_D <= Instr_F;
+       Instr_E <= Instr_D;
+       Instr_WB <= Instr_E;
 
   end if;
   end process;
@@ -205,10 +196,10 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
     ----------------------LOAD AND STORE -----------------------------------
   elsif Instr_D = LB or Instr_D = LBU or Instr_D = LH or Instr_D = LHU or
         Instr_D = LW or Instr_D = LWL  or Instr_D = LWR then
-        RFILE_out_sel_1  <=  BASE;
-        RFILE_out_sel_2  <=  BASE;
+        RFILE_out_sel_1  <=  BASE_D;
+        RFILE_out_sel_2  <=  BASE_D;
     elsif Instr_D = SB or Instr_D = SH  or Instr_D = SW or Instr_D = SWL or Instr_D = SWR then
-        RFILE_out_sel_1  <=  BASE;
+        RFILE_out_sel_1  <=  BASE_D;
         RFILE_out_sel_2  <=  rt_d;
       ----------------------conditional move -----------------------------------
     elsif Instr_D = MOVN or Instr_D = MOVZ or Instr_D = SLT or Instr_D = SLTU then
@@ -221,7 +212,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
   end process;
 
 
-  EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE, DPU_RESULT)
+  EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
       begin
         address_error <= '0';
         DPU_SetFlag    <= DPU_CLEAR_NO_FLAG;
@@ -247,17 +238,17 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             DPU_ALUCommand <= ALU_ADD;
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= CONT;
-            DataToDPU_2 <= ZERO16 & IMMEDIATE;
+            DataToDPU_2 <= ZERO16 & IMMEDIATE_EX;
 
         elsif Instr_E = ADDIU then
             DPU_ALUCommand <= ALU_ADDU;
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= CONT;
 
-            if IMMEDIATE(15) = '0' then
-              DataToDPU_2 <= ZERO16 & IMMEDIATE;
+            if IMMEDIATE_EX(15) = '0' then
+              DataToDPU_2 <= ZERO16 & IMMEDIATE_EX;
             else
-              DataToDPU_2 <= ONE16 & IMMEDIATE;
+              DataToDPU_2 <= ONE16 & IMMEDIATE_EX;
             end if;
 
 
@@ -265,7 +256,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             DPU_ALUCommand <= ALU_PASS_B;
             DPU_Mux_Cont_1 <= CONT;
             DPU_Mux_Cont_2 <= CONT;
-            DataToDPU_2 <= IMMEDIATE & ZERO16;
+            DataToDPU_2 <= IMMEDIATE_EX & ZERO16;
 
         elsif Instr_E = CLO then
             DPU_ALUCommand <= ALU_CLO;
@@ -303,7 +294,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
 
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= CONT;
-            DataToDPU_2 <= ZERO16 & IMMEDIATE;
+            DataToDPU_2 <= ZERO16 & IMMEDIATE_EX;
             if Instr_E = ORI then
               DPU_ALUCommand <= ALU_OR;
             elsif Instr_E = ANDI then
@@ -367,10 +358,10 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             DPU_ALUCommand <= ALU_COMP;
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= CONT;
-            if IMMEDIATE(15) = '0' then
-              DataToDPU_2 <= ZERO16 & IMMEDIATE;
+            if IMMEDIATE_EX(15) = '0' then
+              DataToDPU_2 <= ZERO16 & IMMEDIATE_EX;
             else
-              DataToDPU_2 <= ONE16 & IMMEDIATE;
+              DataToDPU_2 <= ONE16 & IMMEDIATE_EX;
             end if;
 
         elsif Instr_E = SLTU then
@@ -382,10 +373,10 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
             DPU_ALUCommand <= ALU_COMPU;
             DPU_Mux_Cont_1 <= RFILE;
             DPU_Mux_Cont_2 <= CONT;
-            if IMMEDIATE(15) = '0' then
-              DataToDPU_2 <= ZERO16 & IMMEDIATE;
+            if IMMEDIATE_EX(15) = '0' then
+              DataToDPU_2 <= ZERO16 & IMMEDIATE_EX;
             else
-              DataToDPU_2 <= ONE16 & IMMEDIATE;
+              DataToDPU_2 <= ONE16 & IMMEDIATE_EX;
             end if;
         -----------------------MULTIPLICATION AND DIVISION--------------------------
         elsif Instr_D = MULTU or Instr_D = MULT or Instr_D = MUL or Instr_D = DIV or
@@ -428,10 +419,10 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
               DPU_ALUCommand <= ALU_ADDU;
               DPU_Mux_Cont_1 <= RFILE;
               DPU_Mux_Cont_2 <= CONT;
-              if OFFSET(15) = '0' then
-                DataToDPU_2 <= ZERO16 & OFFSET;
+              if OFFSET_EX(15) = '0' then
+                DataToDPU_2 <= ZERO16 & OFFSET_EX;
               else
-                DataToDPU_2 <= ONE16 & OFFSET;
+                DataToDPU_2 <= ONE16 & OFFSET_EX;
               end if;
               MemRdAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
 
@@ -439,10 +430,10 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
               DPU_ALUCommand <= ALU_ADD;
               DPU_Mux_Cont_1 <= RFILE;
               DPU_Mux_Cont_2 <= CONT;
-              if OFFSET(15) = '0' then
-                DataToDPU_2 <= ZERO16 & OFFSET;
+              if OFFSET_EX(15) = '0' then
+                DataToDPU_2 <= ZERO16 & OFFSET_EX;
               else
-                DataToDPU_2 <= ONE16 & OFFSET;
+                DataToDPU_2 <= ONE16 & OFFSET_EX;
               end if;
               MemRdAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
         ------------------------store----------------
@@ -450,10 +441,10 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
               DPU_ALUCommand <= ALU_ADDU;
               DPU_Mux_Cont_1 <= RFILE;
               DPU_Mux_Cont_2 <= CONT;
-              if OFFSET(15) = '0' then
-                DataToDPU_2 <= ZERO16 & OFFSET;
+              if OFFSET_EX(15) = '0' then
+                DataToDPU_2 <= ZERO16 & OFFSET_EX;
               else
-                DataToDPU_2 <= ONE16 & OFFSET;
+                DataToDPU_2 <= ONE16 & OFFSET_EX;
               end if;
 
               -- Address Error Generration!
@@ -596,13 +587,9 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
 
 --PC handling------------------------------------------------------------------------
 PC_HANDLING:
-process(PC_out,Instr_E, halt_signal, LOW, IMMEDIATE )begin
+process(PC_out,Instr_E, LOW, IMMEDIATE_EX )begin
 
-    halt_signal_in <= halt_signal;
 
-    if halt_signal = '1' then
-        pc_in <= PC_out;
-    else
         PC_in <= PC_out + 4;
         if Instr_E = J then
           PC_in <= PC_out(33 downto 28) & InstrReg_out_E(25 downto 0) & "00";
@@ -614,88 +601,88 @@ process(PC_out,Instr_E, halt_signal, LOW, IMMEDIATE )begin
               Instr_E = BGEZAL or Instr_E = BLEZ or Instr_E = BLTZ or
               Instr_E = BLTZAL then
             if LOW = ONE32 then
-                if IMMEDIATE(15) = '0' then
-                  PC_in <= PC_out +(ZERO14 & IMMEDIATE & "00")-1;
+                if IMMEDIATE_EX(15) = '0' then
+                  PC_in <= PC_out +(ZERO14 & IMMEDIATE_EX & "00")-1;
                 else
-                  PC_in <= PC_out +(ONE14 & IMMEDIATE & "00")-1;
+                  PC_in <= PC_out +(ONE14 & IMMEDIATE_EX & "00")-1;
                 end if;
             end if;
         elsif Instr_E = BNE then
             if LOW = ZERO32 then
-                if IMMEDIATE(15) = '0' then
-                  PC_in <= PC_out +(ZERO14 & IMMEDIATE & "00")-1;
+                if IMMEDIATE_EX(15) = '0' then
+                  PC_in <= PC_out +(ZERO14 & IMMEDIATE_EX & "00")-1;
                 else
-                  PC_in <= PC_out +(ONE14 & IMMEDIATE & "00")-1;
+                  PC_in <= PC_out +(ONE14 & IMMEDIATE_EX & "00")-1;
                 end if;
             end if;
         end if;
-    end if;
+
 end process;
 
 ------------------------------------------------
 -- Instr decoder
 ------------------------------------------------
 INST_DECODER:
-process (SPECIAL_in, opcode_in)
+process (SPECIAL_F, opcode_F)
 begin
     Instr_F <= NOP;
-        case SPECIAL_in is
+        case SPECIAL_F is
           when "000000" =>
-              if opcode_in = "000000" then
+              if opcode_F = "000000" then
                   Instr_F <= SLL_inst;
-              elsif opcode_in = "000010" then
+              elsif opcode_F = "000010" then
                   Instr_F <= SRL_inst;
-              elsif opcode_in = "000011" then
+              elsif opcode_F = "000011" then
                   Instr_F <= SRA_inst;
-              elsif opcode_in = "000100" then
+              elsif opcode_F = "000100" then
                   Instr_F <= SLLV;
-              elsif opcode_in = "000110" then
+              elsif opcode_F = "000110" then
                   Instr_F <= SRLV;
-              elsif opcode_in = "000111" then
+              elsif opcode_F = "000111" then
                   Instr_F <= SRAV;
-              elsif opcode_in = "001000" then
+              elsif opcode_F = "001000" then
                   Instr_F <= JR;
-              elsif opcode_in = "001001" then
+              elsif opcode_F = "001001" then
                   Instr_F <= JALR;
-              elsif opcode_in = "001010" then
+              elsif opcode_F = "001010" then
                   Instr_F <= MOVZ;
-              elsif opcode_in = "001011" then
+              elsif opcode_F = "001011" then
                   Instr_F <= MOVN;
-              elsif opcode_in = "010000" then
+              elsif opcode_F = "010000" then
                   Instr_F <= MFHI;
-              elsif opcode_in = "010001" then
+              elsif opcode_F = "010001" then
                   Instr_F <= MTHI;
-              elsif opcode_in = "010010" then
+              elsif opcode_F = "010010" then
                   Instr_F <= MFLO;
-              elsif opcode_in = "010011" then
+              elsif opcode_F = "010011" then
                   Instr_F <= MTLO;
-              elsif opcode_in = "011000" then
+              elsif opcode_F = "011000" then
                   Instr_F <= MULT;
-              elsif opcode_in = "011001" then
+              elsif opcode_F = "011001" then
                   Instr_F <= MULTU;
-              elsif opcode_in = "011010" then
+              elsif opcode_F = "011010" then
                   Instr_F <= DIV;
-                elsif opcode_in = "011011" then
+                elsif opcode_F = "011011" then
                     Instr_F <= DIVU;
-              elsif opcode_in = "100000" then
+              elsif opcode_F = "100000" then
                   Instr_F <= ADD;
-              elsif opcode_in = "100001" then
+              elsif opcode_F = "100001" then
                   Instr_F <= ADDU;
-              elsif opcode_in = "100010" then
+              elsif opcode_F = "100010" then
                   Instr_F <= SUB;
-              elsif opcode_in = "100011" then
+              elsif opcode_F = "100011" then
                   Instr_F <= SUBU;
-              elsif opcode_in = "100100" then
+              elsif opcode_F = "100100" then
                   Instr_F <= AND_inst;
-              elsif opcode_in = "100101" then
+              elsif opcode_F = "100101" then
                   Instr_F <= OR_inst;
-              elsif opcode_in = "100110" then
+              elsif opcode_F = "100110" then
                   Instr_F <= XOR_inst;
-              elsif opcode_in = "100111" then
+              elsif opcode_F = "100111" then
                   Instr_F <= NOR_inst;
-              elsif opcode_in = "101010" then
+              elsif opcode_F = "101010" then
                   Instr_F <= SLT;
-              elsif opcode_in = "101011" then
+              elsif opcode_F = "101011" then
                   Instr_F <= SLTU;
               end if;
           when "000001" =>
@@ -723,19 +710,19 @@ begin
           when "001110" => Instr_F <= XORI;
           when "001111" => Instr_F <= LUI;
           when "011100" =>
-                if opcode_in = "000000" then
+                if opcode_F = "000000" then
                     Instr_F <= MADD;
-                elsif  opcode_in = "000001" then
+                elsif  opcode_F = "000001" then
                     Instr_F <= MADDU;
-                elsif opcode_in = "000010" then
+                elsif opcode_F = "000010" then
                     Instr_F <= MUL;
-                elsif opcode_in = "000100" then
+                elsif opcode_F = "000100" then
                     Instr_F <= MSUB;
-                elsif opcode_in = "000101" then
+                elsif opcode_F = "000101" then
                     Instr_F <= MSUBU;
-                elsif opcode_in = "100001" then
+                elsif opcode_F = "100001" then
                     Instr_F <= CLO;
-                elsif opcode_in = "100000" then
+                elsif opcode_F = "100000" then
                     Instr_F <= CLZ;
                 end if;
           when "100000" => Instr_F <= LB;
