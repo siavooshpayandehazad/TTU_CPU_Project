@@ -71,7 +71,7 @@ architecture RTL of ControlUnit is
   ---------------------------------------------
   alias LOW  : std_logic_vector is DPU_RESULT(31 downto 0);
   alias HIGH : std_logic_vector is DPU_RESULT(63 downto 32);
-  
+
   alias LOW_FF  : std_logic_vector is DPU_RESULT_FF(31 downto 0);
   alias HIGH_FF : std_logic_vector is DPU_RESULT_FF(63 downto 32);
 
@@ -130,7 +130,7 @@ architecture RTL of ControlUnit is
   end process;
 
 
-  Instr_Add <= PC_out;
+  Instr_Add <= PC_in;
 ---------------------------------------------
 --GPIO STUFF
 ---------------------------------------------
