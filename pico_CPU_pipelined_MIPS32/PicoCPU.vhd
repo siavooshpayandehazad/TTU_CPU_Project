@@ -32,13 +32,11 @@ signal IO_RD           : std_logic_vector (CPU_Bitwidth-1 downto 0);
 signal IO_WR           : std_logic_vector (CPU_Bitwidth-1 downto 0);
  ----------------------------------------
 signal DPU_Flags       : std_logic_vector (3 downto 0);
-signal DPU_Flags_FF    : std_logic_vector (3 downto 0);
 signal DataToDPU_1, DataToDPU_2       : std_logic_vector (CPU_Bitwidth-1 downto 0);
  ----------------------------------------
 signal DPU_ALUCommand, DPU_ALUCommand_in  : ALU_COMMAND;
 signal DPU_Mux_Cont_1, DPU_Mux_Cont_1_in  : DPU_IN_MUX;
 signal DPU_Mux_Cont_2, DPU_Mux_Cont_2_in  : DPU_IN_MUX;
-signal DPU_SetFlag   , DPU_SetFlag_in  : std_logic_vector (2 downto 0);
  ----------------------------------------
 signal RFILE_data_sel  : RFILE_IN_MUX;
 signal Data_to_RFILE   : std_logic_vector (CPU_Bitwidth-1 downto 0);
@@ -47,7 +45,6 @@ signal WB_enable       :  std_logic_vector (3 downto 0);
 signal RFILE_out_sel_1, RFILE_out_sel_1_in : std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 signal RFILE_out_sel_2, RFILE_out_sel_2_in : std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 
-signal flush_pipeline  : std_logic;
 signal DPU_RESULT      : std_logic_vector (2*CPU_Bitwidth-1 downto 0);
 signal DPU_RESULT_FF   : std_logic_vector (2*CPU_Bitwidth-1 downto 0);
 
@@ -99,14 +96,12 @@ begin
         IO_WR           => IO_WR          ,
         ----------------=> ---------------,--------
         DPU_Flags       => DPU_Flags      ,
-        DPU_Flags_FF    => DPU_Flags_FF   ,
         DataToDPU_1     => DataToDPU_1    ,
         DataToDPU_2     => DataToDPU_2    ,
 
         DPU_ALUCommand  => DPU_ALUCommand ,
         DPU_Mux_Cont_1  => DPU_Mux_Cont_1 ,
         DPU_Mux_Cont_2  => DPU_Mux_Cont_2 ,
-        DPU_SetFlag     => DPU_SetFlag    ,
         ----------------=> ---------------,--------
         RFILE_data_sel  => RFILE_data_sel ,
     	  RFILE_in_address=> RFILE_in_address   ,
@@ -115,7 +110,6 @@ begin
     	  RFILE_out_sel_2 => RFILE_out_sel_2_in,
         Data_to_RFILE   => Data_to_RFILE ,
 
-    	  flush_pipeline  => flush_pipeline ,
         DPU_RESULT      => DPU_RESULT     ,
         DPU_RESULT_FF   => DPU_RESULT_FF
         );
@@ -159,10 +153,7 @@ begin
             ALUCommand       => DPU_ALUCommand,
             Mux_Cont_1       => DPU_Mux_Cont_1,
             Mux_Cont_2       => DPU_Mux_Cont_2,
-            SetFlag          => DPU_SetFlag   ,
-
             DPU_Flags        => DPU_Flags,
-            DPU_Flags_FF     => DPU_Flags_FF,
             Result           => DPU_RESULT,
             Result_FF        => DPU_RESULT_FF);
 
@@ -182,6 +173,6 @@ MEM_DATA_IN_SELECT: process(MEM_IN_SEL, RFILE_out_sel_1, RFILE_out_sel_2, DPU_Re
   generic map (BitWidth => CPU_Bitwidth, preload_file => "code.txt")
   port map (MemRdAddress, Instr_Add(CPU_Bitwidth+1 downto 2), MEMDATA_IN, MemWrtAddress, clk, Mem_RW , rst , MEMDATA_OUT,  Instr_In);
 
-  FlagOut <=	DPU_Flags_FF;
+  FlagOut <=	DPU_Flags;
   output <= DPU_RESULT_FF;
 end RTL;

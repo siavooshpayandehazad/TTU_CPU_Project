@@ -2,7 +2,7 @@
 
 library IEEE;
 use IEEE.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+use IEEE.std_logic_unsigned.all;
 use IEEE.NUMERIC_STD.all;
 use work.pico_cpu.all;
 

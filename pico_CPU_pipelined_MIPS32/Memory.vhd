@@ -26,12 +26,12 @@ architecture beh of Memory is
 
   type Mem_type is array (0 to DataMem_depth-1) of std_logic_vector(BitWidth-1 downto 0) ;
    signal Mem : Mem_type := ((others=> (others=>'0')));
-   signal read_enable : std_logic;
+   signal write_enable : std_logic;
 
 
 begin
 
-  read_enable <= RW(0) or RW(1) or RW(2) or RW(3);
+  write_enable <= RW(0) or RW(1) or RW(2) or RW(3);
 
 
  MemProcess: process(clk,rst) is
@@ -51,7 +51,7 @@ begin
 
         --Mem<= ((others=> (others=>'0')));
     elsif rising_edge(clk) then
-      if read_enable = '1' then
+      if write_enable = '1' then
         if to_integer(unsigned(WrtAddress(BitWidth-1 downto 0))) <= DataMem_depth-1 then
           if RW(0) = '1' then
             Mem(to_integer(unsigned(WrtAddress(BitWidth-1 downto 0))))(7 downto 0) <= Data_in(7 downto 0);

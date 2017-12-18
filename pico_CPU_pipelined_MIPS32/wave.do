@@ -3,20 +3,25 @@ quietly WaveActivateNextPane {} 0
 add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:rst
 add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:clk
 add wave -noupdate -expand -group {Control Unit} -color Coral -radix unsigned :picocputestbench:PicoCPU_comp:ControlUnit_comp:PC_out
+add wave -noupdate -expand -group {Control Unit} -color Coral -radix unsigned :picocputestbench:PicoCPU_comp:ControlUnit_comp:EPC_out
+add wave -noupdate -expand -group {Control Unit} -color {Green Yellow} :picocputestbench:PicoCPU_comp:ControlUnit_comp:status_reg
+add wave -noupdate -expand -group {Control Unit} -color Cyan  :picocputestbench:PicoCPU_comp:ControlUnit_comp:cause_reg
 add wave -noupdate -expand -group {Control Unit} -group MEM_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:MemRdAddress
 add wave -noupdate -expand -group {Control Unit} -group MEM_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:MemWrtAddress
 add wave -noupdate -expand -group {Control Unit} -group MEM_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:Mem_RW
 add wave -noupdate -expand -group {Control Unit} -group MEM_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:MEM_IN_SEL
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_Flags
-add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_Flags_FF
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DataToDPU_1
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DataToDPU_2
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_ALUCommand
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_Mux_Cont_1
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_Mux_Cont_2
-add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_SetFlag
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_RESULT
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_RESULT_FF
+add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:HIGH_FF
+add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:LOW_FF
+add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:HIGH
+add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:LOW
 add wave -noupdate -expand -group {Control Unit} -group RFILE_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:RFILE_data_sel
 add wave -noupdate -expand -group {Control Unit} -group RFILE_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:RFILE_in_address
 add wave -noupdate -expand -group {Control Unit} -group RFILE_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:RFILE_WB_enable
@@ -40,18 +45,15 @@ add wave -noupdate -expand -group {Control Unit} -group raw_Instructions :picocp
 add wave -noupdate -expand -group {Control Unit} -group raw_Instructions :picocputestbench:PicoCPU_comp:ControlUnit_comp:InstrReg_out_D
 add wave -noupdate -expand -group {Control Unit} -group raw_Instructions :picocputestbench:PicoCPU_comp:ControlUnit_comp:InstrReg_out_E
 add wave -noupdate -expand -group {Control Unit} -group raw_Instructions :picocputestbench:PicoCPU_comp:ControlUnit_comp:InstrReg_out_WB
-add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:address_error
-add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:BGEZ_field
+add wave -noupdate -expand -group {Control Unit} -color Pink :picocputestbench:PicoCPU_comp:ControlUnit_comp:address_error
+add wave -noupdate -expand -group {Control Unit} -color Pink :picocputestbench:PicoCPU_comp:ControlUnit_comp:Illigal_opcode
+add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:BRANCH_FIELD
 add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:BASE_D
 add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:OFFSET_EX
 add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:IMMEDIATE_EX
 add wave -noupdate -expand -group {Control Unit} -radix unsigned :picocputestbench:PicoCPU_comp:ControlUnit_comp:sa_ex
 add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:SPECIAL_F
 add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:opcode_F
-add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:HIGH_FF
-add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:LOW_FF
-add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:HIGH
-add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:LOW
 add wave -noupdate -expand -group RegFile :picocputestbench:PicoCPU_comp:RegFile_comp:rst
 add wave -noupdate -expand -group RegFile :picocputestbench:PicoCPU_comp:RegFile_comp:clk
 add wave -noupdate -expand -group RegFile -group Data_in -color Salmon :picocputestbench:PicoCPU_comp:RegFile_comp:Data_in_sel
@@ -82,28 +84,26 @@ add wave -noupdate -expand -group DPU -group Input :picocputestbench:PicoCPU_com
 add wave -noupdate -expand -group DPU -group Input :picocputestbench:PicoCPU_comp:DPU_comp:Data_in_control_2
 add wave -noupdate -expand -group DPU -group Input :picocputestbench:PicoCPU_comp:DPU_comp:Mux_Out_1
 add wave -noupdate -expand -group DPU -group Input :picocputestbench:PicoCPU_comp:DPU_comp:Mux_Out_2
-add wave -noupdate -expand -group DPU -group Input :picocputestbench:PicoCPU_comp:DPU_comp:SetFlag
 add wave -noupdate -expand -group DPU :picocputestbench:PicoCPU_comp:DPU_comp:ACC_in
 add wave -noupdate -expand -group DPU :picocputestbench:PicoCPU_comp:DPU_comp:ACC_out
 add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:DPU_Flags
-add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:DPU_Flags_FF
-add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:EQ_Flag_out
-add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:OV_Flag_out
-add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:Z_Flag_out
-add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:C_flag_out
+add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:EQ_Flag
+add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:OV_Flag
+add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:Z_Flag
+add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:C_Flag
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:rst
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:clk
-add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:RdAddress_1
-add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:RdAddress_2
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:Data_in
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:WrtAddress
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:RW
+add wave -noupdate -expand -group {Data Memory} -color Yellow :picocputestbench:PicoCPU_comp:Mem_comp:write_enable
+add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:RdAddress_1
+add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:RdAddress_2
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:Data_Out_1
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:Data_Out_2
-add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:read_enable
 add wave -noupdate -expand -group {Data Memory} -color Cyan :picocputestbench:PicoCPU_comp:Mem_comp:Mem
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {1970 ps} 0}
+WaveRestoreCursors {{Cursor 1} {1500 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 613
 configure wave -valuecolwidth 64

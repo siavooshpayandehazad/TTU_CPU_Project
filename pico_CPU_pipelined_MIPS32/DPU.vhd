@@ -23,10 +23,8 @@ entity DPU is
          ALUCommand: in ALU_COMMAND;
          Mux_Cont_1: in DPU_IN_MUX;
          Mux_Cont_2: in DPU_IN_MUX;
-         SetFlag   : in std_logic_vector (2 downto 0);
 
          DPU_Flags   : out std_logic_vector (3 downto 0);
-         DPU_Flags_FF: out std_logic_vector (3 downto 0);
          Result      : out std_logic_vector (2*BitWidth-1 downto 0);
          Result_FF   : out std_logic_vector (2*BitWidth-1 downto 0)
     );
@@ -44,10 +42,10 @@ architecture RTL of DPU is
   ---------------------------------------------
   --      Flags
   ---------------------------------------------
-  signal EQ_Flag_out, EQ_Flag_in: std_logic := '0';
-  signal OV_Flag_out, OV_Flag_in: std_logic := '0';
-  signal Z_Flag_out, Z_Flag_in: std_logic := '0';
-  signal C_flag_in, C_flag_out, Cout:std_logic := '0';
+  signal EQ_Flag: std_logic := '0';
+  signal OV_Flag: std_logic := '0';
+  signal Z_Flag: std_logic := '0';
+  signal C_Flag, Cout:std_logic := '0';
   signal OV_Flag_Value :std_logic := '0';
 
 
@@ -64,10 +62,6 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, OV_Flag_Value, Cout, ACC_in);
     begin
     if rst = '1' then
       ACC_out<=(others =>'0');
-      OV_Flag_out <= '0';
-      Z_Flag_out <=  '0';
-      EQ_Flag_out <=  '0';
-      C_flag_out <= '0';
     elsif clk'event and clk= '1' then
       if ALUCommand = ALU_MULT or ALUCommand = ALU_MULTU or ALUCommand = ALU_MTHI or
          ALUCommand = ALU_MTLO or ALUCommand = ALU_DIV or ALUCommand = ALU_DIVU then
@@ -81,10 +75,6 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, OV_Flag_Value, Cout, ACC_in);
       elsif ALUCommand = ALU_MSUBU then
         ACC_out <= std_logic_vector(unsigned(ACC_in) - unsigned(ACC_out));
       end if;
-      OV_Flag_out <= OV_Flag_in;
-      Z_Flag_out <= Z_Flag_in;
-      EQ_Flag_out <= EQ_Flag_in;
-      C_flag_out <= C_flag_in;
   end if;
   end process;
 
@@ -118,48 +108,28 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, OV_Flag_Value, Cout, ACC_in);
   ---------------------------------------------
   --  Flag controls
   ---------------------------------------------
-  process(SetFlag, ALUCommand, ACC_in, OV_Flag_Value, Data_in_control_1, Cout, ACC_out, EQ_Flag_out,
-				Z_Flag_out, C_flag_out, OV_Flag_out)
+  process(ALUCommand, ACC_in, OV_Flag_Value, Data_in_control_1, Cout, ACC_out)
     begin
       ----------------------------------
-        if SetFlag = "011" then
-              EQ_Flag_in <= '0';
-        else
-            if (ACC_out(BitWidth-1 downto 0) = Data_in_control_1) then
-                EQ_Flag_in <= '1';
-             else
-                EQ_Flag_in <= '0';
-            end if;
-        end if;
-      ----------------------------------
-      if SetFlag = "001" then
-        Z_Flag_in <= '0';
-      else
-          Z_Flag_in <=  not (or_reduce(ACC_in));
-      end if;
-      ----------------------------------
-      if SetFlag = "100" then
-        C_flag_in <= '0';
-      else
-          C_flag_in <= ACC_out(BitWidth-1);
-      end if;
-      ----------------------------------
-      if SetFlag = "010" then
-          OV_Flag_in <= '0';
-      else
-          if (ALUCommand = ALU_ADD or ALUCommand = ALU_SUB) then
-          OV_Flag_in <= OV_Flag_Value;
-          else
-              OV_Flag_in <= OV_Flag_out;
+          if (ACC_out(BitWidth-1 downto 0) = Data_in_control_1) then
+              EQ_Flag <= '1';
+           else
+              EQ_Flag <= '0';
           end if;
-       end if;
+      ----------------------------------
+          Z_Flag <=  not (or_reduce(ACC_in));
+      ----------------------------------
+          C_Flag <= ACC_out(BitWidth-1);
+      ----------------------------------
+          if (ALUCommand = ALU_ADD or ALUCommand = ALU_SUB) then
+            OV_Flag <= OV_Flag_Value;
+          end if;
       ----------------------------------
 
   end process;
 
   Result <= ACC_in;
   Result_FF <= ACC_out;
-  DPU_Flags <= C_flag_in & EQ_Flag_in & Z_Flag_in  & OV_Flag_in;
-  DPU_Flags_FF <= C_flag_out & EQ_Flag_out & Z_Flag_out  & OV_Flag_out;
+  DPU_Flags <= C_Flag & EQ_Flag & Z_Flag  & OV_Flag;
 
 end RTL;

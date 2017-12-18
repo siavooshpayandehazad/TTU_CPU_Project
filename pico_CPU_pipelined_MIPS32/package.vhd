@@ -32,7 +32,9 @@ package pico_cpu is
                         -- load and store
                         LB, LBU, LH, LHU, LW, LWL, LWR, SB, SH, SW, SWL, SWR,
                         -- conditional move
-                        MOVZ, MOVN, SLT, SLTI, SLTIU, SLTU
+                        MOVZ, MOVN, SLT, SLTI, SLTIU, SLTU,
+                        -- system call
+                        SYSCALL
                         );
 
     -------------------------------------------------ALU COMMANDS
@@ -147,14 +149,12 @@ package pico_cpu is
         IO_WR           : out std_logic_vector (BitWidth-1 downto 0);
         ----------------------------------------
         DPU_Flags       : in  std_logic_vector (3 downto 0);
-        DPU_Flags_FF    : in  std_logic_vector (3 downto 0);
         DataToDPU_1     : out std_logic_vector (BitWidth-1 downto 0);
         DataToDPU_2     : out std_logic_vector (BitWidth-1 downto 0);
 
         DPU_ALUCommand  : out ALU_COMMAND;
         DPU_Mux_Cont_1  : out DPU_IN_MUX;
         DPU_Mux_Cont_2  : out DPU_IN_MUX;
-        DPU_SetFlag     : out std_logic_vector (2 downto 0);
         ----------------------------------------
         RFILE_data_sel  : out RFILE_IN_MUX;
     	  RFILE_in_address: out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
@@ -163,7 +163,6 @@ package pico_cpu is
     	  RFILE_out_sel_2 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
         Data_to_RFILE   :  out std_logic_vector (BitWidth-1 downto 0);
         ----------------------------------------
-    	  flush_pipeline  : out std_logic;
         DPU_RESULT      : in std_logic_vector (2*BitWidth-1 downto 0);
         DPU_RESULT_FF   : in  std_logic_vector (2*BitWidth-1 downto 0)
       );
@@ -181,14 +180,10 @@ package pico_cpu is
              Data_in_RegFile_2: in std_logic_vector (BitWidth-1 downto 0);
              Data_in_control_1: in std_logic_vector (BitWidth-1 downto 0);
              Data_in_control_2: in std_logic_vector (BitWidth-1 downto 0);
-
              ALUCommand: in ALU_COMMAND;
              Mux_Cont_1: DPU_IN_MUX;
              Mux_Cont_2: DPU_IN_MUX;
-             SetFlag   : in std_logic_vector (2 downto 0);
-
              DPU_Flags   : out std_logic_vector (3 downto 0);
-             DPU_Flags_FF: out std_logic_vector (3 downto 0);
              Result      : out std_logic_vector (2*BitWidth-1 downto 0);
              Result_FF   : out std_logic_vector (2*BitWidth-1 downto 0)
         );
