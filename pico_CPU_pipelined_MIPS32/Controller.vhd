@@ -521,8 +521,8 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
         case( Instr_WB ) is
             when LBU => RFILE_data_sel <= FROM_MEM8;
             when LB  => RFILE_data_sel <= FROM_MEM8_SGINED;
-            when LH  => RFILE_data_sel <= FROM_MEM16_SGINED;
             when LHU => RFILE_data_sel <= FROM_MEM16;
+            when LH  => RFILE_data_sel <= FROM_MEM16_SGINED;
             when others => RFILE_data_sel <= FROM_MEM32; --Instr_WB = LW
         end case;
 

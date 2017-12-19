@@ -58,7 +58,6 @@ begin
    case Data_in_sel is
   	when CU                => Data_in <= Data_in_CU;
     when DPU_LOW           => Data_in <= Data_in_DPU_LOW;
-  	when DPU_HI            => Data_in <= Data_in_DPU_HI;
     when ACC_LOW           => Data_in <= Data_in_ACC_LOW;
   	when ACC_HI            => Data_in <= Data_in_ACC_HI;
   	when R2                => Data_in <= Data_in_R2;

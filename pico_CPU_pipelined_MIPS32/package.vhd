@@ -55,7 +55,7 @@ package pico_cpu is
     TYPE DPU_IN_MUX IS (MEM, CONT, RFILE, ONE);
 
     ------------------------------------------------
-    TYPE RFILE_IN_MUX IS (CU, ACC_HI, ACC_LOW, DPU_HI, DPU_LOW, R2,
+    TYPE RFILE_IN_MUX IS (CU, ACC_HI, ACC_LOW, DPU_LOW, R2,
                           FROM_MEM8,FROM_MEM16,FROM_MEM32,
                           FROM_MEM8_SGINED, FROM_MEM16_SGINED,
                           ZERO);
