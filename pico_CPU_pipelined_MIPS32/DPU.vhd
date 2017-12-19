@@ -1,5 +1,8 @@
 --Copyright (C) 2017 Siavoosh Payandeh Azad
 
+-- DPU has one fixed input which is coming directly from Register-File 
+-- The other input is selectable between Rfile, Memory, Control 
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 USE ieee.std_logic_unsigned.ALL;
@@ -17,11 +20,9 @@ entity DPU is
          Data_in_mem: in std_logic_vector (BitWidth-1 downto 0);
          Data_in_RegFile_1: in std_logic_vector (BitWidth-1 downto 0);
          Data_in_RegFile_2: in std_logic_vector (BitWidth-1 downto 0);
-         Data_in_control_1: in std_logic_vector (BitWidth-1 downto 0);
          Data_in_control_2: in std_logic_vector (BitWidth-1 downto 0);
 
          ALUCommand: in ALU_COMMAND;
-         Mux_Cont_1: in DPU_IN_MUX;
          Mux_Cont_2: in DPU_IN_MUX;
 
          DPU_OV      : out std_logic;
@@ -75,18 +76,9 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, OV_Flag_Value, Cout, ACC_in);
   end process;
 
   ---------------------------------------------
-  --    ALU 2nd Input multiplexer
+  --    ALU Input multiplexer
   ---------------------------------------------
-  process (Data_in_mem, Data_in_control_1, Data_in_RegFile_1, Mux_Cont_1)
-    begin
-      case Mux_Cont_1 is
-        when MEM   => Mux_Out_1 <= Data_in_mem;
-        when CONT  => Mux_Out_1 <= Data_in_control_1;
-        when RFILE => Mux_Out_1 <= Data_in_RegFile_1;
-        when ONE   => Mux_Out_1 <= std_logic_vector(to_unsigned(1, BitWidth));
-      when others => Mux_Out_1 <= std_logic_vector(to_unsigned(0, BitWidth));
-      end case;
-  end process;
+  Mux_Out_1 <= Data_in_RegFile_1;
 
 
   process (Data_in_mem, Data_in_control_2, Data_in_RegFile_2, Mux_Cont_2)

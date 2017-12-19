@@ -31,11 +31,10 @@ signal IO_RD           : std_logic_vector (CPU_Bitwidth-1 downto 0);
 signal IO_WR           : std_logic_vector (CPU_Bitwidth-1 downto 0);
  ----------------------------------------
 signal DPU_OV          : std_logic;
-signal DataToDPU_1, DataToDPU_2       : std_logic_vector (CPU_Bitwidth-1 downto 0);
+signal DataToDPU_2       : std_logic_vector (CPU_Bitwidth-1 downto 0);
  ----------------------------------------
-signal DPU_ALUCommand, DPU_ALUCommand_in  : ALU_COMMAND;
-signal DPU_Mux_Cont_1, DPU_Mux_Cont_1_in  : DPU_IN_MUX;
-signal DPU_Mux_Cont_2, DPU_Mux_Cont_2_in  : DPU_IN_MUX;
+signal DPU_ALUCommand  : ALU_COMMAND;
+signal DPU_Mux_Cont_2  : DPU_IN_MUX;
  ----------------------------------------
 signal RFILE_data_sel  : RFILE_IN_MUX;
 signal Data_to_RFILE   : std_logic_vector (CPU_Bitwidth-1 downto 0);
@@ -81,27 +80,25 @@ begin
   port map (
         rst             => rst            ,
         clk             => clk            ,
-        ----------------=> ---------------,--------
+        -------------------------------------------
         Instr_In        => Instr_In       ,
         Instr_Add       => Instr_Add      ,
-        ----------------=> ---------------,--------
+        -------------------------------------------
         MemRdAddress    => MemRdAddress   ,
     	  MemWrtAddress   => MemWrtAddress  ,
         Mem_RW          => Mem_RW         ,
         MEM_IN_SEL      => MEM_IN_SEL     ,
-        ----------------=> ---------------,--------
+        -------------------------------------------
         IO_DIR          => IO_DIR         ,
         IO_RD           => IO_RD          ,
         IO_WR           => IO_WR          ,
-        ----------------=> ---------------,--------
-        DPU_OV          => DPU_OV      ,
-        DataToDPU_1     => DataToDPU_1    ,
+        -------------------------------------------
+        DPU_OV          => DPU_OV         ,
         DataToDPU_2     => DataToDPU_2    ,
 
         DPU_ALUCommand  => DPU_ALUCommand ,
-        DPU_Mux_Cont_1  => DPU_Mux_Cont_1 ,
         DPU_Mux_Cont_2  => DPU_Mux_Cont_2 ,
-        ----------------=> ---------------,--------
+        -------------------------------------------
         RFILE_data_sel  => RFILE_data_sel ,
     	  RFILE_in_address=> RFILE_in_address   ,
         RFILE_WB_enable => WB_enable,
@@ -112,8 +109,6 @@ begin
         DPU_RESULT      => DPU_RESULT     ,
         DPU_RESULT_FF   => DPU_RESULT_FF
         );
-
-
 
   --register file
   RegFile_comp: RegisterFile
@@ -146,11 +141,9 @@ begin
             Data_in_mem      => MEMDATA_OUT,
             Data_in_RegFile_1=> R1,
             Data_in_RegFile_2=> R2,
-            Data_in_control_1=> DataToDPU_1,
             Data_in_control_2=> DataToDPU_2,
 
             ALUCommand       => DPU_ALUCommand,
-            Mux_Cont_1       => DPU_Mux_Cont_1,
             Mux_Cont_2       => DPU_Mux_Cont_2,
             DPU_OV           => DPU_OV,
             Result           => DPU_RESULT,
