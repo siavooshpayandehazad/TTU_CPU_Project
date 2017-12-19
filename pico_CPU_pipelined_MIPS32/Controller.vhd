@@ -71,7 +71,7 @@ architecture RTL of ControlUnit is
   type RFILE_type is array (0 to 31) of std_logic_vector(BitWidth-1 downto 0) ;
   signal cp0_control, cp0_control_in : RFILE_type := ((others=> (others=>'0')));
   ---------------------------------------------
-  --      OpCode Aliases
+  --    Aliases
   ---------------------------------------------
   alias LOW  : std_logic_vector is DPU_RESULT(31 downto 0);
   alias HIGH : std_logic_vector is DPU_RESULT(63 downto 32);
@@ -109,7 +109,7 @@ architecture RTL of ControlUnit is
 
   begin
   ---------------------------------------------
-  -- Registers setting
+  -- Clock Process
   ---------------------------------------------
   CLOCK_PROC:process (clk,rst)
     begin
@@ -301,7 +301,7 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
               DataToDPU_2 <= ZERO16 & IMMEDIATE_EX;
             end if;
         elsif Instr_E = LUI then  	-- RFILE by default is giving R0 out
-        	DPU_ALUCommand <= ALU_ADDU;
+        	DPU_ALUCommand <= ALU_OR;	-- we OR the data from control unit with 0
             DPU_Mux_Cont_2 <= CONT;
             DataToDPU_2 <= IMMEDIATE_EX & ZERO16;
         elsif Instr_E = CLO then
@@ -462,38 +462,33 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
 
  WB_SIGNALS_GEN: process(Instr_E,Instr_WB, rd_ex, rt_ex, rs_ex, rt_wb, PC_out, LOW)
       begin
+      -- DO NOT CHANGE THE DEFAULT VALUES!
       RFILE_in_address   <= (others => '0');
-      RFILE_data_sel <= ZERO;
+      RFILE_data_sel <= DPU_LOW;
       Data_to_RFILE  <= (others => '0');
       RFILE_WB_enable <= "0000";
       -----------------------Arithmetic--------------------------
       if Instr_E = ADD or Instr_E = ADDU or Instr_E = SUB or Instr_E = SUBU or Instr_E = CLO or Instr_E = CLZ then
-          RFILE_data_sel <= DPU_LOW;
           RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       elsif Instr_E = ADDI or Instr_E = ADDIU or Instr_E = LUI then
-          RFILE_data_sel <= DPU_LOW;
           RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_ex;
       -----------------------logical--------------------------
       elsif Instr_E = AND_inst or Instr_E = OR_inst or Instr_E = NOR_inst or Instr_E = XOR_inst then
-          RFILE_data_sel <= DPU_LOW;
           RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
 
       elsif Instr_E = ANDI or Instr_E = ORI or Instr_E = XORI then
-          RFILE_data_sel <= DPU_LOW;
           RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_ex;
       -----------------------SHIFT AND ROTATE-----------------
       elsif Instr_E = SLL_inst or Instr_E = SRL_inst or Instr_E = SLLV or
             Instr_E = SRLV or Instr_E = SRA_inst or Instr_E = SRAV then
-          RFILE_data_sel <= DPU_LOW;
           RFILE_WB_enable <= "1111";
           RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       --  MULT and MULTU only WRITES IN ACC
       elsif Instr_E = MUL then
-            RFILE_data_sel <= DPU_LOW;
             RFILE_WB_enable <= "1111";
             RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       ----------------------ACCUMULATOR ACCESS -----------------------------------
@@ -540,7 +535,7 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
       Data_to_RFILE  <= cp0_control(to_integer(unsigned(rd_wb)));
     end if;
 
-    -----------------------JUMP and BRANCH--------------------------
+    -------------------------------------------------------------------------
     if Instr_WB = LWL then
       RFILE_WB_enable <= "1100";
       RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
@@ -575,15 +570,13 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
         Data_to_RFILE  <= (others => '0');
       end if;
     end if;
-
-
     end process;
 
 --PC handling------------------------------------------------------------------------
 PC_HANDLING: process(PC_out,Instr_E, LOW, IMMEDIATE_EX, EPC)begin
         PC_in <= PC_out + 4;
         if Instr_E = SYSCALL  then
-          PC_in <= DPU_RESULT;
+          PC_in <= DPU_RESULT;			-- supposed to be contents of R2
         elsif Instr_E = ERET then
           PC_in <= EPC;
         elsif Instr_E = J then
