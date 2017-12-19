@@ -20,7 +20,7 @@ architecture RTL of PicoCPU is
 --      Signals
 ---------------------------------------------
 signal Instr_In        : std_logic_vector (CPU_Bitwidth-1 downto 0);
-signal Instr_Add       : std_logic_vector (CPU_Bitwidth+1 downto 0);
+signal Instr_Add, Instr_Add_mem : std_logic_vector (CPU_Bitwidth-1 downto 0);
  ----------------------------------------
 signal MemRdAddress    : std_logic_vector (CPU_Bitwidth-1 downto 0);
 signal MemWrtAddress   : std_logic_vector (CPU_Bitwidth-1 downto 0);
@@ -167,10 +167,11 @@ MEM_DATA_IN_SELECT: process(MEM_IN_SEL, RFILE_out_sel_1, RFILE_out_sel_2, DPU_Re
 
   end process;
   --memory
+  Instr_Add_mem <= "00" & Instr_Add(CPU_Bitwidth-1 downto 2);
 
   Mem_comp: RAM
   generic map (BitWidth => CPU_Bitwidth, preload_file => "code.txt")
-  port map (MemRdAddress, Instr_Add(CPU_Bitwidth+1 downto 2), MEMDATA_IN, MemWrtAddress, clk, Mem_RW , rst , MEMDATA_OUT,  Instr_In);
+  port map (MemRdAddress, Instr_Add_mem, MEMDATA_IN, MemWrtAddress, clk, Mem_RW , rst , MEMDATA_OUT,  Instr_In);
 
 
   output <= DPU_RESULT_FF;

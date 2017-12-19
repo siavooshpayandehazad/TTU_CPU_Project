@@ -18,7 +18,7 @@ entity ControlUnit is
     clk             : in  std_logic;
     ----------------------------------------
     Instr_In        : in  std_logic_vector (InstructionWidth-1 downto 0);
-    Instr_Add       : out std_logic_vector (BitWidth+1 downto 0);
+    Instr_Add       : out std_logic_vector (BitWidth-1 downto 0);
     ----------------------------------------
     MemRdAddress    : out std_logic_vector (BitWidth-1 downto 0);
 	  MemWrtAddress   : out std_logic_vector (BitWidth-1 downto 0);
@@ -58,8 +58,8 @@ architecture RTL of ControlUnit is
 
   signal Instr_F, Instr_D, Instr_E, Instr_WB :Instruction := NOP;
 
-  signal PC_in, PC_out : std_logic_vector (BitWidth+1 downto 0):= (others => '0');
-  signal EPC_in, EPC_out : std_logic_vector (BitWidth+1 downto 0):= (others => '0');
+  signal PC_in, PC_out : std_logic_vector (BitWidth-1 downto 0):= (others => '0');
+
 
   signal InstrReg_out_D, InstrReg_out_E, InstrReg_out_WB: std_logic_vector (InstructionWidth-1 downto 0) := (others => '0');
   signal arithmetic_operation : std_logic;
@@ -67,9 +67,11 @@ architecture RTL of ControlUnit is
   signal IO_DIR_in, IO_DIR_FF :std_logic;
   signal address_error  : std_logic;
   signal Illigal_opcode : std_logic;
-  signal sys_call       : std_logic;
-  signal status_reg, status_reg_in :std_logic_vector (31 downto 0);
-  signal cause_reg, cause_reg_in :std_logic_vector (31 downto 0);
+
+
+
+  type RFILE_type is array (0 to 31) of std_logic_vector(BitWidth-1 downto 0) ;
+  signal cp0_control, cp0_control_in : RFILE_type := ((others=> (others=>'0')));
   ---------------------------------------------
   --      OpCode Aliases
   ---------------------------------------------
@@ -81,6 +83,7 @@ architecture RTL of ControlUnit is
 
   alias SPECIAL_F : std_logic_vector (5 downto 0) is Instr_In (31 downto 26);
   alias opcode_F  : std_logic_vector (5 downto 0) is Instr_In (5 downto 0);
+  alias MF        : std_logic_vector (4 downto 0) is Instr_In (25 downto 21);
 
   alias rs_wb : std_logic_vector (4 downto 0) is InstrReg_out_WB (25 downto 21);
   alias rt_wb : std_logic_vector (4 downto 0) is InstrReg_out_WB (20 downto 16);
@@ -101,6 +104,11 @@ architecture RTL of ControlUnit is
   alias BASE_D   : std_logic_vector (4 downto 0) is InstrReg_out_D (25 downto 21);
   alias BRANCH_FIELD: std_logic_vector (4 downto 0) is InstrReg_out_D (20 downto 16);
 
+
+  alias SR    : std_logic_vector (BitWidth-1 downto 0) is cp0_control(12);
+  alias Cause : std_logic_vector (BitWidth-1 downto 0) is cp0_control(13);
+  alias EPC   : std_logic_vector (BitWidth-1 downto 0) is cp0_control(14);
+
   begin
   ---------------------------------------------
   -- Registers setting
@@ -109,7 +117,6 @@ architecture RTL of ControlUnit is
     begin
     if rst = '1' then
        PC_out <= (others => '0');
-       EPC_out <= (others => '0');
        InstrReg_out_D <= (others=> '0');
        InstrReg_out_E <= (others=> '0');
        InstrReg_out_WB <= (others=> '0');
@@ -118,47 +125,56 @@ architecture RTL of ControlUnit is
        Instr_WB <= NOP;
        IO_WR_in_FF <=  (others=> '0');
        IO_DIR_FF <= '0';
-       cause_reg <= (others => '0');
-       status_reg <= (others => '0');
+       cp0_control <= ((others=> (others=>'0')));
     elsif clk'event and clk='1' then
        IO_WR_in_FF <= IO_WR_in;
        IO_DIR_FF <= IO_DIR_in;
        PC_out <= PC_in;
-       EPC_out <= EPC_in;
        InstrReg_out_D <= Instr_In;
        InstrReg_out_E <= InstrReg_out_D;
        InstrReg_out_WB <= InstrReg_out_E;
        Instr_D <= Instr_F;
        Instr_E <= Instr_D;
        Instr_WB <= Instr_E;
-       cause_reg <= cause_reg_in;
-       status_reg <= status_reg_in;
+       cp0_control <= cp0_control_in;
   end if;
   end process;
 
 
- EXCEPTION_HANDLING: process(DPU_OV, cause_reg, EPC_out, PC_out, status_reg,
-                             sys_call, Illigal_opcode)begin
-    cause_reg_in <= cause_reg;
-    status_reg_in <= status_reg;
-    EPC_in <= EPC_out;
+ EXCEPTION_HANDLING: process(DPU_OV, PC_out, cp0_control, Instr_E,
+                             Illigal_opcode)begin
+
+    cp0_control_in(12) <= cp0_control(12); --SR
+    cp0_control_in(14) <= cp0_control(14); --EPC
     if Illigal_opcode = '1' then
-      EPC_in <= PC_out;
-      cause_reg_in(1 downto 0) <="01";
-      status_reg_in <= std_logic_vector(shift_left(unsigned(status_reg), 4));
+      cp0_control_in(14) <= PC_out;      --EPC <= PC
+      cp0_control_in(13)(1 downto 0) <="01";  --cause register
+      cp0_control_in(12) <= std_logic_vector(shift_left(unsigned(cp0_control(12)), 4));
       --TODO: Also should do load PC with the proper address!
-    elsif DPU_OV = '1' then
-      EPC_in <= PC_out;
-      cause_reg_in(1 downto 0) <="10";
-      status_reg_in <= std_logic_vector(shift_left(unsigned(status_reg), 4));
-      --TODO: Also should do load PC with the proper address!
-      --TODO: Happens during execution! should flush the pipe in Fetch and decode!
-    elsif sys_call = '1' then
-      EPC_in <= PC_out;
-      cause_reg_in(1 downto 0) <="11";
-      status_reg_in <= std_logic_vector(shift_left(unsigned(status_reg), 4));
+    end if;
+
+    if DPU_OV = '1' then
+      cp0_control_in(14) <= PC_out;      --EPC <= PC
+      cp0_control_in(13)(1 downto 0) <="10";  --cause register
+      cp0_control_in(12) <= std_logic_vector(shift_left(unsigned(cp0_control(12)), 4));
       --TODO: Also should do load PC with the proper address!
       --TODO: Happens during execution! should flush the pipe in Fetch and decode!
+    end if;
+
+    if Instr_E = SYSCALL then
+      cp0_control_in(14) <= PC_out;     --EPC <= PC
+      cp0_control_in(13)(1 downto 0) <="11"; --cause register
+      cp0_control_in(12) <= std_logic_vector(shift_left(unsigned(cp0_control(12)), 4)); --status_reg
+      --TODO: Also should do load PC with the proper address!
+      --TODO: Happens during execution! should flush the pipe in Fetch and decode!
+    end if;
+
+    if Instr_E = ERET then
+      cp0_control_in(12) <= std_logic_vector(shift_right(unsigned(cp0_control(12)), 4)); --status_reg
+    end if;
+
+    if Instr_E = MTC0 then
+        cp0_control_in(to_integer(unsigned(rd_wb))) <= DPU_Result;
     end if;
   end process;
 
@@ -240,13 +256,19 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
     elsif Instr_D = SLTI or Instr_D = SLTIU then
         RFILE_out_sel_1  <=  rs_d;
         RFILE_out_sel_2  <=  rs_d;
+    elsif Instr_D = SYSCALL then
+        RFILE_out_sel_1  <=  "00010";
+        RFILE_out_sel_2  <=  "00010";
+    elsif Instr_D =  MTC0 then
+        RFILE_out_sel_1  <=  rt_d;
+        RFILE_out_sel_2  <=  rt_d;
     end if;
   end process;
 
 
   EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
       begin
-        sys_call <= '0';
+
         address_error <= '0';
         MemWrtAddress  <= (others => '0');
         MemRdAddress   <= (others => '0');
@@ -469,8 +491,12 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
               when SWL => Mem_RW <= "1100";
               when others => Mem_RW <= "0011"; -- Instr_E = SWR
             end case;
-        elsif Instr_E = SYSCALL then
-          sys_call <= '1';
+
+        elsif Instr_E =  MTC0 or Instr_E = SYSCALL then
+          DPU_ALUCommand <= ALU_PASS_A;
+          DPU_Mux_Cont_1 <= RFILE;
+          DPU_Mux_Cont_2 <= RFILE;
+
         end if;
     end process;
 
@@ -547,6 +573,14 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
         end case;
 
     end if;
+
+    if Instr_WB = MFC0 then
+      RFILE_WB_enable <= "1111";
+      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+      RFILE_data_sel <= CU;
+      Data_to_RFILE  <= cp0_control(to_integer(unsigned(rd_wb)));
+    end if;
+
     -----------------------JUMP and BRANCH--------------------------
     if Instr_WB = LWL then
       RFILE_WB_enable <= "1100";
@@ -582,14 +616,20 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
         Data_to_RFILE  <= (others => '0');
       end if;
     end if;
+
+
     end process;
 
 --PC handling------------------------------------------------------------------------
 PC_HANDLING:
-process(PC_out,Instr_E, LOW, IMMEDIATE_EX )begin
+process(PC_out,Instr_E, LOW, IMMEDIATE_EX, EPC)begin
         PC_in <= PC_out + 4;
-        if Instr_E = J then
-          PC_in <= PC_out(33 downto 28) & InstrReg_out_E(25 downto 0) & "00";
+        if Instr_E = SYSCALL  then
+          PC_in <= DPU_RESULT;
+        elsif Instr_E = ERET then
+          PC_in <= EPC;
+        elsif Instr_E = J then
+          PC_in <= PC_out(31 downto 28) & InstrReg_out_E(25 downto 0) & "00";
         elsif Instr_E = JR then
           PC_in <= LOW;
         elsif Instr_E = JAL then
@@ -679,6 +719,14 @@ begin
           when "001101" => Instr_F <= ORI;
           when "001110" => Instr_F <= XORI;
           when "001111" => Instr_F <= LUI;
+          when "010000" =>
+                if opcode_F = "011000" then
+                    Instr_F <= ERET;
+                elsif MF = "00000" then
+                    Instr_F <= MFC0;
+                elsif MF = "00100" then
+                    Instr_F <= MTC0;
+                end if;
           when "011100" =>
                 case(opcode_F) is
                   when "000000" => Instr_F <= MADD;

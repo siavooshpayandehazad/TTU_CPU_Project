@@ -3,9 +3,9 @@ quietly WaveActivateNextPane {} 0
 add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:rst
 add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:clk
 add wave -noupdate -expand -group {Control Unit} -color Coral -radix unsigned :picocputestbench:PicoCPU_comp:ControlUnit_comp:PC_out
-add wave -noupdate -expand -group {Control Unit} -color Coral -radix unsigned :picocputestbench:PicoCPU_comp:ControlUnit_comp:EPC_out
-add wave -noupdate -expand -group {Control Unit} -color {Green Yellow} :picocputestbench:PicoCPU_comp:ControlUnit_comp:status_reg
-add wave -noupdate -expand -group {Control Unit} -color Cyan  :picocputestbench:PicoCPU_comp:ControlUnit_comp:cause_reg
+add wave -noupdate -expand -group {Control Unit} -color Coral -radix unsigned :picocputestbench:PicoCPU_comp:ControlUnit_comp:EPC
+add wave -noupdate -expand -group {Control Unit} -color {Green Yellow} :picocputestbench:PicoCPU_comp:ControlUnit_comp:SR
+add wave -noupdate -expand -group {Control Unit} -color Cyan  :picocputestbench:PicoCPU_comp:ControlUnit_comp:Cause
 add wave -noupdate -expand -group {Control Unit} -group MEM_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:MemRdAddress
 add wave -noupdate -expand -group {Control Unit} -group MEM_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:MemWrtAddress
 add wave -noupdate -expand -group {Control Unit} -group MEM_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:Mem_RW

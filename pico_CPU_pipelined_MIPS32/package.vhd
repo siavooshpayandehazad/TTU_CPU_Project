@@ -33,8 +33,10 @@ package pico_cpu is
                         LB, LBU, LH, LHU, LW, LWL, LWR, SB, SH, SW, SWL, SWR,
                         -- conditional move
                         MOVZ, MOVN, SLT, SLTI, SLTIU, SLTU,
-                        -- system call
-                        SYSCALL
+                        -- exception
+                        SYSCALL, ERET,
+                        -- Co-processor
+                        MFC0, MTC0
                         );
 
     -------------------------------------------------ALU COMMANDS
