@@ -29,7 +29,7 @@ entity ControlUnit is
     IO_RD           : in std_logic_vector (BitWidth-1 downto 0);
     IO_WR           : out std_logic_vector (BitWidth-1 downto 0);
     ----------------------------------------
-    DPU_Flags       : in  std_logic_vector (3 downto 0);
+    DPU_OV          : in  std_logic;
     DataToDPU_1     : out std_logic_vector (BitWidth-1 downto 0);
     DataToDPU_2     : out std_logic_vector (BitWidth-1 downto 0);
 
@@ -137,7 +137,7 @@ architecture RTL of ControlUnit is
   end process;
 
 
- EXCEPTION_HANDLING: process(DPU_Flags, cause_reg, EPC_out, PC_out, status_reg,
+ EXCEPTION_HANDLING: process(DPU_OV, cause_reg, EPC_out, PC_out, status_reg,
                              sys_call, Illigal_opcode)begin
     cause_reg_in <= cause_reg;
     status_reg_in <= status_reg;
@@ -147,7 +147,7 @@ architecture RTL of ControlUnit is
       cause_reg_in(1 downto 0) <="01";
       status_reg_in <= std_logic_vector(shift_left(unsigned(status_reg), 4));
       --TODO: Also should do load PC with the proper address!
-    elsif DPU_Flags(0) = '1' then
+    elsif DPU_OV = '1' then
       EPC_in <= PC_out;
       cause_reg_in(1 downto 0) <="10";
       status_reg_in <= std_logic_vector(shift_left(unsigned(status_reg), 4));
@@ -158,7 +158,7 @@ architecture RTL of ControlUnit is
       cause_reg_in(1 downto 0) <="11";
       status_reg_in <= std_logic_vector(shift_left(unsigned(status_reg), 4));
       --TODO: Also should do load PC with the proper address!
-      --TODO: Happens during execution! should flush the pipe in Fetch and decode! 
+      --TODO: Happens during execution! should flush the pipe in Fetch and decode!
     end if;
   end process;
 
@@ -188,7 +188,6 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
       elsif Instr_D = ADDI or Instr_D = ADDIU or  Instr_D = CLO or Instr_D = CLZ then
           RFILE_out_sel_1  <=  rs_d;
     	    RFILE_out_sel_2  <=  rs_d;
-
       -----------------------LOGICAL--------------------------
       elsif Instr_D = AND_inst or Instr_D = OR_inst or Instr_D = NOR_inst or Instr_D = XOR_inst then
           RFILE_out_sel_1  <=  rt_d;
@@ -216,7 +215,6 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
                 RFILE_out_sel_1  <=  rt_d;
                 RFILE_out_sel_2  <=  rs_d;
           end if;
-
     -----------------------MULTIPLICATION AND DIVISION--------------------------
   elsif Instr_D = MULTU or Instr_D = MULT or Instr_D = MUL or Instr_D = DIV or
         Instr_D = DIVU or Instr_D = MADD  or Instr_D = MADDU or Instr_D = MSUB or
@@ -282,10 +280,10 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
               DataToDPU_2 <= ZERO16 & IMMEDIATE_EX;
             end if;
         elsif Instr_E = LUI then
-            DPU_ALUCommand <= ALU_PASS_B;
+            DPU_ALUCommand <= ALU_PASS_A;
             DPU_Mux_Cont_1 <= CONT;
             DPU_Mux_Cont_2 <= CONT;
-            DataToDPU_2 <= IMMEDIATE_EX & ZERO16;
+            DataToDPU_1 <= IMMEDIATE_EX & ZERO16;
         elsif Instr_E = CLO then
             DPU_ALUCommand <= ALU_CLO;
             DPU_Mux_Cont_1 <= RFILE;

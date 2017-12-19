@@ -7,7 +7,7 @@ use work.pico_cpu.all;
 use ieee.std_logic_textio.all;
 use std.textio.all;
 
-entity Memory is
+entity RAM is
   generic (BitWidth: integer;
            preload_file: string :="code.txt");
   port ( RdAddress_1: in std_logic_vector (BitWidth-1 downto 0);
@@ -20,9 +20,9 @@ entity Memory is
          Data_Out_1: out std_logic_vector (BitWidth-1 downto 0);
          Data_Out_2: out std_logic_vector (BitWidth-1 downto 0)
     );
-end Memory;
+end RAM;
 
-architecture beh of Memory is
+architecture beh of RAM is
 
   type Mem_type is array (0 to DataMem_depth-1) of std_logic_vector(BitWidth-1 downto 0) ;
    signal Mem : Mem_type := ((others=> (others=>'0')));

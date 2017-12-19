@@ -10,7 +10,7 @@ add wave -noupdate -expand -group {Control Unit} -group MEM_signals :picocputest
 add wave -noupdate -expand -group {Control Unit} -group MEM_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:MemWrtAddress
 add wave -noupdate -expand -group {Control Unit} -group MEM_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:Mem_RW
 add wave -noupdate -expand -group {Control Unit} -group MEM_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:MEM_IN_SEL
-add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_Flags
+add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_OV
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DataToDPU_1
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DataToDPU_2
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_ALUCommand
@@ -47,6 +47,7 @@ add wave -noupdate -expand -group {Control Unit} -group raw_Instructions :picocp
 add wave -noupdate -expand -group {Control Unit} -group raw_Instructions :picocputestbench:PicoCPU_comp:ControlUnit_comp:InstrReg_out_WB
 add wave -noupdate -expand -group {Control Unit} -color Pink :picocputestbench:PicoCPU_comp:ControlUnit_comp:address_error
 add wave -noupdate -expand -group {Control Unit} -color Pink :picocputestbench:PicoCPU_comp:ControlUnit_comp:Illigal_opcode
+add wave -noupdate -expand -group {Control Unit} -color Pink :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_OV
 add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:BRANCH_FIELD
 add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:BASE_D
 add wave -noupdate -expand -group {Control Unit} :picocputestbench:PicoCPU_comp:ControlUnit_comp:OFFSET_EX
@@ -86,11 +87,7 @@ add wave -noupdate -expand -group DPU -group Input :picocputestbench:PicoCPU_com
 add wave -noupdate -expand -group DPU -group Input :picocputestbench:PicoCPU_comp:DPU_comp:Mux_Out_2
 add wave -noupdate -expand -group DPU :picocputestbench:PicoCPU_comp:DPU_comp:ACC_in
 add wave -noupdate -expand -group DPU :picocputestbench:PicoCPU_comp:DPU_comp:ACC_out
-add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:DPU_Flags
-add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:EQ_Flag
-add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:OV_Flag
-add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:Z_Flag
-add wave -noupdate -expand -group DPU -group Flags :picocputestbench:PicoCPU_comp:DPU_comp:C_Flag
+add wave -noupdate -expand -group DPU :picocputestbench:PicoCPU_comp:DPU_comp:DPU_OV
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:rst
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:clk
 add wave -noupdate -expand -group {Data Memory} :picocputestbench:PicoCPU_comp:Mem_comp:Data_in

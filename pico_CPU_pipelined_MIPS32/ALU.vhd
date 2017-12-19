@@ -57,23 +57,20 @@ PROC_ALU: process(Command,A,B)
                                 if result_tmp(BitWidth) /= result_tmp(BitWidth-1) then
                                     OV_out <= '1';
                                 end if;
+            -------------------------------------------------------------------------------------------------------------------------------------
             WHEN ALU_PASS_A =>   Result(BitWidth-1 downto 0) <= A;  --Bypass A
-            WHEN ALU_PASS_B =>   Result(BitWidth-1 downto 0) <= B;  --Bypass B
             WHEN ALU_MTLO   =>   Result(BitWidth-1 downto 0) <= A;  --Bypass A
-            WHEN ALU_MTHI   =>   Result(BitWidth-1 downto 0) <= std_logic_vector(shift_left(unsigned(A), 16));  --Bypass B
-            WHEN ALU_AND    =>   Result(BitWidth-1 downto 0) <= A and B;  --And
-            WHEN ALU_OR     =>   Result(BitWidth-1 downto 0) <= A or B;  --or
-            WHEN ALU_NOR    =>   Result(BitWidth-1 downto 0) <= not(A or B);  --or
-            WHEN ALU_XOR    =>   Result(BitWidth-1 downto 0) <= A xor B;  --xor
+            WHEN ALU_MTHI   =>   Result(BitWidth-1 downto 0) <= std_logic_vector(shift_left(unsigned(A), 16));
+            WHEN ALU_AND    =>   Result(BitWidth-1 downto 0) <= A and B;      --And
+            WHEN ALU_OR     =>   Result(BitWidth-1 downto 0) <= A or B;       --OR
+            WHEN ALU_NOR    =>   Result(BitWidth-1 downto 0) <= not(A or B);  --NOR
+            WHEN ALU_XOR    =>   Result(BitWidth-1 downto 0) <= A xor B;      --XOR
+            -------------------------------------------------------------------------------------------------------------------------------------
             WHEN ALU_SLR    =>   Result(BitWidth-1 downto 0) <= std_logic_vector(shift_right(unsigned(A), to_integer(unsigned(B(4 downto 0)))));--shift Rigth
-            -------------------------------------------------------------------------------------------------------------------------------------
             WHEN ALU_SLL    =>   Result(BitWidth-1 downto 0) <= std_logic_vector(shift_left (unsigned(A), to_integer(unsigned(B(4 downto 0)))));--shift left
-            -------------------------------------------------------------------------------------------------------------------------------------
-            WHEN ALU_NEG_A  =>   Result(BitWidth-1 downto 0) <= not A +1;  --negation
             WHEN ALU_SAR    =>   Result(BitWidth-1 downto 0) <= A(BitWidth-1) & std_logic_vector(shift_right(unsigned(A(BitWidth-2 downto 0)), to_integer(unsigned(B(4 downto 0)))-1));  --shift right Arith
             WHEN ALU_SAL    =>   Result(BitWidth-1 downto 0) <= A(BitWidth-1) & std_logic_vector(shift_left(unsigned(A(BitWidth-2 downto 0)), to_integer(unsigned(B(4 downto 0)))-1));  --shift left Arith
-            WHEN ALU_FLIP_A =>   Result(BitWidth-1 downto 0) <= not(A); --Not of A
-            WHEN ALU_CLR_A  =>   Result(BitWidth-1 downto 0) <= (others => '0'); --Clear ACC
+            -------------------------------------------------------------------------------------------------------------------------------------
             WHEN ALU_MULTU  =>   Result <= std_logic_vector(unsigned(A)*unsigned(B)) ; -- unsigned multiplication
             WHEN ALU_MADDU  =>   Result <= std_logic_vector(unsigned(A)*unsigned(B)) ; -- unsigned multiplication and addition
             WHEN ALU_MSUBU  =>   Result <= std_logic_vector(unsigned(A)*unsigned(B)) ; -- unsigned multiplication and subtraction
@@ -111,16 +108,16 @@ PROC_ALU: process(Command,A,B)
             -------------------------------------------------------------------------------------------------------------------------------------
             WHEN ALU_CLO    =>  temp := 0;
                                 for i in A'range loop
-                                   if A(i) = '0' then
-                                     temp := temp + 1;
+                                   if A(i) = '1' then
+                                     temp := i;
                                    end if;
                                 end loop;
                                 Result(BitWidth-1 downto 0) <=  std_logic_vector(to_unsigned(temp,BitWidth));
             -------------------------------------------------------------------------------------------------------------------------------------
             WHEN ALU_CLZ    =>  temp := 0;
                                 for i in A'range loop
-                                  if A(i) = '1' then
-                                    temp := temp + 1;
+                                  if A(i) = '0' then
+                                    temp := i;
                                   end if;
                                 end loop;
                                 Result(BitWidth-1 downto 0) <=  std_logic_vector(to_unsigned(temp, BitWidth));

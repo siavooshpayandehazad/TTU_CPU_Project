@@ -24,7 +24,7 @@ entity DPU is
          Mux_Cont_1: in DPU_IN_MUX;
          Mux_Cont_2: in DPU_IN_MUX;
 
-         DPU_Flags   : out std_logic_vector (3 downto 0);
+         DPU_OV      : out std_logic;
          Result      : out std_logic_vector (2*BitWidth-1 downto 0);
          Result_FF   : out std_logic_vector (2*BitWidth-1 downto 0)
     );
@@ -42,11 +42,7 @@ architecture RTL of DPU is
   ---------------------------------------------
   --      Flags
   ---------------------------------------------
-  signal EQ_Flag: std_logic := '0';
-  signal OV_Flag: std_logic := '0';
-  signal Z_Flag: std_logic := '0';
-  signal C_Flag, Cout:std_logic := '0';
-  signal OV_Flag_Value :std_logic := '0';
+  signal OV_Flag_Value, Cout :std_logic := '0';
 
 
 begin
@@ -105,31 +101,9 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, OV_Flag_Value, Cout, ACC_in);
   end process;
 
 
-  ---------------------------------------------
-  --  Flag controls
-  ---------------------------------------------
-  process(ALUCommand, ACC_in, OV_Flag_Value, Data_in_control_1, Cout, ACC_out)
-    begin
-      ----------------------------------
-          if (ACC_out(BitWidth-1 downto 0) = Data_in_control_1) then
-              EQ_Flag <= '1';
-           else
-              EQ_Flag <= '0';
-          end if;
-      ----------------------------------
-          Z_Flag <=  not (or_reduce(ACC_in));
-      ----------------------------------
-          C_Flag <= ACC_out(BitWidth-1);
-      ----------------------------------
-          if (ALUCommand = ALU_ADD or ALUCommand = ALU_SUB) then
-            OV_Flag <= OV_Flag_Value;
-          end if;
-      ----------------------------------
-
-  end process;
 
   Result <= ACC_in;
   Result_FF <= ACC_out;
-  DPU_Flags <= C_Flag & EQ_Flag & Z_Flag  & OV_Flag;
+  DPU_OV <= OV_Flag_Value;
 
 end RTL;

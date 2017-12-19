@@ -9,7 +9,6 @@ entity PicoCPU is
   port(
     rst: in std_logic;
     clk: in std_logic;
-	  FlagOut: out std_logic_vector ( 3 downto 0);
     IO: inout std_logic_vector (CPU_Bitwidth-1 downto 0);
 	  output: out std_logic_vector ( 2*CPU_Bitwidth-1 downto 0)
   );
@@ -31,7 +30,7 @@ signal IO_DIR          : std_logic;
 signal IO_RD           : std_logic_vector (CPU_Bitwidth-1 downto 0);
 signal IO_WR           : std_logic_vector (CPU_Bitwidth-1 downto 0);
  ----------------------------------------
-signal DPU_Flags       : std_logic_vector (3 downto 0);
+signal DPU_OV          : std_logic;
 signal DataToDPU_1, DataToDPU_2       : std_logic_vector (CPU_Bitwidth-1 downto 0);
  ----------------------------------------
 signal DPU_ALUCommand, DPU_ALUCommand_in  : ALU_COMMAND;
@@ -95,7 +94,7 @@ begin
         IO_RD           => IO_RD          ,
         IO_WR           => IO_WR          ,
         ----------------=> ---------------,--------
-        DPU_Flags       => DPU_Flags      ,
+        DPU_OV          => DPU_OV      ,
         DataToDPU_1     => DataToDPU_1    ,
         DataToDPU_2     => DataToDPU_2    ,
 
@@ -153,7 +152,7 @@ begin
             ALUCommand       => DPU_ALUCommand,
             Mux_Cont_1       => DPU_Mux_Cont_1,
             Mux_Cont_2       => DPU_Mux_Cont_2,
-            DPU_Flags        => DPU_Flags,
+            DPU_OV           => DPU_OV,
             Result           => DPU_RESULT,
             Result_FF        => DPU_RESULT_FF);
 
@@ -169,10 +168,10 @@ MEM_DATA_IN_SELECT: process(MEM_IN_SEL, RFILE_out_sel_1, RFILE_out_sel_2, DPU_Re
   end process;
   --memory
 
-  Mem_comp: Memory
+  Mem_comp: RAM
   generic map (BitWidth => CPU_Bitwidth, preload_file => "code.txt")
   port map (MemRdAddress, Instr_Add(CPU_Bitwidth+1 downto 2), MEMDATA_IN, MemWrtAddress, clk, Mem_RW , rst , MEMDATA_OUT,  Instr_In);
 
-  FlagOut <=	DPU_Flags;
+
   output <= DPU_RESULT_FF;
 end RTL;
