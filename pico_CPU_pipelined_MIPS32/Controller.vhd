@@ -66,7 +66,7 @@ architecture RTL of ControlUnit is
   signal address_error  : std_logic;
   signal Illigal_opcode : std_logic;
 
-
+  signal flush_F, flush_D : std_logic;
 
   type RFILE_type is array (0 to 31) of std_logic_vector(BitWidth-1 downto 0) ;
   signal cp0_control, cp0_control_in : RFILE_type := ((others=> (others=>'0')));
@@ -133,37 +133,51 @@ architecture RTL of ControlUnit is
        InstrReg_out_WB <= InstrReg_out_E;
        Instr_D <= Instr_F;
        Instr_E <= Instr_D;
+       if flush_F = '1' then
+          Instr_D <= NOP;
+          InstrReg_out_D <= (others => '0');
+       end if;
+       if flush_D = '1' then
+          Instr_E <= NOP;
+          InstrReg_out_E <= (others => '0');
+       end if;
        Instr_WB <= Instr_E;
        cp0_control <= cp0_control_in;
   end if;
+
   end process;
 
 
 ---------------------------------------------Exception handling------------------------------------------
 EXCEPTION_HANDLING: process(DPU_OV, PC_out, cp0_control, Instr_E,
                              Illigal_opcode)begin
+    flush_F <= '0';
+    flush_D <= '0';
 
     cp0_control_in(12) <= cp0_control(12); --SR
+    cp0_control_in(13) <= cp0_control(13); --Cause
     cp0_control_in(14) <= cp0_control(14); --EPC
     if Illigal_opcode = '1' then
       cp0_control_in(14) <= PC_out;      --EPC <= PC
       cp0_control_in(13)(1 downto 0) <="01";  --cause register
       cp0_control_in(12) <= std_logic_vector(shift_left(unsigned(cp0_control(12)), 4));
+      flush_F <= '1';   -- we flush the Fetch
     end if;
 
-    --TODO: for overflow we also have to check the instructions! ov exception happens only in specific arithmetic instructions. 
-    if DPU_OV = '1' then
+    if DPU_OV = '1' and (Instr_E = ADD or Instr_E = ADDI or Instr_E = SUB)then
       cp0_control_in(14) <= PC_out;      --EPC <= PC
       cp0_control_in(13)(1 downto 0) <="10";  --cause register
       cp0_control_in(12) <= std_logic_vector(shift_left(unsigned(cp0_control(12)), 4));
-      --TODO: Happens during execution! should flush the pipe in Fetch and decode!
+      flush_F <= '1';   -- we flush the Fetch
+      flush_D <= '1';   -- here we flush the decode stage (it will be replaced with )
     end if;
 
     if Instr_E = SYSCALL then
       cp0_control_in(14) <= PC_out;     --EPC <= PC
       cp0_control_in(13)(1 downto 0) <="11"; --cause register
       cp0_control_in(12) <= std_logic_vector(shift_left(unsigned(cp0_control(12)), 4)); --status_reg
-      --TODO: Happens during execution! should flush the pipe in Fetch and decode!
+      flush_F <= '1';   -- we flush the Fetch
+      flush_D <= '1';   -- here we flush the decode stage (it will be replaced with )
     end if;
 
     if Instr_E = ERET then
@@ -192,10 +206,10 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
 
     RFILE_out_sel_1 <= (others => '0');
     RFILE_out_sel_2 <= (others => '0');
-      -----------------------Arithmetic--------------------------
+    -----------------------Arithmetic--------------------------
     if Instr_D = ADD or Instr_D = ADDU or Instr_D = SUB or Instr_D = SUBU  then
           RFILE_out_sel_1  <=  rs_d;
-		  RFILE_out_sel_2  <=  rt_d;
+      RFILE_out_sel_2  <=  rt_d;
     elsif Instr_D = ADDI or Instr_D = ADDIU or  Instr_D = CLO or Instr_D = CLZ then
           RFILE_out_sel_1  <=  rs_d;
     	  RFILE_out_sel_2  <=  rs_d;
@@ -225,7 +239,7 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
           elsif Instr_D = BEQ  or Instr_D = BNE then
                 RFILE_out_sel_1  <=  rt_d;
                 RFILE_out_sel_2  <=  rs_d;
-          elsif Instr_D = BLEZ or Instr_D = BLTZ or Instr_D = BLTZAL then 
+          elsif Instr_D = BLEZ or Instr_D = BLTZ or Instr_D = BLTZAL then
           		RFILE_out_sel_1  <=  "00000"; -- we use R0 here!
                 RFILE_out_sel_2  <=  rs_d;
           end if;
@@ -576,7 +590,7 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
 PC_HANDLING: process(PC_out,Instr_E, LOW, IMMEDIATE_EX, EPC)begin
         PC_in <= PC_out + 4;
         if Instr_E = SYSCALL  then
-          PC_in <= DPU_RESULT;			-- supposed to be contents of R2
+          PC_in <= LOW;			-- supposed to be contents of R2
         elsif Instr_E = ERET then
           PC_in <= EPC;
         elsif Instr_E = J then
@@ -613,96 +627,96 @@ INST_DECODER: process (SPECIAL_F, opcode_F)
 begin
     Instr_F <= NOP;
     Illigal_opcode <= '0';
-        case SPECIAL_F is
-          when "000000" =>
-              case(opcode_F) is
-                  when "000000" => Instr_F <= SLL_inst;
-                  when "000010" => Instr_F <= SRL_inst;
-                  when "000011" => Instr_F <= SRA_inst;
-                  when "000100" => Instr_F <= SLLV;
-                  when "000110" => Instr_F <= SRLV;
-                  when "000111" => Instr_F <= SRAV;
-                  when "001000" => Instr_F <= JR;
-                  when "001001" => Instr_F <= JALR;
-                  when "001010" => Instr_F <= MOVZ;
-                  when "001011" => Instr_F <= MOVN;
-                  when "001100" => Instr_F <= SYSCALL;
-                  when "010000" => Instr_F <= MFHI;
-                  when "010001" => Instr_F <= MTHI;
-                  when "010010" => Instr_F <= MFLO;
-                  when "010011" => Instr_F <= MTLO;
-                  when "011000" => Instr_F <= MULT;
-                  when "011001" => Instr_F <= MULTU;
-                  when "011010" => Instr_F <= DIV;
-                  when "011011" => Instr_F <= DIVU;
-                  when "100000" => Instr_F <= ADD;
-                  when "100001" => Instr_F <= ADDU;
-                  when "100010" => Instr_F <= SUB;
-                  when "100011" => Instr_F <= SUBU;
-                  when "100100" => Instr_F <= AND_inst;
-                  when "100101" => Instr_F <= OR_inst;
-                  when "100110" => Instr_F <= XOR_inst;
-                  when "100111" => Instr_F <= NOR_inst;
-                  when "101010" => Instr_F <= SLT;
-                  when "101011" => Instr_F <= SLTU;
-                  when others => Illigal_opcode <= '1';
-              end case;
-          when "000001" =>
-              case(BRANCH_FIELD) is
-                  when "00000" => Instr_F <= BLTZ;
-                  when "00001" => Instr_F <= BGEZ;
-                  when "10000" => Instr_F <= BLTZAL;
-                  when "10001" => Instr_F <= BGEZAL;
-                  when others => Illigal_opcode <= '1';
-              end case;
-          when "000010" => Instr_F <= J;
-          when "000011" => Instr_F <= JAL;
-          when "000100" => Instr_F <= BEQ;
-          when "000101" => Instr_F <= BNE;
-          when "000110" => Instr_F <= BLEZ;
-          when "000111" => Instr_F <= BGTZ;
-          when "001000" => Instr_F <= ADDI;
-          when "001001" => Instr_F <= ADDIU;
-          when "001010" => Instr_F <= SLTI;
-          when "001011" => Instr_F <= SLTIU;
-          when "001100" => Instr_F <= ANDI;
-          when "001101" => Instr_F <= ORI;
-          when "001110" => Instr_F <= XORI;
-          when "001111" => Instr_F <= LUI;
-          when "010000" =>
-                if opcode_F = "011000" then
-                    Instr_F <= ERET;
-                elsif MF = "00000" then
-                    Instr_F <= MFC0;
-                elsif MF = "00100" then
-                    Instr_F <= MTC0;
-                end if;
-          when "011100" =>
-                case(opcode_F) is
-                  when "000000" => Instr_F <= MADD;
-                  when "000001" => Instr_F <= MADDU;
-                  when "000010" => Instr_F <= MUL;
-                  when "000100" => Instr_F <= MSUB;
-                  when "000101" => Instr_F <= MSUBU;
-                  when "100000" => Instr_F <= CLZ;
-                  when "100001" => Instr_F <= CLO;
-                  when others => Illigal_opcode <= '1';
-                end case;
-          when "100000" => Instr_F <= LB;
-          when "100001" => Instr_F <= LH;
-          when "100010" => Instr_F <= LWL;
-          when "100011" => Instr_F <= LW;
-          when "100100" => Instr_F <= LBU;
-          when "100101" => Instr_F <= LHU;
-          when "100110" => Instr_F <= LWR;
-          when "101000" => Instr_F <= SB;
-          when "101001" => Instr_F <= SH;
-          when "101010" => Instr_F <= SWL;
-          when "101011" => Instr_F <= SW;
-          when "101110" => Instr_F <= SWR;
-          when others =>
-                Illigal_opcode <= '1';
-        end case;
+    case SPECIAL_F is
+      when "000000" =>
+          case(opcode_F) is
+              when "000000" => Instr_F <= SLL_inst;
+              when "000010" => Instr_F <= SRL_inst;
+              when "000011" => Instr_F <= SRA_inst;
+              when "000100" => Instr_F <= SLLV;
+              when "000110" => Instr_F <= SRLV;
+              when "000111" => Instr_F <= SRAV;
+              when "001000" => Instr_F <= JR;
+              when "001001" => Instr_F <= JALR;
+              when "001010" => Instr_F <= MOVZ;
+              when "001011" => Instr_F <= MOVN;
+              when "001100" => Instr_F <= SYSCALL;
+              when "010000" => Instr_F <= MFHI;
+              when "010001" => Instr_F <= MTHI;
+              when "010010" => Instr_F <= MFLO;
+              when "010011" => Instr_F <= MTLO;
+              when "011000" => Instr_F <= MULT;
+              when "011001" => Instr_F <= MULTU;
+              when "011010" => Instr_F <= DIV;
+              when "011011" => Instr_F <= DIVU;
+              when "100000" => Instr_F <= ADD;
+              when "100001" => Instr_F <= ADDU;
+              when "100010" => Instr_F <= SUB;
+              when "100011" => Instr_F <= SUBU;
+              when "100100" => Instr_F <= AND_inst;
+              when "100101" => Instr_F <= OR_inst;
+              when "100110" => Instr_F <= XOR_inst;
+              when "100111" => Instr_F <= NOR_inst;
+              when "101010" => Instr_F <= SLT;
+              when "101011" => Instr_F <= SLTU;
+              when others => Illigal_opcode <= '1';
+          end case;
+      when "000001" =>
+          case(BRANCH_FIELD) is
+              when "00000" => Instr_F <= BLTZ;
+              when "00001" => Instr_F <= BGEZ;
+              when "10000" => Instr_F <= BLTZAL;
+              when "10001" => Instr_F <= BGEZAL;
+              when others => Illigal_opcode <= '1';
+          end case;
+      when "000010" => Instr_F <= J;
+      when "000011" => Instr_F <= JAL;
+      when "000100" => Instr_F <= BEQ;
+      when "000101" => Instr_F <= BNE;
+      when "000110" => Instr_F <= BLEZ;
+      when "000111" => Instr_F <= BGTZ;
+      when "001000" => Instr_F <= ADDI;
+      when "001001" => Instr_F <= ADDIU;
+      when "001010" => Instr_F <= SLTI;
+      when "001011" => Instr_F <= SLTIU;
+      when "001100" => Instr_F <= ANDI;
+      when "001101" => Instr_F <= ORI;
+      when "001110" => Instr_F <= XORI;
+      when "001111" => Instr_F <= LUI;
+      when "010000" =>
+            if opcode_F = "011000" then
+                Instr_F <= ERET;
+            elsif MF = "00000" then
+                Instr_F <= MFC0;
+            elsif MF = "00100" then
+                Instr_F <= MTC0;
+            end if;
+      when "011100" =>
+            case(opcode_F) is
+              when "000000" => Instr_F <= MADD;
+              when "000001" => Instr_F <= MADDU;
+              when "000010" => Instr_F <= MUL;
+              when "000100" => Instr_F <= MSUB;
+              when "000101" => Instr_F <= MSUBU;
+              when "100000" => Instr_F <= CLZ;
+              when "100001" => Instr_F <= CLO;
+              when others => Illigal_opcode <= '1';
+            end case;
+      when "100000" => Instr_F <= LB;
+      when "100001" => Instr_F <= LH;
+      when "100010" => Instr_F <= LWL;
+      when "100011" => Instr_F <= LW;
+      when "100100" => Instr_F <= LBU;
+      when "100101" => Instr_F <= LHU;
+      when "100110" => Instr_F <= LWR;
+      when "101000" => Instr_F <= SB;
+      when "101001" => Instr_F <= SH;
+      when "101010" => Instr_F <= SWL;
+      when "101011" => Instr_F <= SW;
+      when "101110" => Instr_F <= SWR;
+      when others =>
+            Illigal_opcode <= '1';
+    end case;
 end process;
 
 end RTL;
