@@ -119,7 +119,6 @@ begin
     rst                => rst,
     Data_in_mem        => MEMDATA_OUT,
     Data_in_CU         => Data_to_RFILE,
-    Data_in_DPU_HI     => DPU_RESULT(2*CPU_Bitwidth-1 downto CPU_Bitwidth),
     Data_in_DPU_LOW    => DPU_RESULT(CPU_Bitwidth-1 downto 0),
     Data_in_ACC_HI     => DPU_RESULT_FF(2*CPU_Bitwidth-1 downto CPU_Bitwidth),
     Data_in_ACC_LOW    => DPU_RESULT_FF(CPU_Bitwidth-1 downto 0),
@@ -149,7 +148,7 @@ begin
             Result           => DPU_RESULT,
             Result_FF        => DPU_RESULT_FF);
 
-
+-- MEMORY Input select MUX
 MEM_DATA_IN_SELECT: process(MEM_IN_SEL, RFILE_out_sel_1, RFILE_out_sel_2, DPU_Result)begin
     case( MEM_IN_SEL ) is
       when RFILE_DATA_1 => MEMDATA_IN <= R1;

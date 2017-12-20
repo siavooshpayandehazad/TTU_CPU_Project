@@ -100,7 +100,6 @@ package pico_cpu is
               Data_in_mem        : in std_logic_vector (BitWidth-1 downto 0);
               Data_in_CU         : in std_logic_vector (BitWidth-1 downto 0);
               Data_in_DPU_LOW    : in std_logic_vector (BitWidth-1 downto 0);
-        			Data_in_DPU_HI     : in std_logic_vector (BitWidth-1 downto 0);
               Data_in_ACC_HI     : in std_logic_vector (BitWidth-1 downto 0);
               Data_in_ACC_LOW    : in std_logic_vector (BitWidth-1 downto 0);
               Data_in_R2         : in std_logic_vector (BitWidth-1 downto 0);

@@ -62,7 +62,6 @@ add wave -noupdate -expand -group RegFile -group Data_in -color Salmon :picocput
 add wave -noupdate -expand -group RegFile -group Data_in :picocputestbench:PicoCPU_comp:RegFile_comp:Data_in_mem
 add wave -noupdate -expand -group RegFile -group Data_in :picocputestbench:PicoCPU_comp:RegFile_comp:Data_in_CU
 add wave -noupdate -expand -group RegFile -group Data_in :picocputestbench:PicoCPU_comp:RegFile_comp:Data_in_DPU_LOW
-add wave -noupdate -expand -group RegFile -group Data_in :picocputestbench:PicoCPU_comp:RegFile_comp:Data_in_DPU_HI
 add wave -noupdate -expand -group RegFile -group Data_in :picocputestbench:PicoCPU_comp:RegFile_comp:Data_in_ACC_LOW
 add wave -noupdate -expand -group RegFile -group Data_in :picocputestbench:PicoCPU_comp:RegFile_comp:Data_in_ACC_HI
 add wave -noupdate -expand -group RegFile -group Data_in :picocputestbench:PicoCPU_comp:RegFile_comp:Data_in_R2
