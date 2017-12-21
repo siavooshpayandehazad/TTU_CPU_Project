@@ -54,7 +54,7 @@ begin
         address := 0;
         while not endfile(preloadfile) loop
               readline(preloadfile, line_read);
-              read(line_read, line_data);
+              hread(line_read, line_data);
               Mem(address) <= line_data;
               address := address + 1;
         end loop;
