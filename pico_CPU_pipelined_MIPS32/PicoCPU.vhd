@@ -6,11 +6,11 @@ USE ieee.std_logic_unsigned.ALL;
 use work.pico_cpu.all;
 
 entity PicoCPU is
+  generic (Mem_preload_file: string :="code.txt");
   port(
     rst: in std_logic;
     clk: in std_logic;
-    IO: inout std_logic_vector (CPU_Bitwidth-1 downto 0);
-	  output: out std_logic_vector ( 2*CPU_Bitwidth-1 downto 0)
+    IO: inout std_logic_vector (CPU_Bitwidth-1 downto 0)
   );
 end PicoCPU;
 
@@ -58,7 +58,7 @@ begin
 ---------------------------------------------
 --      component instantiation
 ---------------------------------------------
-  process (clk, rst)begin
+  CLOCK_PROCESS:process (clk, rst)begin
     if rst = '1' then
 
       RFILE_out_sel_1<= (others => '0');
@@ -149,7 +149,7 @@ begin
             Result_FF        => DPU_RESULT_FF);
 
 -- MEMORY Input select MUX
-MEM_DATA_IN_SELECT: process(MEM_IN_SEL, RFILE_out_sel_1, RFILE_out_sel_2, DPU_Result)begin
+  MEM_DATA_IN_SELECT: process(MEM_IN_SEL, RFILE_out_sel_1, RFILE_out_sel_2, DPU_Result)begin
     case( MEM_IN_SEL ) is
       when RFILE_DATA_1 => MEMDATA_IN <= R1;
       when RFILE_DATA_2 => MEMDATA_IN <= R2;
@@ -162,9 +162,7 @@ MEM_DATA_IN_SELECT: process(MEM_IN_SEL, RFILE_out_sel_1, RFILE_out_sel_2, DPU_Re
   Instr_Add_mem <= "00" & Instr_Add(CPU_Bitwidth-1 downto 2);
 
   Mem_comp: RAM
-  generic map (BitWidth => CPU_Bitwidth, preload_file => "code.txt")
+  generic map (BitWidth => CPU_Bitwidth, preload_file => Mem_preload_file)
   port map (MemRdAddress, Instr_Add_mem, MEMDATA_IN, MemWrtAddress, clk, Mem_RW , rst , MEMDATA_OUT,  Instr_In);
 
-
-  output <= DPU_RESULT_FF;
 end RTL;

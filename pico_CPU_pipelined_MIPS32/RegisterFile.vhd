@@ -7,7 +7,7 @@ use IEEE.Numeric_Std.all;
 use work.pico_cpu.all;
 
 entity RegisterFile is
-generic (BitWidth: integer);
+  generic (BitWidth: integer);
   port ( clk : in std_logic;
 			rst: in std_logic;
 			Data_in_mem        : in std_logic_vector (BitWidth-1 downto 0);

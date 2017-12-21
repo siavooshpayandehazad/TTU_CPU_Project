@@ -1,7 +1,7 @@
 --Copyright (C) 2017 Siavoosh Payandeh Azad
 
--- DPU has one fixed input which is coming directly from Register-File 
--- The other input is selectable between Rfile, Memory, Control 
+-- DPU has one fixed input which is coming directly from Register-File
+-- The other input is selectable between Rfile, Memory, Control
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -49,13 +49,13 @@ architecture RTL of DPU is
 begin
 
 ALU_comp: ALU
-generic map (BitWidth => BitWidth)
-port map (Mux_Out_1, Mux_Out_2, ALUCommand, OV_Flag_Value, Cout, ACC_in);
+          generic map (BitWidth => BitWidth)
+          port map (Mux_Out_1, Mux_Out_2, ALUCommand, OV_Flag_Value, Cout, ACC_in);
 
   ---------------------------------------------
   --  Registers and Flags
   ---------------------------------------------
-  process (clk,rst)
+  CLOCK_PROCESS:process (clk,rst)
     begin
     if rst = '1' then
       ACC_out<=(others =>'0');
@@ -81,7 +81,7 @@ port map (Mux_Out_1, Mux_Out_2, ALUCommand, OV_Flag_Value, Cout, ACC_in);
   Mux_Out_1 <= Data_in_RegFile_1;
 
 
-  process (Data_in_mem, Data_in_control_2, Data_in_RegFile_2, Mux_Cont_2)
+  INPUT_MUX_2:process (Data_in_mem, Data_in_control_2, Data_in_RegFile_2, Mux_Cont_2)
     begin
       case Mux_Cont_2 is
         when MEM   => Mux_Out_2 <= Data_in_mem;

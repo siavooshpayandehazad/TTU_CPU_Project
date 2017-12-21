@@ -1,5 +1,8 @@
 --Copyright (C) 2017 Siavoosh Payandeh Azad
 
+-- TODO: multiplication and division should be broken into multi-cycle instructions
+--       however, this needs fondumental changes to the pipe.
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
@@ -20,17 +23,13 @@ end ALU;
 
 --Architecture of the DPU
 architecture RTL of ALU is
----------------------------------------------
---      Signals
----------------------------------------------
+
+--------Signals------------------------------
  signal Cout: std_logic := '0';
 
 begin
-
-
----------------------------------------------
+-- TODO: we are not actually using C-flag, we can remove it at some point.
 Cflag_out <= Cout;
-
 
 PROC_ALU: process(Command,A,B)
    variable temp : integer := 0;

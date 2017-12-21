@@ -16,7 +16,7 @@ end GPIO;
 
 architecture behavioral of GPIO is
   begin
-    process(IO_sel, IO, WrtData)begin
+    IO_CONT:process(IO_sel, IO, WrtData)begin
         if IO_sel = '0' then
           IO <= (others => 'Z');
           RdData <= IO;

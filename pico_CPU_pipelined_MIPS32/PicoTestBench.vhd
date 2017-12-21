@@ -18,9 +18,11 @@ architecture Bench of PicoCPUTestBench is
 begin
 
 --Component instantiation of ALU
-PicoCPU_comp: PicoCPU port map (rst, clk, IO => IO);
+PicoCPU_comp: PicoCPU
+            generic map (Mem_preload_file => "code.txt")
+            port map (rst, clk, IO => IO);
 
-process
+CLOCK_GEN:process
 begin
   clk <= '0';
   wait for clock_period/2;
@@ -28,7 +30,7 @@ begin
   wait for clock_period/2;
 end process;
 
-process
+RST_GEN:process
 begin
   rst <= '1';
   wait for 1*clock_period;

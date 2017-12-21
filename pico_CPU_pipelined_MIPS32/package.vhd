@@ -114,11 +114,11 @@ package pico_cpu is
     end component;
 
     component PicoCPU is
+      generic (Mem_preload_file: string :="code.txt");
       port(
         rst: in std_logic;
         clk: in std_logic;
-        IO: inout std_logic_vector (CPU_Bitwidth-1 downto 0);
-    	  output: out std_logic_vector ( 2*CPU_Bitwidth-1 downto 0)
+        IO: inout std_logic_vector (CPU_Bitwidth-1 downto 0)
       );
     end component;
 

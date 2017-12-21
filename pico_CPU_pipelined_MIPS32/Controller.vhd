@@ -5,7 +5,16 @@ use IEEE.std_logic_1164.all;
 USE IEEE.std_logic_unsigned.ALL;
 USE IEEE.NUMERIC_STD.ALL;
 use work.pico_cpu.all;
-
+-- There are 4 stages of pipeline:
+--      * Fetch: we read the instruction from memory, since the memory will respond in 1
+--               clock cycle, we need to pass the input of the PC register to be on time!
+--      * Decode/REGFILE: here we extract the registers used by the instructions
+--      * Execute: we execute ALU operations here
+--      * WB: we write into the REGFILE, in cases that we read from Memory and want to write into REGFILE,
+--            since the ALU generates the address, We will write into the REGFILE during WB but the value
+--            be inside the register in the next clock cycle, however, the REGFILE has a bypass mechanism
+--            that can push this value to output as soon as it gets it!
+-----------------------------------
 -- Regarding the jumps, we assume that the compiler always executes 2 instructions
 -- after the jump! so we will not have to insert any bubble into the pipeline!
 
@@ -21,7 +30,7 @@ entity ControlUnit is
     Instr_Add       : out std_logic_vector (BitWidth-1 downto 0);
     ----------------------------------------
     MemRdAddress    : out std_logic_vector (BitWidth-1 downto 0);
-	MemWrtAddress   : out std_logic_vector (BitWidth-1 downto 0);
+    MemWrtAddress   : out std_logic_vector (BitWidth-1 downto 0);
     Mem_RW          : out std_logic_vector (3 downto 0);
     MEM_IN_SEL      : out MEM_IN_MUX;
     ----------------------------------------
@@ -36,10 +45,10 @@ entity ControlUnit is
     DPU_Mux_Cont_2  : out DPU_IN_MUX;
     ----------------------------------------
     RFILE_data_sel  : out RFILE_IN_MUX;
-	RFILE_in_address: out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
+    RFILE_in_address: out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
     RFILE_WB_enable : out std_logic_vector (3 downto 0);
-	RFILE_out_sel_1 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
-	RFILE_out_sel_2 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
+    RFILE_out_sel_1 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
+    RFILE_out_sel_2 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
     Data_to_RFILE   :  out std_logic_vector (BitWidth-1 downto 0);
     ----------------------------------------
     DPU_RESULT      : in std_logic_vector (2*BitWidth-1 downto 0);
@@ -195,6 +204,7 @@ EXCEPTION_HANDLING: process(DPU_OV, PC_out, cp0_control, Instr_E,
 --------------------------------------------------------------------------------------------------------
 --GPIO STUFF
 -------------------------------------------------------------------------------------------------------
+-- TODO: we need to map the IO-regs somewhere!
 IO_DIR <= IO_DIR_FF;
 IO_WR <= IO_WR_in_FF;
 
@@ -531,7 +541,6 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
     if Instr_WB = LBU or Instr_WB = LB or Instr_WB = LH or Instr_WB = LW then
         RFILE_WB_enable <= "1111";
         RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
-
         case( Instr_WB ) is
             when LBU => RFILE_data_sel <= FROM_MEM8;
             when LB  => RFILE_data_sel <= FROM_MEM8_SGINED;
