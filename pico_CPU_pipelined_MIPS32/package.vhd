@@ -35,14 +35,13 @@ package pico_cpu is
                         MOVZ, MOVN, SLT, SLTI, SLTIU, SLTU,
                         -- exception
                         SYSCALL, ERET,
-                        -- Co-processor
+                        -- co-processor
                         MFC0, MTC0,
-                        -- TRAPS
-                        TEQ, TGE, TGEU
+                        -- traps
+                        TEQ, TEQI, TGE, TGEI, TGEU, TGEIU
                         );
 
     -------------------------------------------------ALU COMMANDS
-
     TYPE ALU_COMMAND IS (ALU_ADDU,   ALU_SUBU,  ALU_ADD  , ALU_SUB,
                          ALU_PASS_A,
                          ALU_AND,    ALU_OR,    ALU_XOR   , ALU_SLR,
@@ -57,16 +56,15 @@ package pico_cpu is
     -------------------------------------------------DPU COMMANDS
     TYPE DPU_IN_MUX IS (MEM, CONT, RFILE, ONE);
 
-    ------------------------------------------------
+    ------------------------------------------------RFILE COMMANDS
     TYPE RFILE_IN_MUX IS (CU, ACC_HI, ACC_LOW, DPU_LOW, R2,
                           FROM_MEM8,FROM_MEM16,FROM_MEM32,
                           FROM_MEM8_SGINED, FROM_MEM16_SGINED,
                           ZERO);
+    ------------------------------------------------MEMORY COMMANDS
     TYPE MEM_IN_MUX IS (RFILE_DATA_1, RFILE_DATA_2, DPU_DATA);
 
-    --constant DPU_COMMAND_WIDTH : integer := 12;
-
-    ------------------------------------------------
+    ------------------------------------------------CONSTANTS
     constant ZERO8  :std_logic_vector(7 downto 0)  := "00000000";
     constant ONE8   :std_logic_vector(7 downto 0)  := "11111111";
     constant ZERO14 :std_logic_vector(13 downto 0) := "00000000000000";

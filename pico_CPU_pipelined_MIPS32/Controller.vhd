@@ -89,9 +89,10 @@ architecture RTL of ControlUnit is
   alias LOW_FF  : std_logic_vector is DPU_RESULT_FF(31 downto 0);
   alias HIGH_FF : std_logic_vector is DPU_RESULT_FF(63 downto 32);
 
-  alias SPECIAL_F : std_logic_vector (5 downto 0) is Instr_In (31 downto 26);
-  alias opcode_F  : std_logic_vector (5 downto 0) is Instr_In (5 downto 0);
-  alias MF        : std_logic_vector (4 downto 0) is Instr_In (25 downto 21);
+  alias SPECIAL_F   : std_logic_vector (5 downto 0) is Instr_In (31 downto 26);
+  alias opcode_F    : std_logic_vector (5 downto 0) is Instr_In (5 downto 0);
+  alias MF          : std_logic_vector (4 downto 0) is Instr_In (25 downto 21);
+  alias BRANCH_FIELD: std_logic_vector (4 downto 0) is Instr_In (20 downto 16);
 
   alias rs_wb : std_logic_vector (4 downto 0) is InstrReg_out_WB (25 downto 21);
   alias rt_wb : std_logic_vector (4 downto 0) is InstrReg_out_WB (20 downto 16);
@@ -110,7 +111,7 @@ architecture RTL of ControlUnit is
   alias IMMEDIATE_EX : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
   alias OFFSET_EX : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
   alias BASE_D   : std_logic_vector (4 downto 0) is InstrReg_out_D (25 downto 21);
-  alias BRANCH_FIELD: std_logic_vector (4 downto 0) is InstrReg_out_D (20 downto 16);
+
 
 
   alias SR    : std_logic_vector (BitWidth-1 downto 0) is cp0_control(12);
@@ -291,6 +292,9 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
     elsif Instr_D =  TEQ or Instr_D = TGE or Instr_D = TGEU then
         RFILE_out_sel_1  <=  rs_d;
         RFILE_out_sel_2  <=  rt_d;
+    elsif Instr_D = TGEI or Instr_D = TGEIU or Instr_D = TEQI then
+        RFILE_out_sel_1  <=  rs_d;
+        RFILE_out_sel_2  <=  rs_d;
     end if;
   end process;
 
@@ -484,7 +488,7 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
         elsif Instr_E =  MTC0 or Instr_E = SYSCALL then
           DPU_ALUCommand <= ALU_PASS_A;
         -------------------------------TRAPS-----------------------
-      elsif Instr_E = TEQ or Instr_E = TGE or Instr_E = TGEU then
+        elsif Instr_E = TEQ or Instr_E = TGE or Instr_E = TGEU then
           case( Instr_E ) is
             when TEQ  => DPU_ALUCommand <= ALU_EQ;
             when TGE  => DPU_ALUCommand <= ALU_COMP_EQ;
@@ -493,7 +497,21 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
           if LOW = ONE32 then
               trap <= '1';
           end if;
-       end if;
+        elsif  Instr_E = TGEI or Instr_E = TGEIU or Instr_E = TEQI then
+          case( Instr_E ) is
+            when TGEI => DPU_ALUCommand <= ALU_COMP;
+            when TGEIU => DPU_ALUCommand <= ALU_COMPU;
+            when others => DPU_ALUCommand <= ALU_EQ; -- TEQI
+          end case;
+          DPU_Mux_Cont_2 <= CONT;
+          DataToDPU_2 <= ONE16 & IMMEDIATE_EX;
+          if IMMEDIATE_EX(15) = '0' then
+            DataToDPU_2 <= ZERO16 & IMMEDIATE_EX;
+          end if;
+          if LOW = ONE32 then
+              trap <= '1';
+          end if;
+        end if;
     end process;
 
 
@@ -690,6 +708,9 @@ begin
           case(BRANCH_FIELD) is
               when "00000" => Instr_F <= BLTZ;
               when "00001" => Instr_F <= BGEZ;
+              when "01000" => Instr_F <= TGEI;
+              when "01001" => Instr_F <= TGEIU;
+              when "01100" => Instr_F <= TEQI;
               when "10000" => Instr_F <= BLTZAL;
               when "10001" => Instr_F <= BGEZAL;
               when others => Illigal_opcode <= '1';
