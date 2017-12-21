@@ -36,7 +36,9 @@ package pico_cpu is
                         -- exception
                         SYSCALL, ERET,
                         -- Co-processor
-                        MFC0, MTC0
+                        MFC0, MTC0,
+                        -- TRAPS
+                        TEQ, TGE, TGEU
                         );
 
     -------------------------------------------------ALU COMMANDS
@@ -46,7 +48,8 @@ package pico_cpu is
                          ALU_AND,    ALU_OR,    ALU_XOR   , ALU_SLR,
                          ALU_SLL,    ALU_SAR   , ALU_SAL,
                          ALU_NOR,    ALU_COMP,  ALU_CLO   , ALU_CLZ,
-                         ALU_EQ_Z,   ALU_EQ,    ALU_COMP_EQ, ALU_COMPU,
+                         ALU_EQ_Z,   ALU_EQ,    ALU_COMP_EQ, ALU_COMP_EQU,
+                         ALU_COMPU,
                          ALU_MULTU,  ALU_MULT,  ALU_MTHI, ALU_MTLO,
                          ALU_MADD,   ALU_MADDU, ALU_MSUB, ALU_MSUBU,
                          ALU_DIV, ALU_DIVU);

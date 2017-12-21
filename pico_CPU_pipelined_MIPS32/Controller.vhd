@@ -76,6 +76,7 @@ architecture RTL of ControlUnit is
   signal Illigal_opcode : std_logic;
 
   signal flush_F, flush_D : std_logic;
+  signal trap : std_logic;
 
   type RFILE_type is array (0 to 31) of std_logic_vector(BitWidth-1 downto 0) ;
   signal cp0_control, cp0_control_in : RFILE_type := ((others=> (others=>'0')));
@@ -287,6 +288,9 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
     elsif Instr_D =  MTC0 then
         RFILE_out_sel_1  <=  rt_d;
         RFILE_out_sel_2  <=  rt_d;
+    elsif Instr_D =  TEQ or Instr_D = TGE or Instr_D = TGEU then
+        RFILE_out_sel_1  <=  rs_d;
+        RFILE_out_sel_2  <=  rt_d;
     end if;
   end process;
 
@@ -295,8 +299,8 @@ DEC_SIGNALS_GEN: process(Instr_D, rs_ex, rt_ex)
 --------------------------------------------------------------------------------------------------------
 EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
       begin
-
       	-- DO NOT CHANGE THE DEFAULT VALUES!
+        trap <= '0';
         address_error <= '0';
         MemWrtAddress  <= (others => '0');
         MemRdAddress   <= (others => '0');
@@ -409,9 +413,9 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
               DataToDPU_2 <= ZERO16 & IMMEDIATE_EX;
             end if;
         -----------------------MULTIPLICATION AND DIVISION--------------------------
-        elsif Instr_D = MULTU or Instr_D = MULT or Instr_D = MUL or Instr_D = DIV or
-              Instr_D = DIVU or Instr_D = MADD  or Instr_D = MADDU or Instr_D = MSUB or
-              Instr_D = MSUBU then
+        elsif Instr_E = MULTU or Instr_E = MULT or Instr_E = MUL or Instr_E = DIV or
+              Instr_E = DIVU or Instr_E = MADD  or Instr_E = MADDU or Instr_E = MSUB or
+              Instr_E = MSUBU then
 
             case( Instr_E ) is
               when MULTU => DPU_ALUCommand <= ALU_MULTU;
@@ -432,7 +436,7 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
             DPU_ALUCommand <= ALU_MTHI;
             DataToDPU_2 <= ZERO16 & "0000000000010000";
             DPU_Mux_Cont_2 <= CONT;
-        ----------------------LOAD AND STORE -----------------------------------
+        ----------------------LOAD ---------------- -----------------------------------
         elsif Instr_E = LBU or Instr_E = LHU or Instr_E = LW  or
               Instr_E = LWL or Instr_E = LWR then
             DPU_ALUCommand <= ALU_ADDU;
@@ -451,7 +455,7 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
               DataToDPU_2 <= ZERO16 & OFFSET_EX;
             end if;
             MemRdAddress <= DPU_RESULT(CPU_Bitwidth-1 downto 0);
-        ------------------------store----------------
+        ------------------------store------------------------------------------------
         elsif Instr_E = SB or Instr_E = SH or Instr_E = SW  or Instr_E = SWL or Instr_E = SWR then
             DPU_ALUCommand <= ALU_ADDU;
             DPU_Mux_Cont_2 <= CONT;
@@ -476,11 +480,20 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
               when SWL => Mem_RW <= "1100";
               when others => Mem_RW <= "0011"; -- Instr_E = SWR
             end case;
-
+        -------------------Co-Processor 0 and SYSCALL--------------
         elsif Instr_E =  MTC0 or Instr_E = SYSCALL then
           DPU_ALUCommand <= ALU_PASS_A;
-
-        end if;
+        -------------------------------TRAPS-----------------------
+      elsif Instr_E = TEQ or Instr_E = TGE or Instr_E = TGEU then
+          case( Instr_E ) is
+            when TEQ  => DPU_ALUCommand <= ALU_EQ;
+            when TGE  => DPU_ALUCommand <= ALU_COMP_EQ;
+            when others => DPU_ALUCommand <= ALU_COMP_EQU; --TGEU
+          end case;
+          if LOW = ONE32 then
+              trap <= '1';
+          end if;
+       end if;
     end process;
 
 
@@ -668,6 +681,9 @@ begin
               when "100111" => Instr_F <= NOR_inst;
               when "101010" => Instr_F <= SLT;
               when "101011" => Instr_F <= SLTU;
+              when "110000" => Instr_F <= TGE;
+              when "110001" => Instr_F <= TGEU;
+              when "110100" => Instr_F <= TEQ;
               when others => Illigal_opcode <= '1';
           end case;
       when "000001" =>
