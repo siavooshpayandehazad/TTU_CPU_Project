@@ -75,7 +75,7 @@ architecture RTL of ControlUnit is
   signal address_error  : std_logic;
   signal Illigal_opcode : std_logic;
 
-  signal flush_F, flush_D : std_logic;
+  signal flush_F,flush_F2, flush_D : std_logic;
   signal trap : std_logic;
 
   type RFILE_type is array (0 to 31) of std_logic_vector(BitWidth-1 downto 0) ;
@@ -108,6 +108,7 @@ architecture RTL of ControlUnit is
   alias rd_d : std_logic_vector (4 downto 0) is InstrReg_out_D (15 downto 11);
 
 
+  alias INST_INDEX_EX : std_logic_vector (25 downto 0) is InstrReg_out_E (25 downto 0);
   alias IMMEDIATE_EX : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
   alias OFFSET_EX : std_logic_vector (15 downto 0) is InstrReg_out_E (15 downto 0);
   alias BASE_D   : std_logic_vector (4 downto 0) is InstrReg_out_D (25 downto 21);
@@ -125,7 +126,7 @@ architecture RTL of ControlUnit is
   CLOCK_PROC:process (clk,rst)
     begin
     if rst = '1' then
-       PC_out <= (others => '0');
+       PC_out <= ZERO32-4;
        InstrReg_out_D <= (others=> '0');
        InstrReg_out_E <= (others=> '0');
        InstrReg_out_WB <= (others=> '0');
@@ -144,7 +145,7 @@ architecture RTL of ControlUnit is
        InstrReg_out_WB <= InstrReg_out_E;
        Instr_D <= Instr_F;
        Instr_E <= Instr_D;
-       if flush_F = '1' then
+       if flush_F = '1' or flush_F2 = '1' then
           Instr_D <= NOP;
           InstrReg_out_D <= (others => '0');
        end if;
@@ -196,7 +197,7 @@ EXCEPTION_HANDLING: process(DPU_OV, PC_out, cp0_control, Instr_E,
     end if;
 
     if Instr_E = MTC0 then
-        cp0_control_in(to_integer(unsigned(rd_wb))) <= DPU_Result;
+        cp0_control_in(to_integer(unsigned(rd_wb))) <= LOW;
     end if;
   end process;
 
@@ -377,7 +378,6 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
 
         elsif Instr_E = BEQ or Instr_E = BNE then
             DPU_ALUCommand <= ALU_EQ;
-
         elsif Instr_E = BGTZ or (Instr_E = BGEZ  or Instr_E = BGEZAL)then
             case( Instr_E ) is
                 when BGTZ => DPU_ALUCommand <= ALU_COMP;
@@ -629,20 +629,25 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
 --PC handling------------------------------------------------------------------------
 PC_HANDLING: process(PC_out,Instr_E, LOW, IMMEDIATE_EX, EPC)begin
         PC_in <= PC_out + 4;
+        flush_F2 <= '0';
         if Instr_E = SYSCALL  then
           PC_in <= LOW;			-- supposed to be contents of R2
         elsif Instr_E = ERET then
           PC_in <= EPC;
         elsif Instr_E = J then
+          flush_F2 <= '1';
           PC_in <= PC_out(31 downto 28) & InstrReg_out_E(25 downto 0) & "00";
         elsif Instr_E = JR then
+          flush_F2 <= '1';
           PC_in <= LOW;
         elsif Instr_E = JAL then
-          PC_in <= LOW;
+          flush_F2 <= '1';
+          PC_in <= PC_out(31 downto 28) & INST_INDEX_EX & "00";
         elsif Instr_E = BEQ or Instr_E = BGTZ or Instr_E = BGEZ or
               Instr_E = BGEZAL or Instr_E = BLEZ or Instr_E = BLTZ or
               Instr_E = BLTZAL then
             if LOW = ONE32 then
+                flush_F2 <= '1';
                 if IMMEDIATE_EX(15) = '0' then
                   PC_in <= PC_out +(ZERO14 & IMMEDIATE_EX & "00")-1;
                 else
@@ -651,6 +656,7 @@ PC_HANDLING: process(PC_out,Instr_E, LOW, IMMEDIATE_EX, EPC)begin
             end if;
         elsif Instr_E = BNE then
             if LOW = ZERO32 then
+                flush_F2 <= '1';
                 if IMMEDIATE_EX(15) = '0' then
                   PC_in <= PC_out +(ZERO14 & IMMEDIATE_EX & "00")-1;
                 else

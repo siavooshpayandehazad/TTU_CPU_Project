@@ -33,7 +33,7 @@ end process;
 RST_GEN:process
 begin
   rst <= '1';
-  wait for 1*clock_period;
+  wait for 0.5*clock_period;
   rst <=  '0';
   wait;
 end process;

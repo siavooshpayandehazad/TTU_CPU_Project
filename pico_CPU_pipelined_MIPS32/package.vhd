@@ -10,8 +10,8 @@ package pico_cpu is
 
     constant CPU_Bitwidth  : integer := 32;
     constant CPU_Instwidth : integer := CPU_Bitwidth;
-    constant InstMem_depth : integer := 1024;
-    constant DataMem_depth : integer := 1024;
+    constant InstMem_depth : integer := 10240;
+    constant DataMem_depth : integer := 10240;
     constant RFILE_DEPTH : integer := 32;
     constant RFILE_SEL_WIDTH : integer := 5; --should be log2 of RFILE_DEPTH
     constant clock_period  : time := 1 ns;
