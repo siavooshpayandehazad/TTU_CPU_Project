@@ -41,11 +41,14 @@ CLOCK_PROCCESS:  process (clk,rst)begin
   	elsif clk'event and clk='1' then
       if WB_enable(0) = '1' then
   		    RFILE(to_integer(unsigned(RFILE_in_address)))(7 downto 0) <= Data_in(7 downto 0);
-      elsif WB_enable(1) = '1' then
+      end if;
+      if WB_enable(1) = '1' then
           RFILE(to_integer(unsigned(RFILE_in_address)))(15 downto 8) <= Data_in(15 downto 8);
-      elsif WB_enable(2) = '1' then
+      end if;
+      if WB_enable(2) = '1' then
           RFILE(to_integer(unsigned(RFILE_in_address)))(23 downto 16) <= Data_in(23 downto 16);
-      elsif WB_enable(3) = '1' then
+      end if;
+      if WB_enable(3) = '1' then
           RFILE(to_integer(unsigned(RFILE_in_address)))(31 downto 23) <= Data_in(31 downto 23);
       end if;
        RFILE(0) <= (others=>'0');

@@ -15,8 +15,8 @@ use work.pico_cpu.all;
 --            be inside the register in the next clock cycle, however, the REGFILE has a bypass mechanism
 --            that can push this value to output as soon as it gets it!
 -----------------------------------
--- Regarding the jumps, we assume that the compiler always executes 2 instructions
--- after the jump! so we will not have to insert any bubble into the pipeline!
+-- Regarding the jumps, we assume that the compiler always executes 1 instruction
+-- after the jump!
 
 
 entity ControlUnit is
@@ -566,7 +566,7 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
         RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       end if;
       RFILE_data_sel <= CU;
-      Data_to_RFILE  <= PC_out+8;
+      Data_to_RFILE  <= PC_out; --we are already in PC+8 since we are in execution cycle so the PC out is 2*4 places ahead!
     end if;
     -------------------------------------------------------------------------
     if Instr_WB = LBU or Instr_WB = LB or Instr_WB = LH or Instr_WB = LW then
