@@ -43,7 +43,7 @@ signal WB_enable       :  std_logic_vector (3 downto 0);
 signal RFILE_out_sel_1, RFILE_out_sel_1_in : std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 signal RFILE_out_sel_2, RFILE_out_sel_2_in : std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 
-signal DPU_RESULT      : std_logic_vector (2*CPU_Bitwidth-1 downto 0);
+signal DPU_RESULT, DPU_RESULT_out : std_logic_vector (2*CPU_Bitwidth-1 downto 0);
 signal DPU_RESULT_FF   : std_logic_vector (2*CPU_Bitwidth-1 downto 0);
 
 -- Register file outputs
@@ -64,10 +64,12 @@ begin
       RFILE_out_sel_1<= (others => '0');
       RFILE_out_sel_2<= (others => '0');
       R2_FF <= (others => '0');
+      DPU_RESULT_out <= (others => '0');
     elsif clk'event and clk='1' then
       RFILE_out_sel_1<= RFILE_out_sel_1_in;
       RFILE_out_sel_2<= RFILE_out_sel_2_in;
       R2_FF <= R2;
+      DPU_RESULT_out <= DPU_RESULT;
     end if;
   end process;
 
@@ -119,7 +121,7 @@ begin
     rst                => rst,
     Data_in_mem        => MEMDATA_OUT,
     Data_in_CU         => Data_to_RFILE,
-    Data_in_DPU_LOW    => DPU_RESULT(CPU_Bitwidth-1 downto 0),
+    Data_in_DPU_LOW    => DPU_RESULT_out(CPU_Bitwidth-1 downto 0),
     Data_in_ACC_HI     => DPU_RESULT_FF(2*CPU_Bitwidth-1 downto CPU_Bitwidth),
     Data_in_ACC_LOW    => DPU_RESULT_FF(CPU_Bitwidth-1 downto 0),
     Data_in_R2         => R2_FF,

@@ -82,20 +82,20 @@ DATA_INPUT_SELECT:  process(Data_in_mem,Data_in_CU,Data_in_ACC_HI, Data_in_ACC_L
    end case;
   end process;
 
-OUTPUT_1_MANAGEMENT:  process(Register_out_sel_1, address_in, Data_in, Data_in_sel)begin
+OUTPUT_1_MANAGEMENT:  process(Register_out_sel_1, address_in, Data_in, WB_enable)begin
     -- here we bypass the REGFILE if the address_in =  Register_out_sel_1 to avoid some of the data-hazards
     -- be carefull if you remove the checks for Data_in_sel then you might end up with a nice combinatorial loop
-    if address_in = Register_out_sel_1 and (Data_in_sel = FROM_MEM8 or Data_in_sel = FROM_MEM16 or Data_in_sel = FROM_MEM32) then
+    if address_in = Register_out_sel_1 and WB_enable /= "0000" then
       Data_out_1 <= Data_in;
     else
       Data_out_1<= RFILE(to_integer(unsigned(Register_out_sel_1)));
     end if;
   end process;
 
-OUTPUT_2_MANAGEMENT:  process(Register_out_sel_2, address_in, Data_in, Data_in_sel)begin
+OUTPUT_2_MANAGEMENT:  process(Register_out_sel_2, address_in, Data_in, WB_enable)begin
     -- here we bypass the REGFILE if the address_in =  Register_out_sel_2 to avoid some of the data-hazards
     -- be carefull if you remove the checks for Data_in_sel then you might end up with a nice combinatorial loop
-    if address_in = Register_out_sel_2 and (Data_in_sel = FROM_MEM8 or Data_in_sel = FROM_MEM16 or Data_in_sel = FROM_MEM32) then
+    if address_in = Register_out_sel_2 and WB_enable /= "0000" then
       Data_out_2 <= Data_in;
     else
       Data_out_2<= RFILE(to_integer(unsigned(Register_out_sel_2)));

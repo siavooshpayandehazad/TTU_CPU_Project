@@ -66,6 +66,7 @@ architecture RTL of ControlUnit is
   signal Instr_F, Instr_D, Instr_E, Instr_WB :Instruction := NOP;
 
   signal PC_in, PC_out : std_logic_vector (BitWidth-1 downto 0):= (others => '0');
+  signal PC_jmp_in, PC_jmp_out : std_logic_vector (BitWidth-1 downto 0):= (others => '0');
 
 
   signal InstrReg_out_D, InstrReg_out_E, InstrReg_out_WB: std_logic_vector (InstructionWidth-1 downto 0) := (others => '0');
@@ -136,6 +137,7 @@ architecture RTL of ControlUnit is
        IO_WR_in_FF <=  (others=> '0');
        IO_DIR_FF <= '0';
        cp0_control <= ((others=> (others=>'0')));
+       PC_jmp_out <= (others=> '0');
     elsif clk'event and clk='1' then
        IO_WR_in_FF <= IO_WR_in;
        IO_DIR_FF <= IO_DIR_in;
@@ -155,6 +157,7 @@ architecture RTL of ControlUnit is
        end if;
        Instr_WB <= Instr_E;
        cp0_control <= cp0_control_in;
+        PC_jmp_out <=  PC_jmp_in;
   end if;
 
   end process;
@@ -377,7 +380,6 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
         elsif Instr_E = XOR_inst then
             DPU_ALUCommand <= ALU_XOR;
         -----------------------JUMP and BRANCH--------------------------
-        -- JR and JALR use DPU_ALUCommand <= ALU_PASS_A;
 
         elsif Instr_E = BEQ or Instr_E = BNE then
             DPU_ALUCommand <= ALU_EQ;
@@ -518,7 +520,7 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
     end process;
 
 
- WB_SIGNALS_GEN: process(Instr_E,Instr_WB, rd_ex, rt_ex, rs_ex, rt_wb, PC_out, LOW)
+ WB_SIGNALS_GEN: process(Instr_E,Instr_WB, rd_ex, rt_ex, rs_ex, rt_wb, PC_out, LOW,PC_jmp_out)
       begin
       -- DO NOT CHANGE THE DEFAULT VALUES!
       RFILE_in_address   <= (others => '0');
@@ -526,29 +528,29 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
       Data_to_RFILE  <= (others => '0');
       RFILE_WB_enable <= "0000";
       -----------------------Arithmetic--------------------------
-      if Instr_E = ADD or Instr_E = ADDU or Instr_E = SUB or Instr_E = SUBU or Instr_E = CLO or Instr_E = CLZ then
+      if Instr_WB = ADD or Instr_WB = ADDU or Instr_WB = SUB or Instr_WB = SUBU or Instr_WB = CLO or Instr_WB = CLZ then
           RFILE_WB_enable <= "1111";
-          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
-      elsif Instr_E = ADDI or Instr_E = ADDIU or Instr_E = LUI then
+          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
+      elsif Instr_WB = ADDI or Instr_WB = ADDIU or Instr_WB = LUI then
           RFILE_WB_enable <= "1111";
-          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_ex;
+          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
       -----------------------logical--------------------------
-      elsif Instr_E = AND_inst or Instr_E = OR_inst or Instr_E = NOR_inst or Instr_E = XOR_inst then
+      elsif Instr_WB = AND_inst or Instr_WB = OR_inst or Instr_WB = NOR_inst or Instr_WB = XOR_inst then
           RFILE_WB_enable <= "1111";
-          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
 
-      elsif Instr_E = ANDI or Instr_E = ORI or Instr_E = XORI then
+      elsif Instr_WB = ANDI or Instr_WB = ORI or Instr_WB = XORI then
           RFILE_WB_enable <= "1111";
-          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_ex;
+          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
       -----------------------SHIFT AND ROTATE-----------------
-      elsif Instr_E = SLL_inst or Instr_E = SRL_inst or Instr_E = SLLV or
-            Instr_E = SRLV or Instr_E = SRA_inst or Instr_E = SRAV then
+      elsif Instr_WB = SLL_inst or Instr_WB = SRL_inst or Instr_WB = SLLV or
+            Instr_WB = SRLV or Instr_WB = SRA_inst or Instr_WB = SRAV then
           RFILE_WB_enable <= "1111";
-          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
       --  MULT and MULTU only WRITES IN ACC
-      elsif Instr_E = MUL then
+      elsif Instr_WB = MUL then
             RFILE_WB_enable <= "1111";
-            RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+            RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
       ----------------------ACCUMULATOR ACCESS -----------------------------------
       elsif Instr_E = MFLO then
           RFILE_data_sel <= ACC_LOW;
@@ -561,15 +563,15 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
     end if;
 
       ----------------------LOAD AND STORE -----------------------------------
-    if Instr_E = JAL  or ((Instr_E = BGEZAL or Instr_E = BLTZAL) and LOW = ONE32) or Instr_E = JALR then
+    if Instr_WB = JAL  or ((Instr_WB = BGEZAL or Instr_WB = BLTZAL) and LOW = ONE32) or Instr_WB = JALR then
       RFILE_WB_enable <= "1111";
-      if Instr_E = JAL or ((Instr_E = BGEZAL or Instr_E = BLTZAL) and LOW = ONE32) then
+      if Instr_WB = JAL or ((Instr_WB = BGEZAL or Instr_WB = BLTZAL) and LOW = ONE32) then
         RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= "11111"; --REG(31)
-      elsif Instr_E = JALR then
-        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
+      elsif Instr_WB = JALR then
+        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
       end if;
       RFILE_data_sel <= CU;
-      Data_to_RFILE  <= PC_out; --we are already in PC+8 since we are in execution cycle so the PC out is 2*4 places ahead!
+      Data_to_RFILE  <= PC_jmp_out; --we are already in PC+8 since we are in execution cycle so the PC out is 2*4 places ahead!
     end if;
     -------------------------------------------------------------------------
     if Instr_WB = LBU or Instr_WB = LB or Instr_WB = LH or Instr_WB = LW then
@@ -611,7 +613,7 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
       RFILE_data_sel <= R2;
     end if;
 
-    if  Instr_E = MOVN and LOW = ZERO32 then
+    if Instr_E = MOVN and LOW = ZERO32 then
       RFILE_WB_enable <= "1111";
       RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
       RFILE_data_sel <= R2;
@@ -630,9 +632,10 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
     end process;
 
 --PC handling------------------------------------------------------------------------
-PC_HANDLING: process(PC_out,Instr_E, LOW, IMMEDIATE_EX, EPC)begin
+PC_HANDLING: process(PC_out,Instr_E, LOW, IMMEDIATE_EX, EPC, PC_jmp_out)begin
         PC_in <= PC_out + 4;
         flush_F2 <= '0';
+        PC_jmp_in <= PC_jmp_out;
         if Instr_E = SYSCALL  then
           PC_in <= LOW;			-- supposed to be contents of R2
         elsif Instr_E = ERET then
@@ -641,9 +644,11 @@ PC_HANDLING: process(PC_out,Instr_E, LOW, IMMEDIATE_EX, EPC)begin
           flush_F2 <= '1';
           PC_in <= PC_out(31 downto 28) & InstrReg_out_E(25 downto 0) & "00";
         elsif Instr_E = JR then
+          PC_jmp_in <= PC_out;
           flush_F2 <= '1';
           PC_in <= LOW;
         elsif Instr_E = JAL then
+          PC_jmp_in <= PC_out;
           flush_F2 <= '1';
           PC_in <= PC_out(31 downto 28) & INST_INDEX_EX & "00";
         elsif Instr_E = BEQ or Instr_E = BGTZ or Instr_E = BGEZ or
@@ -651,6 +656,7 @@ PC_HANDLING: process(PC_out,Instr_E, LOW, IMMEDIATE_EX, EPC)begin
               Instr_E = BLTZAL then
             if LOW = ONE32 then
                 flush_F2 <= '1';
+                PC_jmp_in <= PC_out;
                 if IMMEDIATE_EX(15) = '0' then
                   PC_in <= PC_out +(ZERO14 & IMMEDIATE_EX & "00")-1;
                 else
