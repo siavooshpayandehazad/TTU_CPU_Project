@@ -325,7 +325,10 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
         elsif Instr_E = ADDI then
             DPU_ALUCommand <= ALU_ADD;
             DPU_Mux_Cont_2 <= CONT;
-            DataToDPU_2 <= ZERO16 & IMMEDIATE_EX;
+            DataToDPU_2 <= ONE16 & IMMEDIATE_EX;
+            if IMMEDIATE_EX(15) = '0' then
+              DataToDPU_2 <= ZERO16 & IMMEDIATE_EX;
+            end if;
         elsif Instr_E = ADDIU then
             DPU_ALUCommand <= ALU_ADDU;
             DPU_Mux_Cont_2 <= CONT;
