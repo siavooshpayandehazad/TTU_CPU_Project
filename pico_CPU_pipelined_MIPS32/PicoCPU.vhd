@@ -44,7 +44,7 @@ signal RFILE_out_sel_1, RFILE_out_sel_1_in : std_logic_vector (RFILE_SEL_WIDTH-1
 signal RFILE_out_sel_2, RFILE_out_sel_2_in : std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
 
 signal DPU_RESULT, DPU_RESULT_out : std_logic_vector (2*CPU_Bitwidth-1 downto 0);
-signal DPU_RESULT_FF   : std_logic_vector (2*CPU_Bitwidth-1 downto 0);
+signal Result_ACC   : std_logic_vector (2*CPU_Bitwidth-1 downto 0);
 
 -- Register file outputs
 signal R1, R2, R2_FF   : std_logic_vector (CPU_Bitwidth-1 downto 0);
@@ -109,7 +109,7 @@ begin
         Data_to_RFILE   => Data_to_RFILE ,
 
         DPU_RESULT      => DPU_RESULT     ,
-        DPU_RESULT_FF   => DPU_RESULT_FF
+        Result_ACC   => Result_ACC
         );
 
   --register file
@@ -122,8 +122,8 @@ begin
     Data_in_mem        => MEMDATA_OUT,
     Data_in_CU         => Data_to_RFILE,
     Data_in_DPU_LOW    => DPU_RESULT_out(CPU_Bitwidth-1 downto 0),
-    Data_in_ACC_HI     => DPU_RESULT_FF(2*CPU_Bitwidth-1 downto CPU_Bitwidth),
-    Data_in_ACC_LOW    => DPU_RESULT_FF(CPU_Bitwidth-1 downto 0),
+    Data_in_ACC_HI     => Result_ACC(2*CPU_Bitwidth-1 downto CPU_Bitwidth),
+    Data_in_ACC_LOW    => Result_ACC(CPU_Bitwidth-1 downto 0),
     Data_in_R2         => R2_FF,
     Data_in_sel        => RFILE_data_sel,
     RFILE_in_address   => RFILE_in_address,
@@ -148,7 +148,7 @@ begin
             Mux_Cont_2       => DPU_Mux_Cont_2,
             DPU_OV           => DPU_OV,
             Result           => DPU_RESULT,
-            Result_FF        => DPU_RESULT_FF);
+            Result_ACC       => Result_ACC);
 
 -- MEMORY Input select MUX
   MEM_DATA_IN_SELECT: process(MEM_IN_SEL, RFILE_out_sel_1, RFILE_out_sel_2, DPU_Result)begin

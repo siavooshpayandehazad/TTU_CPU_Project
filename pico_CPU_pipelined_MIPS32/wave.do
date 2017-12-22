@@ -15,9 +15,7 @@ add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputest
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_ALUCommand
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_Mux_Cont_2
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_RESULT
-add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:DPU_RESULT_FF
-add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:HIGH_FF
-add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:LOW_FF
+add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:Result_ACC
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:HIGH
 add wave -noupdate -expand -group {Control Unit} -group DPU_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:LOW
 add wave -noupdate -expand -group {Control Unit} -group RFILE_signals :picocputestbench:PicoCPU_comp:ControlUnit_comp:RFILE_data_sel

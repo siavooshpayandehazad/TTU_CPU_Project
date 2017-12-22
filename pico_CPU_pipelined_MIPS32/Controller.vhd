@@ -52,7 +52,7 @@ entity ControlUnit is
     Data_to_RFILE   :  out std_logic_vector (BitWidth-1 downto 0);
     ----------------------------------------
     DPU_RESULT      : in std_logic_vector (2*BitWidth-1 downto 0);
-    DPU_RESULT_FF   : in  std_logic_vector (2*BitWidth-1 downto 0)
+    Result_ACC   : in  std_logic_vector (2*BitWidth-1 downto 0)
   );
 end ControlUnit;
 
@@ -81,14 +81,13 @@ architecture RTL of ControlUnit is
 
   type RFILE_type is array (0 to 31) of std_logic_vector(BitWidth-1 downto 0) ;
   signal cp0_control, cp0_control_in : RFILE_type := ((others=> (others=>'0')));
+
+  signal LOW_FF  : std_logic_vector (BitWidth-1 downto 0);
   ---------------------------------------------
   --    Aliases
   ---------------------------------------------
   alias LOW  : std_logic_vector is DPU_RESULT(31 downto 0);
   alias HIGH : std_logic_vector is DPU_RESULT(63 downto 32);
-
-  alias LOW_FF  : std_logic_vector is DPU_RESULT_FF(31 downto 0);
-  alias HIGH_FF : std_logic_vector is DPU_RESULT_FF(63 downto 32);
 
   alias SPECIAL_F   : std_logic_vector (5 downto 0) is Instr_In (31 downto 26);
   alias opcode_F    : std_logic_vector (5 downto 0) is Instr_In (5 downto 0);
@@ -138,6 +137,7 @@ architecture RTL of ControlUnit is
        IO_DIR_FF <= '0';
        cp0_control <= ((others=> (others=>'0')));
        PC_jmp_out <= (others=> '0');
+       LOW_FF <= (others=> '0');
     elsif clk'event and clk='1' then
        IO_WR_in_FF <= IO_WR_in;
        IO_DIR_FF <= IO_DIR_in;
@@ -157,7 +157,8 @@ architecture RTL of ControlUnit is
        end if;
        Instr_WB <= Instr_E;
        cp0_control <= cp0_control_in;
-        PC_jmp_out <=  PC_jmp_in;
+       PC_jmp_out <=  PC_jmp_in;
+       LOW_FF <= LOW;
   end if;
 
   end process;
@@ -520,7 +521,7 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
     end process;
 
 
- WB_SIGNALS_GEN: process(Instr_E,Instr_WB, rd_ex, rt_ex, rs_ex, rt_wb, PC_out, LOW,PC_jmp_out)
+ WB_SIGNALS_GEN: process(Instr_WB,  rt_wb, PC_out, LOW,PC_jmp_out)
       begin
       -- DO NOT CHANGE THE DEFAULT VALUES!
       RFILE_in_address   <= (others => '0');
@@ -545,36 +546,34 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
       -----------------------SHIFT AND ROTATE-----------------
       elsif Instr_WB = SLL_inst or Instr_WB = SRL_inst or Instr_WB = SLLV or
             Instr_WB = SRLV or Instr_WB = SRA_inst or Instr_WB = SRAV then
-          RFILE_WB_enable <= "1111";
-          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
+            RFILE_WB_enable <= "1111";
+            RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
       --  MULT and MULTU only WRITES IN ACC
       elsif Instr_WB = MUL then
             RFILE_WB_enable <= "1111";
             RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
       ----------------------ACCUMULATOR ACCESS -----------------------------------
-      elsif Instr_E = MFLO then
+      elsif Instr_WB = MFLO then
           RFILE_data_sel <= ACC_LOW;
           RFILE_WB_enable <= "1111";
-          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rs_ex;
-      elsif Instr_E = MFHI then
+          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rs_wb;
+      elsif Instr_WB = MFHI then
           RFILE_data_sel <= ACC_HI;
           RFILE_WB_enable <= "1111";
-          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rs_ex;
-    end if;
+          RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rs_wb;
 
       ----------------------LOAD AND STORE -----------------------------------
-    if Instr_WB = JAL  or ((Instr_WB = BGEZAL or Instr_WB = BLTZAL) and LOW = ONE32) or Instr_WB = JALR then
-      RFILE_WB_enable <= "1111";
-      if Instr_WB = JAL or ((Instr_WB = BGEZAL or Instr_WB = BLTZAL) and LOW = ONE32) then
-        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= "11111"; --REG(31)
-      elsif Instr_WB = JALR then
-        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
-      end if;
-      RFILE_data_sel <= CU;
-      Data_to_RFILE  <= PC_jmp_out; --we are already in PC+8 since we are in execution cycle so the PC out is 2*4 places ahead!
-    end if;
+      elsif Instr_WB = JAL  or ((Instr_WB = BGEZAL or Instr_WB = BLTZAL) and LOW = ONE32) or Instr_WB = JALR then
+          RFILE_WB_enable <= "1111";
+          if Instr_WB = JAL or ((Instr_WB = BGEZAL or Instr_WB = BLTZAL) and LOW = ONE32) then
+            RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= "11111"; --REG(31)
+          elsif Instr_WB = JALR then
+            RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
+          end if;
+          RFILE_data_sel <= CU;
+          Data_to_RFILE  <= PC_jmp_out; --we are already in PC+8 since we are in execution cycle so the PC out is 2*4 places ahead!
     -------------------------------------------------------------------------
-    if Instr_WB = LBU or Instr_WB = LB or Instr_WB = LH or Instr_WB = LW then
+    elsif Instr_WB = LBU or Instr_WB = LB or Instr_WB = LH or Instr_WB = LW then
         RFILE_WB_enable <= "1111";
         RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
         case( Instr_WB ) is
@@ -584,50 +583,39 @@ EX_SIGNALS_GEN:process(Instr_E, IMMEDIATE_EX, DPU_RESULT)
             when LH  => RFILE_data_sel <= FROM_MEM16_SGINED;
             when others => RFILE_data_sel <= FROM_MEM32; --Instr_WB = LW
         end case;
-
-    end if;
-
-    if Instr_WB = MFC0 then
-      RFILE_WB_enable <= "1111";
-      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
-      RFILE_data_sel <= CU;
-      Data_to_RFILE  <= cp0_control(to_integer(unsigned(rd_wb)));
-    end if;
-
+    elsif Instr_WB = MFC0 then
+        RFILE_WB_enable <= "1111";
+        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+        RFILE_data_sel <= CU;
+        Data_to_RFILE  <= cp0_control(to_integer(unsigned(rd_wb)));
     -------------------------------------------------------------------------
-    if Instr_WB = LWL then
-      RFILE_WB_enable <= "1100";
-      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
-      RFILE_data_sel <= FROM_MEM32;
-    end if;
+    elsif Instr_WB = LWL then
+        RFILE_WB_enable <= "1100";
+        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+        RFILE_data_sel <= FROM_MEM32;
 
-    if Instr_WB = LWR then
-      RFILE_WB_enable <= "0011";
-      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
-      RFILE_data_sel <= FROM_MEM32;
-    end if;
-
-    if  Instr_E = MOVZ and LOW = ONE32 then
-      RFILE_WB_enable <= "1111";
-      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
-      RFILE_data_sel <= R2;
-    end if;
-
-    if Instr_E = MOVN and LOW = ZERO32 then
-      RFILE_WB_enable <= "1111";
-      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
-      RFILE_data_sel <= R2;
-    end if;
-
-    if Instr_E = SLT or Instr_E = SLTI or Instr_E =  SLTU or Instr_E = SLTIU then
-      RFILE_WB_enable <= "1111";
-      RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_ex;
-      RFILE_data_sel <= CU;
-      if low = ONE32 then
-        Data_to_RFILE  <= "00000000000000000000000000000001";
-      else
-        Data_to_RFILE  <= (others => '0');
-      end if;
+    elsif Instr_WB = LWR then
+        RFILE_WB_enable <= "0011";
+        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rt_wb;
+        RFILE_data_sel <= FROM_MEM32;
+    -------------------------------------------------------------------------
+    elsif  Instr_WB = MOVZ and LOW_FF = ONE32 then
+        RFILE_WB_enable <= "1111";
+        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
+        RFILE_data_sel <= R2;
+    elsif Instr_WB = MOVN and LOW_FF = ZERO32 then
+        RFILE_WB_enable <= "1111";
+        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
+        RFILE_data_sel <= R2;
+    elsif Instr_WB = SLT or Instr_WB = SLTI or Instr_WB =  SLTU or Instr_WB = SLTIU then
+        RFILE_WB_enable <= "1111";
+        RFILE_in_address(RFILE_SEL_WIDTH-1 downto 0)  <= rd_wb;
+        RFILE_data_sel <= CU;
+        if LOW_FF = ONE32 then
+          Data_to_RFILE  <= "00000000000000000000000000000001";
+        else
+          Data_to_RFILE  <= (others => '0');
+        end if;
     end if;
     end process;
 
@@ -644,10 +632,12 @@ PC_HANDLING: process(PC_out,Instr_E, LOW, IMMEDIATE_EX, EPC, PC_jmp_out)begin
           flush_F2 <= '1';
           PC_in <= PC_out(31 downto 28) & InstrReg_out_E(25 downto 0) & "00";
         elsif Instr_E = JR then
+          -- we are stroing PC in PC_jmp because we need WB for LINK. and by that time we have overwritten PC!
           PC_jmp_in <= PC_out;
           flush_F2 <= '1';
           PC_in <= LOW;
         elsif Instr_E = JAL then
+          -- we are stroing PC in PC_jmp because we need WB for LINK. and by that time we have overwritten PC!
           PC_jmp_in <= PC_out;
           flush_F2 <= '1';
           PC_in <= PC_out(31 downto 28) & INST_INDEX_EX & "00";
@@ -656,6 +646,8 @@ PC_HANDLING: process(PC_out,Instr_E, LOW, IMMEDIATE_EX, EPC, PC_jmp_out)begin
               Instr_E = BLTZAL then
             if LOW = ONE32 then
                 flush_F2 <= '1';
+                -- we are stroing PC in PC_jmp because we need WB in case of BGEZAL and BLTZAL.
+                -- and by that time we have overwritten PC!
                 PC_jmp_in <= PC_out;
                 if IMMEDIATE_EX(15) = '0' then
                   PC_in <= PC_out +(ZERO14 & IMMEDIATE_EX & "00")-1;

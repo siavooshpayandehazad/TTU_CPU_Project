@@ -7,7 +7,7 @@ vlib work
 # Include files and compile them
 vcom "package.vhd"
 vcom "GPIO.vhd"
- 
+
 vcom "ALU.vhd"
 vcom "Controller.vhd"
 vcom "DPU.vhd"
@@ -25,5 +25,5 @@ do wave.do
 # Run the simulation
 vcd file wave.vcd
 vcd add -r -optcells /*
-run 50 ns
+run 1000 ns
 vcd flush

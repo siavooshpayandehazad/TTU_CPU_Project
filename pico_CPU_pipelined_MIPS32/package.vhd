@@ -149,14 +149,14 @@ package pico_cpu is
         DPU_Mux_Cont_2  : out DPU_IN_MUX;
         ----------------------------------------
         RFILE_data_sel  : out RFILE_IN_MUX;
-    	RFILE_in_address: out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
+        RFILE_in_address: out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
         RFILE_WB_enable : out std_logic_vector (3 downto 0);
-    	RFILE_out_sel_1 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
-    	RFILE_out_sel_2 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
+        RFILE_out_sel_1 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
+        RFILE_out_sel_2 : out std_logic_vector (RFILE_SEL_WIDTH-1 downto 0);
         Data_to_RFILE   :  out std_logic_vector (BitWidth-1 downto 0);
         ----------------------------------------
         DPU_RESULT      : in std_logic_vector (2*BitWidth-1 downto 0);
-        DPU_RESULT_FF   : in  std_logic_vector (2*BitWidth-1 downto 0)
+        Result_ACC   : in  std_logic_vector (2*BitWidth-1 downto 0)
       );
     end component;
 
@@ -175,7 +175,7 @@ package pico_cpu is
              Mux_Cont_2: DPU_IN_MUX;
              DPU_OV      : out std_logic;
              Result      : out std_logic_vector (2*BitWidth-1 downto 0);
-             Result_FF   : out std_logic_vector (2*BitWidth-1 downto 0)
+             Result_ACC  : out std_logic_vector (2*BitWidth-1 downto 0)
         );
     end component;
     ----------------------------------------

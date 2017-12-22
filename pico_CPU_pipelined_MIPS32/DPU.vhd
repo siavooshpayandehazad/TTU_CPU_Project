@@ -27,7 +27,7 @@ entity DPU is
 
          DPU_OV      : out std_logic;
          Result      : out std_logic_vector (2*BitWidth-1 downto 0);
-         Result_FF   : out std_logic_vector (2*BitWidth-1 downto 0)
+         Result_ACC  : out std_logic_vector (2*BitWidth-1 downto 0)
     );
 end DPU;
 
@@ -95,7 +95,7 @@ ALU_comp: ALU
 
 
   Result <= ACC_in;
-  Result_FF <= ACC_out;
+  Result_ACC <= ACC_out;
   DPU_OV <= OV_Flag_Value;
 
 end RTL;
